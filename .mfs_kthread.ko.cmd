@@ -1,1 +1,0 @@
-cmd_/home/lookfiresu/Desktop/test/test_module/mfs_kthread.ko := ld -r -m elf_x86_64 -T /usr/src/linux-headers-3.13.11-ckt39/scripts/module-common.lds --build-id  -o /home/lookfiresu/Desktop/test/test_module/mfs_kthread.ko /home/lookfiresu/Desktop/test/test_module/mfs_kthread.o /home/lookfiresu/Desktop/test/test_module/mfs_kthread.mod.o

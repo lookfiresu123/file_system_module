@@ -6,4 +6,4 @@ obj-m := mfs_kthread.o
 all:
 	make -C /usr/src/linux-headers-$(shell uname -r) M=$(shell pwd) modules
 clean:
-	rm *.ko *.mod.* *.o *.order *.symvers
+	rm *.ko *.mod.* *.o *.order *.symvers .fs* .mfs* .work*

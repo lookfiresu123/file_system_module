@@ -1,1 +1,0 @@
-cmd_/home/lookfiresu/Desktop/test/test_module/fs_kthread2.ko := ld -r -m elf_x86_64 -T /home/lookfiresu/Desktop/linux-3.10.104/scripts/module-common.lds --build-id  -o /home/lookfiresu/Desktop/test/test_module/fs_kthread2.ko /home/lookfiresu/Desktop/test/test_module/fs_kthread2.o /home/lookfiresu/Desktop/test/test_module/fs_kthread2.mod.o
