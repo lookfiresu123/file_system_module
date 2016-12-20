@@ -335,17 +335,20 @@ long my_do_msgsnd(int msqid, long mtype, void *mtext, size_t msgsz, int msgflg){
         printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
         err = -EACCES;
 
+        /*
         if(my_ipcperms(ns, &msq->q_perm, S_IWUGO))
             goto out_unlock0;
+        */
 
         if(msq->q_perm.deleted){
             err = -EIDRM;
             goto out_unlock0;
         }
-        /*err = security_msg_queue_msgsnd(msq, msg, msgflg);
+        /*
+        err = security_msg_queue_msgsnd(msq, msg, msgflg);
         if(err)
             goto out_unlock0;
-            */
+        */
         if(msgsz + msq->q_cbytes <= msq->q_qbytes && 1 + msq->q_qnum <= msq->q_qbytes){
             break;
         }
@@ -666,10 +669,12 @@ long my_do_msgrcv(int msqid, void *buf, size_t bufsz, long msgtyp, int msgflg,
 
 	for (;;) {
 		struct my_msg_receiver msr_d;
-    printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
+    // printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
 		msg = ERR_PTR(-EACCES);
+    /*
 		if (my_ipcperms(ns, &msq->q_perm, S_IRUGO))
 			goto out_unlock1;
+    */
 
 		my_ipc_lock_object(&msq->q_perm);
 

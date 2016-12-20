@@ -51,7 +51,7 @@ struct my_msgbuf {
     char mtext[1];
     struct task_struct *tsk;
     void (*deal_data)(struct my_msgbuf *msgp, void **retpp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
-    union {
+    struct {
         void *func_container_ptr;
         void *object_ptr;
     } data;

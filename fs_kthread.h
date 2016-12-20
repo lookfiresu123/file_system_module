@@ -31,6 +31,7 @@ MODULE_LICENSE("GPL");
 
 #define TEXT_SIZE 512
 #define SEND_TIME 100000
+#define PATH_SIZE 128
 
 #define typeof __typeof__
 
