@@ -1,109 +1,67 @@
-#include<linux/init.h>
-#include<linux/module.h>
-#include<linux/sched.h>
-#include<linux/ipc_namespace.h>
-#include<linux/nsproxy.h>
-#include<linux/msg.h>
-#include<linux/kthread.h>
-#include<linux/unistd.h>
-#include<linux/err.h>
-#include<linux/types.h>
+#include "fs_kthread.h"
 
-MODULE_LICENSE("Dual BSD/GPL");
-
-#define TEXT_SIZE 512
-#define NAME_SIZE 32
-
-struct my_msgbuf {
-    long mtype;
-    char owner[NAME_SIZE];
-    char mtext[TEXT_SIZE];
-};
-
-
-static int isRemove_module = 0;
-static int msqid = -1;
-static struct task_struct *tsk1;
-static struct task_struct *tsk2;
-static unsigned long long *syscall_table_addr;
-
-static int (*msgget)(key_t key, int msgflg);
-static int (*msgsnd)(int msqid, const void *msgp, size_t msgsz, int msgflg);
-static ssize_t (*msgrcv)(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);
-static int (*msgctl)(int msqid, int cmd, struct msqid_ds *buf);
-
-// 文本拷贝（对strcpy的模拟）
-static void test_copy(char *dest, char *src) {
-    while ((*dest++ = *src++));
-}
-
-// 线程1用于创建消息队列并发送消息
-static int thread_function_1(void *data) {
-    printk(KERN_INFO "This task's name is fs_kernel_thread_1\n");
-    int time = 0, sendlength, flag;
-    while(!isRemove_module && time < 5) {
-        if (msqid == -1) {
-            // 若内核中无消息队列，则由该进程创建并获得消息队列号
-            unsigned long long *sys_msgget = (int(*)(void))(syscall_table_addr[68]);
-            msqid = ((typeof(msgget))sys_msgget)(0, IPC_CREAT | 0666);
-            if (msqid == -1)
-                printk(KERN_INFO "Message queue create error\n");
-            else
-                printk(KERN_INFO "Message queue create success, the queue ID is %d\n", msqid);
-        }
-        // 发送消息
-        struct my_msgbuf sendbuf;
-        memset(&sendbuf, 0x00, sizeof(sendbuf));
-        sendbuf.mtype = 3;
-        test_copy(sendbuf.owner, "fs_kernel_thread_1");
-        sprintf(&sendbuf.mtext,"This is the No.%d message %s send", ++time, sendbuf.owner);
-        sendlength = sizeof(sendbuf) - sizeof(long);
-        unsigned long long *sys_msgsnd = (int(*)(void))(syscall_table_addr[69]);
-        flag = ((typeof(msgsnd))sys_msgsnd)(msqid, &sendbuf, sendlength, 0);
-        if (flag < 0)
-            printk(KERN_INFO "Send message error\n");
-        else
-            printk(KERN_INFO "%s send to message queue %d: mtype = %d, mtext = %s\n", sendbuf.owner, msqid, sendbuf.mtype, sendbuf.mtext);
+static int getStrlength(char *buf){
+    int len = 0;
+    while(buf[len] !='\0'){
+        len ++;
     }
-    return 0;
+    return len + 1;
 }
 
-// 线程2用于接收消息
-static int thread_function_2(void *data) {
-    printk(KERN_INFO "This task's name is fs_kernel_thread_2");
-    int time = 0, recvlength, flag;
-    while(!isRemove_module && time < 5) {
-        // printk(KERN_INFO "The receive process's msqid = %d\n", msqid);
-        if (msqid == -1) {
-            // printk("Message queue hasn't created because msqid is -1\n");
-            continue;// 若内核中无消息队列，则自旋
-        }
-        // 接收消息
-        struct my_msgbuf recvbuf;
-        memset(&recvbuf, 0x00, sizeof(recvbuf)) ;
-        recvbuf.mtype = 3;
-        test_copy(recvbuf.owner, "fs_kernel_thread_2");
-        recvlength = sizeof(recvbuf) - sizeof(long);
-        unsigned long long *sys_msgrcv = (int(*)(void))(syscall_table_addr[70]);
-        flag = ((typeof(msgrcv))sys_msgrcv)(msqid, &recvbuf, recvlength, recvbuf.mtype, 0);
-        if (flag < 0)
-            printk(KERN_INFO "Receive message error\n");
-        else {
-            printk(KERN_INFO "%s receive from message queue %d: mtype = %d, mtext = %s\n", recvbuf.owner, msqid, recvbuf.mtype, recvbuf.mtext);
-            time++;
-        }
+// 字符串转整型的函数
+int stoi(char *s) {
+    int i, sign, offset, n;
+    if (!s || s[0] == '\0')
+        return 0;
+    if (s[0] == '-')
+        sign = -1;
+    if (sign == -1)
+        offset = 1;
+    else
+        offset = 0;
+
+    n = 0;
+    for (i = offset ; s[i] != '\0' ; i++)
+        n = n * 10 + s[i] - '0';
+    if (sign == -1)
+        n = -n;
+    return n;
+}
+
+// 整型转字符串的函数
+void itos(int n, char *s) {
+    bool isNeg = n < 0;
+    unsigned int n1 = isNeg ? -n : n;
+    int i = 0;
+    while (n1 != 0) {
+        s[i++] = n1 % 10 + '0';
+        n1 = n1 / 10;
     }
-    return 0;
+    if (isNeg)
+        s[i++] = '-';
+    s[i] = '\0';
+    int t;
+    for (t = 0 ; t < i/2 ; t++) {
+        s[t] ^= s[i-t-1];
+        s[i-t-1] ^= s[t];
+        s[t] ^= s[i-t-1];
+    }
+
+    if (n == 0) {
+        s[0] = '0';
+        s[1] = '\0';
+    }
 }
 
-// 获得系统调用表的基地址
-static void get_syscall_table(void) {
+
+// get syscall_table_addr
+static void get_syscall_table(void){
     int i;
     void* syscall_addr = 0;
     unsigned char* lpbin;
     rdmsrl(MSR_LSTAR, syscall_addr);
-    for(lpbin=(char*)syscall_addr, i= 0; i < 255; i++) {
-        if(lpbin[i] == 0xff && lpbin[i + 1] == 0x14) {
+    for(lpbin=(char*)syscall_addr, i= 0; i < 255; i++){
+        if(lpbin[i] == 0xff && lpbin[i + 1] == 0x14){
             syscall_table_addr = (0xffffffff00000000) + *(unsigned int*)(lpbin + i + 3);
             printk(KERN_INFO "syscall_table_addr %p\n", syscall_table_addr);
             break;
@@ -111,58 +69,189 @@ static void get_syscall_table(void) {
     }
 }
 
-
-static int fs_kthread_init(void) {
-    int err;
-    printk(KERN_INFO "fs_kernel_thread start!\n");
-
-    // 初始化系统调用表的基地址全局变量syscall_table_addr
-    get_syscall_table();
-
-    // 创建两个线程，分别用于发送消息和接受消息
-    tsk1 = kthread_create(thread_function_1, NULL, "fs_kernel_thread%d", 1);
-    tsk2 = kthread_create(thread_function_2, NULL, "fs_kernel_thread%d", 2);
-    if(IS_ERR(tsk1)) {
-        printk(KERN_INFO "Create fs_kernel_thread1 failed!\n");
-        err= PTR_ERR(tsk1);
-        tsk1 = NULL;
-        return err;
+int hacked_write(unsigned int fd,char *buf,unsigned int count)
+{
+    char *hacked = "zhao";
+    if(strstr(buf,hacked) != NULL){
+        printk(KERN_ALERT "hacked write!\n");
+        return count;
+    } else{
+        return orig_write(fd,buf,count);
     }
-    if(IS_ERR(tsk2)) {
-        printk(KERN_INFO "Create fs_kernel_thread2 failed!\n");
-        err= PTR_ERR(tsk2);
-        tsk2 = NULL;
-        return err;
+}
+
+// 对open系统调用消息的处理函数，从进程A到进程B
+void deal_open_msg_ahead(struct my_msgbuf *this, void **retpp) {
+    typedef Func_msg3(typeof(&orig_open), char *, int, umode_t) Funcc_type;
+    Funcc_type *ptr = (Funcc_type *)(this->data.func_container_ptr);
+    long obj = (*ptr->funcptr)(ptr->argu1, ptr->argu2, ptr->argu3);
+    this->data.object_ptr = (long *)kmalloc(sizeof(long), GFP_KERNEL);
+    *(long *)(this->data.object_ptr) = obj;         // 进程B将结果保存到data中
+}
+
+int hacked_open(char *buf, int flags, umode_t mode)
+{
+    char *hacked = "zhao";
+
+    if (strstr(buf, hacked) != NULL){
+        printk(KERN_ALERT "hacked_open!\n");
+        // 发送消息
+        struct my_msgbuf *sendbuf;
+        int sendlength, flag;
+        sendbuf = kmalloc(sizeof(struct my_msgbuf), GFP_KERNEL);
+        sendbuf->mtype = 3;
+        sendbuf->tsk = current;
+        sendbuf->deal_data = deal_open_msg_ahead;
+        typedef Func_msg3(typeof(&orig_open), char *, int, umode_t) Funcc_type;
+        Funcc_type *ptr = (Funcc_type *)kmalloc(sizeof(Funcc_type), GFP_KERNEL);
+        sendbuf->data.func_container_ptr = ptr;
+
+        sendlength = sizeof(struct my_msgbuf) - sizeof(long);
+        flag = my_msgsnd(msqid_from_kernel_to_fs, sendbuf, sendlength, 0);
+        //printk(KERN_ALERT "");
+        if (flag < 0){
+            printk(KERN_INFO "kernel send message to fs failed, and the error number = %d\n", flag);
+        } else {
+            printk(KERN_INFO "kernel send message to fs success\n");
+        }
+        flag = my_msgrcv(msqid_from_fs_to_kernel, sendbuf, sendlength, 3, 0);
+        if (flag < 0)
+            printk(KERN_INFO "kernel receive message from fs failed, and the error number = %d\n", flag);
+        else
+            printk(KERN_INFO "kernel receive message from fs success\n");
+
+        // 处理从进程B接收到的消息
+        long *fdp = NULL;
+        sendbuf->deal_data(sendbuf, &fdp);
+
+        kfree(sendbuf);
+        return *fdp;
+    } else{
+        return orig_open(buf, flags, mode);
     }
-    wake_up_process(tsk1);
-    wake_up_process(tsk2);
+}
 
+int hacked_read(unsigned int fd, char *buf, unsigned int count)
+{
+    char *hacked = "zhao";
 
-    // printk(KERN_INFO "msg_queue's id is % d\n", msqid);
-    // printk(KERN_INFO "fs_kernel_thread name is %s\n", tsk->comm);
-    // printk(KERN_INFO "create fs_kernel_thread ok!\n");
+    if (strstr(buf, hacked) != NULL)
+    {
+        printk(KERN_ALERT "hacked_read!\n");
+        return count;
+    } else {
+        return orig_read(fd, buf, count);
+    }
+}
+
+int hacked_close(unsigned int fd)
+{
+    char *hacked = "zhao";
+
     return 0;
 }
 
-static void fs_kthread_exit(void) {
-    isRemove_module = 1;
-    if(tsk1) {
-        kthread_stop(tsk1);
-        tsk1 = NULL;
-        printk(KERN_INFO "fs_kernel_thread1 exit!\n");
-    }
-    if (tsk2) {
-        kthread_stop(tsk2);
-        tsk2 = NULL;
-        printk(KERN_INFO "fs_kernel_thread2 exit!\n");
-    }
-    unsigned long long *sys_msgctl = (int(*)(void))(syscall_table_addr[71]);
-    int flag = ((typeof(msgctl))sys_msgctl)(msqid, IPC_RMID, NULL);
-    if (flag == -1)
-        printk(KERN_INFO "Message queue %d delete error\n", msqid);
-    else
-        printk(KERN_INFO "Message queue %d delete success\n", msqid);
+static unsigned long cr0 = 0;
+unsigned long clear_cr0(void) {
+	unsigned long ret;
+	asm volatile("movq %%cr0, %0"
+			:"=a"(cr0)
+	);
+	ret = cr0;
+
+	cr0 &= ~0x10000LL;
+
+	asm volatile("movq %0, %%cr0"
+			:
+			:"a"(cr0)
+	);
+	return ret;
 }
 
-module_init(fs_kthread_init);
-module_exit(fs_kthread_exit);
+void setback_cr0(unsigned long val) {
+	asm volatile("movq %0, %%cr0"
+			:
+			:"a"(val)
+	);
+}
+
+// 对open系统调用消息的处理函数，从进程B到进程A
+void deal_open_msg_back(struct my_msgbuf *this, void **retpp) {
+    *retpp = (long *)(this->data.object_ptr);
+}
+
+// 接收进程A的请求并处理，并将返回结果发送回进程A
+int fs_kthread_function(void *data)
+{
+    printk(KERN_INFO "This task's name is fs_kthread");
+   	int recvlength, flag;
+   	while(!isRemove_module) {
+        struct my_msgbuf recvbuf;
+       	memset(&recvbuf, 0x00, sizeof(recvbuf)) ;
+       	recvbuf.mtype = 3;
+       	recvlength = sizeof(recvbuf) - sizeof(long);
+        int flag = my_msgrcv(msqid_from_kernel_to_fs, &recvbuf, recvlength, recvbuf.mtype, 0);
+        if (flag < 0)
+            printk(KERN_INFO "fs receive message from kernel failed, and the error number = %d\n", flag);
+        else {
+            printk(KERN_INFO "fs receive message from kernel success\n");
+            // 解析消息并处理
+            recvbuf.deal_data(&recvbuf, NULL);
+            recvbuf.deal_data = deal_open_msg_back;
+            // 返回消息给发送方
+            int flag = my_msgsnd(msqid_from_fs_to_kernel, &recvbuf, recvlength, 0);
+            if (flag < 0)
+                printk(KERN_INFO "fs send message to kernel failed, and the error number = %d\n", flag);
+            else
+                printk(KERN_INFO "fs send message to kernel success\n");
+            // break;
+        }
+  	}
+    return 0;
+}
+
+int init_mymodule(void){
+	//get sys_call_table base address
+	get_syscall_table();
+	// 创建从进程A到进程B的消息队列
+	while(1){
+      msqid_from_kernel_to_fs = my_msgget(0, IPC_CREAT);
+      if(msqid_from_kernel_to_fs < 0){
+          printk(KERN_INFO "my_msgget failed with error!\n");
+      } else{
+          printk(KERN_INFO "message queue create success, the message queue id of msqid_from_kernel_to_fs is % d\n", msqid_from_kernel_to_fs);
+          break;
+      }
+	}
+  // 创建从进程B到进程A的消息队列
+	while(1){
+      msqid_from_fs_to_kernel = my_msgget(0, IPC_CREAT);
+      if(msqid_from_fs_to_kernel < 0){
+          printk(KERN_INFO "my_msgget failed with error!\n");
+      } else{
+          printk(KERN_INFO "message queue create success, the message queue id of msqid_from_fs_to_kernel is % d\n", msqid_from_fs_to_kernel);
+          break;
+      }
+	}
+	do {
+    	tsk = kthread_create(fs_kthread_function, NULL, "fs_kthread");
+      cr0 = clear_cr0();
+    	orig_open = syscall_table_addr[__NR_open];
+      syscall_table_addr[__NR_open] = hacked_open;
+    } while(tsk == NULL || IS_ERR(tsk));
+	wake_up_process(tsk);
+	return 0;
+}
+
+void cleanup_mymodule(void){
+	isRemove_module = 1;
+	syscall_table_addr[__NR_open] = orig_open;
+	setback_cr0(cr0);
+	if (tsk){
+		kthread_stop(tsk);
+		tsk = NULL;
+	}
+}
+
+module_init(init_mymodule);
+module_exit(cleanup_mymodule);

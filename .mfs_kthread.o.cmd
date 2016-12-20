@@ -1,0 +1,1 @@
+cmd_/home/lookfiresu/Desktop/test/test_module/mfs_kthread.o := ld -m elf_x86_64   -r -o /home/lookfiresu/Desktop/test/test_module/mfs_kthread.o /home/lookfiresu/Desktop/test/test_module/my_msg.o /home/lookfiresu/Desktop/test/test_module/fs_kthread.o 
