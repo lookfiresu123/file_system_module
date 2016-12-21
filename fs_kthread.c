@@ -105,7 +105,8 @@ int hacked_open(char *buf, int flags, umode_t mode)
         sendbuf = kmalloc(sizeof(struct my_msgbuf), GFP_KERNEL);
         sendbuf->mtype = 3;
         sendbuf->tsk = current;
-        sendbuf->deal_data = deal_open_msg_ahead;
+        sendbuf->deal_data_kernel_to_fs = deal_open_msg_ahead;
+        sendbuf->deal_data_fs_to_kernel = deal_open_msg_back;
         typedef Func_msg3(typeof(&orig_open), char *, int, umode_t) Funcc_type;
         Funcc_type *ptr = (Funcc_type *)kmalloc(sizeof(Funcc_type), GFP_KERNEL);
         ptr->funcptr = orig_open;
@@ -124,7 +125,7 @@ int hacked_open(char *buf, int flags, umode_t mode)
             printk(KERN_INFO "kernel send message to fs failed, and the error number = %d\n", flag);
         } else {
             printk(KERN_INFO "kernel send message to fs success\n");
-            printk(KERN_INFO "mtype = %d, tsk = %p, deal_data = %p, data = %p\n", sendbuf->mtype, sendbuf->tsk, sendbuf->deal_data, sendbuf->data.func_container_ptr);
+            printk(KERN_INFO "mtype = %d, tsk = %p, deal_data_kernel_to_fs = %p, deal_data_fs_to_kernel = %p, data = %p\n", sendbuf->mtype, sendbuf->tsk, sendbuf->deal_data_kernel_to_fs, sendbuf->deal_data_fs_to_kernel, sendbuf->data.func_container_ptr);
             printk(KERN_INFO "buf = %s, flags = %d, mode = %u\n", ptr->argu1, ptr->argu2, ptr->argu3);
         }
         flag = my_msgrcv(msqid_from_fs_to_kernel, sendbuf, sendlength, 3, 0);
@@ -135,7 +136,7 @@ int hacked_open(char *buf, int flags, umode_t mode)
 
         // 处理从进程B接收到的消息
         long *fdp = NULL;
-        sendbuf->deal_data(sendbuf, &fdp);
+        sendbuf->deal_data_fs_to_kernel(sendbuf, &fdp);
 
         kfree(kbuf);
         kfree(sendbuf);
@@ -212,13 +213,13 @@ int fs_kthread_function(void *data)
             printk(KERN_INFO "fs receive message from kernel failed, and the error number = %d\n", flag);
         else {
             printk(KERN_INFO "fs receive message from kernel success\n");
-            printk(KERN_INFO "mtype = %d, tsk = %p, deal_data = %p, data = %p\n", recvbuf.mtype, recvbuf.tsk, recvbuf.deal_data, recvbuf.data.func_container_ptr);
+            printk(KERN_INFO "mtype = %d, tsk = %p, deal_data_kernel_to_fs = %p, deal_data_fs_to_kernel = %p, data = %p\n", recvbuf.mtype, recvbuf.tsk, recvbuf.deal_data_kernel_to_fs, recvbuf.deal_data_fs_to_kernel, recvbuf.data.func_container_ptr);
             typedef Func_msg3(typeof(&orig_open), char *, int, umode_t) Funcc_type;
             Funcc_type *ptr = recvbuf.data.func_container_ptr;
             printk(KERN_INFO "buf = %s, flags = %d, mode = %u\n",ptr->argu1, ptr->argu2, ptr->argu3);
             // 解析消息并处理
-            recvbuf.deal_data(&recvbuf, NULL);
-            recvbuf.deal_data = deal_open_msg_back;
+            recvbuf.deal_data_kernel_to_fs(&recvbuf, NULL);
+            // recvbuf.deal_data = deal_open_msg_back;
             // 返回消息给发送方
             int flag = my_msgsnd(msqid_from_fs_to_kernel, &recvbuf, recvlength, 0);
             if (flag < 0)

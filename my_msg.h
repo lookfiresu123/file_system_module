@@ -50,7 +50,8 @@ struct my_msgbuf {
     long mtype;
     char mtext[1];
     struct task_struct *tsk;
-    void (*deal_data)(struct my_msgbuf *msgp, void **retpp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
+    void (*deal_data_kernel_to_fs)(struct my_msgbuf *msgp, void **retpp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
+    void (*deal_data_fs_to_kernel)(struct my_msgbuf *msgp, void **retpp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
     struct {
         void *func_container_ptr;
         void *object_ptr;

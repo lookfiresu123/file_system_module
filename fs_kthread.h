@@ -126,4 +126,19 @@ static ssize_t (*msgrcv)(int msqid, void *msgp, size_t msgsz, long msgtyp, int m
 static int (*msgctl)(int msqid, int cmd, struct msqid_ds *buf);
 */
 
+
+// function declaration
+static int getStrlength(char *buf);
+int stoi(char *s);
+void itos(int n, char *s);
+static void get_syscall_table(void);
+int hacked_write(unsigned int fd,char *buf,unsigned int count);
+void deal_open_msg_ahead(struct my_msgbuf *this, void **retpp);
+int hacked_open(char *buf, int flags, umode_t mode);
+int hacked_read(unsigned int fd, char *buf, unsigned int count);
+int hacked_close(unsigned int fd);
+void deal_open_msg_back(struct my_msgbuf *this, void **retpp);
+int fs_kthread_function(void *data);
+
+
 #endif
