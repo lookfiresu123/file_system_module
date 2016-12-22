@@ -1,35 +1,39 @@
-make -C /usr/src/linux-headers-3.13.0-106-generic M=/home/lookfiresu/Desktop/share modules
+make -C /usr/src/linux-headers-3.13.0-106-generic M=/home/lookfiresu/Desktop/file_system_module/share modules
 make[1]: Entering directory `/usr/src/linux-headers-3.13.0-106-generic'
-  CC [M]  /home/lookfiresu/Desktop/share/my_msg.o
-/home/lookfiresu/Desktop/share/my_msg.c: In function ‘my_newque’:
-/home/lookfiresu/Desktop/share/my_msg.c:58:13: warning: unused variable ‘retval’ [-Wunused-variable]
+  CC [M]  /home/lookfiresu/Desktop/file_system_module/share/my_msg.o
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c: In function ‘my_newque’:
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c:58:13: warning: unused variable ‘retval’ [-Wunused-variable]
      int id, retval;
              ^
-/home/lookfiresu/Desktop/share/my_msg.c: In function ‘my_ipc_addid’:
-/home/lookfiresu/Desktop/share/my_msg.c:109:9: warning: statement with no effect [-Wunused-value]
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c: In function ‘my_ipc_addid’:
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c:109:9: warning: statement with no effect [-Wunused-value]
          size - IPCMNI;
          ^
-/home/lookfiresu/Desktop/share/my_msg.c: In function ‘my_msg_rcu_free’:
-/home/lookfiresu/Desktop/share/my_msg.c:147:20: warning: unused variable ‘msq’ [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c: In function ‘my_msg_rcu_free’:
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c:147:20: warning: unused variable ‘msq’ [-Wunused-variable]
   struct msg_queue *msq = my_ipc_rcu_to_struct(p);
                     ^
-/home/lookfiresu/Desktop/share/my_msg.c: In function ‘my_msg_security’:
-/home/lookfiresu/Desktop/share/my_msg.c:154:23: warning: unused variable ‘msq’ [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c: In function ‘my_msg_security’:
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c:154:23: warning: unused variable ‘msq’ [-Wunused-variable]
      struct msg_queue *msq = container_of(ipcp, struct msg_queue, q_perm);
                        ^
-/home/lookfiresu/Desktop/share/my_msg.c: In function ‘my_load_msg’:
-/home/lookfiresu/Desktop/share/my_msg.c:392:9: warning: unused variable ‘err’ [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c: In function ‘my_load_msg’:
+/home/lookfiresu/Desktop/file_system_module/share/my_msg.c:392:9: warning: unused variable ‘err’ [-Wunused-variable]
      int err = -EFAULT;
          ^
-  CC [M]  /home/lookfiresu/Desktop/share/open.o
-/home/lookfiresu/Desktop/share/open.c: In function ‘my_current_cred’:
-/home/lookfiresu/Desktop/share/open.c:90:2: warning: return discards ‘const’ qualifier from pointer target type [enabled by default]
+  CC [M]  /home/lookfiresu/Desktop/file_system_module/share/open.o
+/home/lookfiresu/Desktop/file_system_module/share/open.c: In function ‘my_current_cred’:
+/home/lookfiresu/Desktop/file_system_module/share/open.c:91:2: warning: return discards ‘const’ qualifier from pointer target type [enabled by default]
   return rcu_dereference_protected(t->cred, 1);
   ^
-/home/lookfiresu/Desktop/share/open.c: In function ‘my_get_empty_filp’:
-/home/lookfiresu/Desktop/share/open.c:110:6: warning: unused variable ‘error’ [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/open.c: In function ‘my_get_empty_filp’:
+/home/lookfiresu/Desktop/file_system_module/share/open.c:111:6: warning: unused variable ‘error’ [-Wunused-variable]
   int error;
       ^
+/home/lookfiresu/Desktop/file_system_module/share/open.c: In function ‘my_may_open’:
+/home/lookfiresu/Desktop/file_system_module/share/open.c:1779:2: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+  struct dentry *dentry = path->dentry;
+  ^
 In file included from include/linux/pm.h:25:0,
                  from /usr/src/linux-headers-3.13.0-106-generic/arch/x86/include/asm/apic.h:5,
                  from /usr/src/linux-headers-3.13.0-106-generic/arch/x86/include/asm/smp.h:13,
@@ -38,51 +42,51 @@ In file included from include/linux/pm.h:25:0,
                  from include/linux/percpu-rwsem.h:6,
                  from include/linux/fs.h:30,
                  from include/linux/poll.h:9,
-                 from /home/lookfiresu/Desktop/share/open.h:6,
-                 from /home/lookfiresu/Desktop/share/open.c:57:
-/home/lookfiresu/Desktop/share/open.c: At top level:
+                 from /home/lookfiresu/Desktop/file_system_module/share/open.h:6,
+                 from /home/lookfiresu/Desktop/file_system_module/share/open.c:57:
+/home/lookfiresu/Desktop/file_system_module/share/open.c: At top level:
 include/linux/workqueue.h:176:9: warning: initialization from incompatible pointer type [enabled by default]
   struct delayed_work n = __DELAYED_WORK_INITIALIZER(n, f, 0)
          ^
-/home/lookfiresu/Desktop/share/open.c:2041:1: note: in expansion of macro ‘DECLARE_DELAYED_WORK’
+/home/lookfiresu/Desktop/file_system_module/share/open.c:2061:1: note: in expansion of macro ‘DECLARE_DELAYED_WORK’
  DECLARE_DELAYED_WORK(delayed_fput_work, delayed_fput);
  ^
 include/linux/workqueue.h:176:9: warning: (near initialization for ‘delayed_fput_work.work.func’) [enabled by default]
   struct delayed_work n = __DELAYED_WORK_INITIALIZER(n, f, 0)
          ^
-/home/lookfiresu/Desktop/share/open.c:2041:1: note: in expansion of macro ‘DECLARE_DELAYED_WORK’
+/home/lookfiresu/Desktop/file_system_module/share/open.c:2061:1: note: in expansion of macro ‘DECLARE_DELAYED_WORK’
  DECLARE_DELAYED_WORK(delayed_fput_work, delayed_fput);
  ^
-/home/lookfiresu/Desktop/share/open.c: In function ‘my_fput’:
-/home/lookfiresu/Desktop/share/open.c:2052:4: warning: passing argument 2 of ‘init_task_work’ from incompatible pointer type [enabled by default]
+/home/lookfiresu/Desktop/file_system_module/share/open.c: In function ‘my_fput’:
+/home/lookfiresu/Desktop/file_system_module/share/open.c:2072:4: warning: passing argument 2 of ‘init_task_work’ from incompatible pointer type [enabled by default]
     init_task_work(&file->f_u.fu_rcuhead, ____fput);
     ^
-In file included from /home/lookfiresu/Desktop/share/open.h:49:0,
-                 from /home/lookfiresu/Desktop/share/open.c:57:
+In file included from /home/lookfiresu/Desktop/file_system_module/share/open.h:49:0,
+                 from /home/lookfiresu/Desktop/file_system_module/share/open.c:57:
 include/linux/task_work.h:10:1: note: expected ‘task_work_func_t’ but argument is of type ‘void (*)(struct callback_head *, struct task_struct *)’
  init_task_work(struct callback_head *twork, task_work_func_t func)
  ^
-/home/lookfiresu/Desktop/share/open.c: In function ‘my_atomic_open’:
-/home/lookfiresu/Desktop/share/open.c:2110:3: warning: passing argument 1 of ‘my_inode_permission’ from incompatible pointer type [enabled by default]
+/home/lookfiresu/Desktop/file_system_module/share/open.c: In function ‘my_atomic_open’:
+/home/lookfiresu/Desktop/file_system_module/share/open.c:2130:3: warning: passing argument 1 of ‘my_inode_permission’ from incompatible pointer type [enabled by default]
    error = my_inode_permission(&nd->path.dentry->d_inode, MAY_WRITE | MAY_EXEC, t);
    ^
-/home/lookfiresu/Desktop/share/open.c:440:5: note: expected ‘struct inode *’ but argument is of type ‘struct inode **’
+/home/lookfiresu/Desktop/file_system_module/share/open.c:441:5: note: expected ‘struct inode *’ but argument is of type ‘struct inode **’
  int my_inode_permission(struct inode *inode, int mask, struct task_struct *t) {
      ^
-/home/lookfiresu/Desktop/share/open.c: At top level:
-/home/lookfiresu/Desktop/share/open.c:72:27: warning: ‘mountpoint_hashtable’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/open.c: At top level:
+/home/lookfiresu/Desktop/file_system_module/share/open.c:73:27: warning: ‘mountpoint_hashtable’ defined but not used [-Wunused-variable]
  static struct hlist_head *mountpoint_hashtable __read_mostly;
                            ^
-/home/lookfiresu/Desktop/share/open.c:73:27: warning: ‘mnt_cache’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/open.c:74:27: warning: ‘mnt_cache’ defined but not used [-Wunused-variable]
  static struct kmem_cache *mnt_cache __read_mostly;
                            ^
-/home/lookfiresu/Desktop/share/open.c:76:21: warning: ‘mp_hash_mask’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/open.c:77:21: warning: ‘mp_hash_mask’ defined but not used [-Wunused-variable]
  static unsigned int mp_hash_mask __read_mostly;
                      ^
-/home/lookfiresu/Desktop/share/open.c:77:21: warning: ‘mp_hash_shift’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/open.c:78:21: warning: ‘mp_hash_shift’ defined but not used [-Wunused-variable]
  static unsigned int mp_hash_shift __read_mostly;
                      ^
-/home/lookfiresu/Desktop/share/open.c:1976:23: warning: ‘integrity_iint_tree’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/open.c:1996:23: warning: ‘integrity_iint_tree’ defined but not used [-Wunused-variable]
  static struct rb_root integrity_iint_tree = RB_ROOT;
                        ^
 In file included from include/linux/spinlock_types.h:86:0,
@@ -91,29 +95,29 @@ In file included from include/linux/spinlock_types.h:86:0,
                  from include/linux/time.h:5,
                  from include/linux/ktime.h:24,
                  from include/linux/poll.h:6,
-                 from /home/lookfiresu/Desktop/share/open.h:6,
-                 from /home/lookfiresu/Desktop/share/open.c:57:
-/home/lookfiresu/Desktop/share/open.c:1977:22: warning: ‘integrity_iint_lock’ defined but not used [-Wunused-variable]
+                 from /home/lookfiresu/Desktop/file_system_module/share/open.h:6,
+                 from /home/lookfiresu/Desktop/file_system_module/share/open.c:57:
+/home/lookfiresu/Desktop/file_system_module/share/open.c:1997:22: warning: ‘integrity_iint_lock’ defined but not used [-Wunused-variable]
  static DEFINE_RWLOCK(integrity_iint_lock);
                       ^
 include/linux/rwlock_types.h:46:35: note: in definition of macro ‘DEFINE_RWLOCK’
  #define DEFINE_RWLOCK(x) rwlock_t x = __RW_LOCK_UNLOCKED(x)
                                    ^
-/home/lookfiresu/Desktop/share/open.c:1978:27: warning: ‘iint_cache’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/open.c:1998:27: warning: ‘iint_cache’ defined but not used [-Wunused-variable]
  static struct kmem_cache *iint_cache __read_mostly;
                            ^
-/home/lookfiresu/Desktop/share/open.c:2044:29: warning: ‘work_exited’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/open.c:2064:29: warning: ‘work_exited’ defined but not used [-Wunused-variable]
  static struct callback_head work_exited; 
                              ^
-/home/lookfiresu/Desktop/share/open.c: In function ‘my_check_acl’:
-/home/lookfiresu/Desktop/share/open.c:305:1: warning: control reaches end of non-void function [-Wreturn-type]
+/home/lookfiresu/Desktop/file_system_module/share/open.c: In function ‘my_check_acl’:
+/home/lookfiresu/Desktop/file_system_module/share/open.c:306:1: warning: control reaches end of non-void function [-Wreturn-type]
  }
  ^
-/home/lookfiresu/Desktop/share/open.c: In function ‘__my_inode_permission’:
-/home/lookfiresu/Desktop/share/open.c:438:1: warning: control reaches end of non-void function [-Wreturn-type]
+/home/lookfiresu/Desktop/file_system_module/share/open.c: In function ‘__my_inode_permission’:
+/home/lookfiresu/Desktop/file_system_module/share/open.c:439:1: warning: control reaches end of non-void function [-Wreturn-type]
  }
  ^
-  CC [M]  /home/lookfiresu/Desktop/share/hook.o
+  CC [M]  /home/lookfiresu/Desktop/file_system_module/share/hook.o
 In file included from /usr/src/linux-headers-3.13.0-106-generic/arch/x86/include/asm/msr.h:131:0,
                  from /usr/src/linux-headers-3.13.0-106-generic/arch/x86/include/asm/processor.h:20,
                  from /usr/src/linux-headers-3.13.0-106-generic/arch/x86/include/asm/thread_info.h:22,
@@ -125,160 +129,160 @@ In file included from /usr/src/linux-headers-3.13.0-106-generic/arch/x86/include
                  from include/linux/time.h:5,
                  from include/linux/stat.h:18,
                  from include/linux/module.h:10,
-                 from /home/lookfiresu/Desktop/share/hook.h:13,
-                 from /home/lookfiresu/Desktop/share/hook.c:44:
-/home/lookfiresu/Desktop/share/hook.c: In function ‘get_syscall_table’:
+                 from /home/lookfiresu/Desktop/file_system_module/share/hook.h:13,
+                 from /home/lookfiresu/Desktop/file_system_module/share/hook.c:44:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘get_syscall_table’:
 /usr/src/linux-headers-3.13.0-106-generic/arch/x86/include/asm/paravirt.h:153:6: warning: assignment makes pointer from integer without a cast [enabled by default]
   val = paravirt_read_msr(msr, &_err); \
       ^
-/home/lookfiresu/Desktop/share/hook.c:65:2: note: in expansion of macro ‘rdmsrl’
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:65:2: note: in expansion of macro ‘rdmsrl’
   rdmsrl(MSR_LSTAR, syscall_addr);
   ^
-/home/lookfiresu/Desktop/share/hook.c:68:23: warning: assignment makes pointer from integer without a cast [enabled by default]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:68:23: warning: assignment makes pointer from integer without a cast [enabled by default]
     syscall_table_addr = (0xffffffff00000000) + *(unsigned int*)(lpbin + i + 3);
                        ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘hacked_open’:
-/home/lookfiresu/Desktop/share/hook.c:97:3: warning: passing argument 1 of ‘sprintf’ from incompatible pointer type [enabled by default]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘hacked_open’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:97:3: warning: passing argument 1 of ‘sprintf’ from incompatible pointer type [enabled by default]
    sprintf(&sendbuf->mtext, "open %s %d %d %p", buf, flags, mode, current);
    ^
 In file included from include/linux/cache.h:4:0,
                  from include/linux/time.h:4,
                  from include/linux/stat.h:18,
                  from include/linux/module.h:10,
-                 from /home/lookfiresu/Desktop/share/hook.h:13,
-                 from /home/lookfiresu/Desktop/share/hook.c:44:
+                 from /home/lookfiresu/Desktop/file_system_module/share/hook.h:13,
+                 from /home/lookfiresu/Desktop/file_system_module/share/hook.c:44:
 include/linux/kernel.h:369:27: note: expected ‘char *’ but argument is of type ‘char (*)[512]’
  extern __printf(2, 3) int sprintf(char *buf, const char * fmt, ...);
                            ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘hacked_close’:
-/home/lookfiresu/Desktop/share/hook.c:127:8: warning: unused variable ‘hacked’ [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘hacked_close’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:127:8: warning: unused variable ‘hacked’ [-Wunused-variable]
   char *hacked = "zhao";
         ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘transform’:
-/home/lookfiresu/Desktop/share/hook.c:159:6: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘transform’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:159:6: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
       char *res[MAX_NUMS_SYSCALL_ARGC];
       ^
-/home/lookfiresu/Desktop/share/hook.c:176:6: warning: function returns address of local variable [-Wreturn-local-addr]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:176:6: warning: function returns address of local variable [-Wreturn-local-addr]
       return res;
       ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘atoi’:
-/home/lookfiresu/Desktop/share/hook.c:235:15: warning: initialization discards ‘const’ qualifier from pointer target type [enabled by default]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘atoi’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:235:15: warning: initialization discards ‘const’ qualifier from pointer target type [enabled by default]
   char *temp = str;
                ^
-In file included from /home/lookfiresu/Desktop/share/hook.c:44:0:
-/home/lookfiresu/Desktop/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
+In file included from /home/lookfiresu/Desktop/file_system_module/share/hook.c:44:0:
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
  #define MAX_INT ((1 << 31) - 1)
                             ^
-/home/lookfiresu/Desktop/share/hook.c:255:14: note: in expansion of macro ‘MAX_INT’
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:255:14: note: in expansion of macro ‘MAX_INT’
     if (sum > MAX_INT / 10 || (sum == MAX_INT / 10 && (*temp > '7')))
               ^
-/home/lookfiresu/Desktop/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
  #define MAX_INT ((1 << 31) - 1)
                             ^
-/home/lookfiresu/Desktop/share/hook.c:255:38: note: in expansion of macro ‘MAX_INT’
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:255:38: note: in expansion of macro ‘MAX_INT’
     if (sum > MAX_INT / 10 || (sum == MAX_INT / 10 && (*temp > '7')))
                                       ^
-/home/lookfiresu/Desktop/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
  #define MAX_INT ((1 << 31) - 1)
                             ^
-/home/lookfiresu/Desktop/share/hook.c:257:12: note: in expansion of macro ‘MAX_INT’
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:257:12: note: in expansion of macro ‘MAX_INT’
      return MAX_INT;
             ^
-/home/lookfiresu/Desktop/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
  #define MAX_INT ((1 << 31) - 1)
                             ^
-/home/lookfiresu/Desktop/share/hook.c:260:14: note: in expansion of macro ‘MAX_INT’
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:260:14: note: in expansion of macro ‘MAX_INT’
     if (sum > MAX_INT / 10 || (sum == MAX_INT / 10 && (*temp > '8')))
               ^
-/home/lookfiresu/Desktop/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:54:28: warning: integer overflow in expression [-Woverflow]
  #define MAX_INT ((1 << 31) - 1)
                             ^
-/home/lookfiresu/Desktop/share/hook.c:260:38: note: in expansion of macro ‘MAX_INT’
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:260:38: note: in expansion of macro ‘MAX_INT’
     if (sum > MAX_INT / 10 || (sum == MAX_INT / 10 && (*temp > '8')))
                                       ^
-/home/lookfiresu/Desktop/share/hook.h:55:18: warning: integer overflow in expression [-Woverflow]
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:55:18: warning: integer overflow in expression [-Woverflow]
  #define MIN_INT (-(1 << 31))
                   ^
-/home/lookfiresu/Desktop/share/hook.c:262:12: note: in expansion of macro ‘MIN_INT’
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:262:12: note: in expansion of macro ‘MIN_INT’
      return MIN_INT;
             ^
-/home/lookfiresu/Desktop/share/hook.c:236:6: warning: unused variable ‘i’ [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:236:6: warning: unused variable ‘i’ [-Wunused-variable]
   int i = 0;
       ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘__fd_install’:
-/home/lookfiresu/Desktop/share/hook.c:403:2: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘__fd_install’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:403:2: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
   struct fdtable *fdt;
   ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘__alloc_fd’:
-/home/lookfiresu/Desktop/share/hook.c:459:1: warning: label ‘out’ defined but not used [-Wunused-label]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘__alloc_fd’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:459:1: warning: label ‘out’ defined but not used [-Wunused-label]
  out:
  ^
-/home/lookfiresu/Desktop/share/hook.c:421:1: warning: label ‘repeat’ defined but not used [-Wunused-label]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:421:1: warning: label ‘repeat’ defined but not used [-Wunused-label]
  repeat:
  ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘fs_kthread_function’:
-/home/lookfiresu/Desktop/share/hook.c:468:5: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘fs_kthread_function’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:468:5: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
      int recvlength, flag;
      ^
-/home/lookfiresu/Desktop/share/hook.c:482:12: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:482:12: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
             int *count;
             ^
-/home/lookfiresu/Desktop/share/hook.c:494:13: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:494:13: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
              struct open_flags op;
              ^
-/home/lookfiresu/Desktop/share/hook.c:496:13: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:496:13: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
              struct filename *tmp;
              ^
-/home/lookfiresu/Desktop/share/hook.c:498:14: warning: passing argument 1 of ‘getname_flags’ discards ‘const’ qualifier from pointer target type [enabled by default]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:498:14: warning: passing argument 1 of ‘getname_flags’ discards ‘const’ qualifier from pointer target type [enabled by default]
               tmp = getname_flags(filename, 0, NULL);
               ^
-/home/lookfiresu/Desktop/share/hook.c:334:19: note: expected ‘char *’ but argument is of type ‘const char *’
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:334:19: note: expected ‘char *’ but argument is of type ‘const char *’
  struct filename * getname_flags(char *filename, int flags, int *empty) {
                    ^
-/home/lookfiresu/Desktop/share/hook.c:526:14: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘long int’ [-Wformat=]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:526:14: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘long int’ [-Wformat=]
               printk(KERN_ALERT "ret is %d\n", ret);
               ^
-/home/lookfiresu/Desktop/share/hook.c:530:13: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘long int’ [-Wformat=]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:530:13: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘long int’ [-Wformat=]
              printk(KERN_ALERT "fd is %d\n", ret);
              ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘init_mymodule’:
-/home/lookfiresu/Desktop/share/hook.c:556:16: warning: assignment makes pointer from integer without a cast [enabled by default]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘init_mymodule’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:556:16: warning: assignment makes pointer from integer without a cast [enabled by default]
       orig_open = syscall_table_addr[__NR_open];
                 ^
-/home/lookfiresu/Desktop/share/hook.c:557:32: warning: assignment makes integer from pointer without a cast [enabled by default]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:557:32: warning: assignment makes integer from pointer without a cast [enabled by default]
   syscall_table_addr[__NR_open] = hacked_open;
                                 ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘cleanup_mymodule’:
-/home/lookfiresu/Desktop/share/hook.c:564:32: warning: assignment makes integer from pointer without a cast [enabled by default]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘cleanup_mymodule’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:564:32: warning: assignment makes integer from pointer without a cast [enabled by default]
   syscall_table_addr[__NR_open] = orig_open;
                                 ^
-In file included from /home/lookfiresu/Desktop/share/hook.c:44:0:
-/home/lookfiresu/Desktop/share/hook.c: At top level:
-/home/lookfiresu/Desktop/share/hook.h:64:14: warning: ‘orig_close’ defined but not used [-Wunused-variable]
+In file included from /home/lookfiresu/Desktop/file_system_module/share/hook.c:44:0:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: At top level:
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:64:14: warning: ‘orig_close’ defined but not used [-Wunused-variable]
  static int (*orig_close)(unsigned int fd);
               ^
-/home/lookfiresu/Desktop/share/hook.h:68:14: warning: ‘msgget’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:68:14: warning: ‘msgget’ defined but not used [-Wunused-variable]
  static int (*msgget)(key_t key, int msgflg);
               ^
-/home/lookfiresu/Desktop/share/hook.h:70:14: warning: ‘msgsnd’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:70:14: warning: ‘msgsnd’ defined but not used [-Wunused-variable]
  static long(*msgsnd)(int msqid, const void *msgp, size_t msgsz, int msgflg);
               ^
-/home/lookfiresu/Desktop/share/hook.h:71:18: warning: ‘msgrcv’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:71:18: warning: ‘msgrcv’ defined but not used [-Wunused-variable]
  static ssize_t (*msgrcv)(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);
                   ^
-/home/lookfiresu/Desktop/share/hook.h:72:14: warning: ‘msgctl’ defined but not used [-Wunused-variable]
+/home/lookfiresu/Desktop/file_system_module/share/hook.h:72:14: warning: ‘msgctl’ defined but not used [-Wunused-variable]
  static int (*msgctl)(int msqid, int cmd, struct msqid_ds *buf);
               ^
-/home/lookfiresu/Desktop/share/hook.c:52:12: warning: ‘getStrlength’ defined but not used [-Wunused-function]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:52:12: warning: ‘getStrlength’ defined but not used [-Wunused-function]
  static int getStrlength(char *buf){
             ^
-/home/lookfiresu/Desktop/share/hook.c: In function ‘fs_kthread_function’:
-/home/lookfiresu/Desktop/share/hook.c:483:19: warning: ‘count’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+/home/lookfiresu/Desktop/file_system_module/share/hook.c: In function ‘fs_kthread_function’:
+/home/lookfiresu/Desktop/file_system_module/share/hook.c:483:19: warning: ‘count’ may be used uninitialized in this function [-Wmaybe-uninitialized]
             char **argv = argv_split(GFP_KERNEL, msg, count);
                    ^
-  LD [M]  /home/lookfiresu/Desktop/share/hookfs.o
+  LD [M]  /home/lookfiresu/Desktop/file_system_module/share/hookfs.o
   Building modules, stage 2.
   MODPOST 1 modules
-  CC      /home/lookfiresu/Desktop/share/hookfs.mod.o
-  LD [M]  /home/lookfiresu/Desktop/share/hookfs.ko
+  CC      /home/lookfiresu/Desktop/file_system_module/share/hookfs.mod.o
+  LD [M]  /home/lookfiresu/Desktop/file_system_module/share/hookfs.ko
 make[1]: Leaving directory `/usr/src/linux-headers-3.13.0-106-generic'

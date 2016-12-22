@@ -317,6 +317,7 @@ extern const struct seq_operations mounts_op;
 
 
 extern void my_files_init(void);
+// extern int my_vfs_open(const struct path*, struct file *, const struct cred *);
 
 extern struct file *my_do_filp_open(int , struct filename *, const struct open_flags *, struct task_struct *);
 

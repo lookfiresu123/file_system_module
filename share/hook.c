@@ -464,7 +464,7 @@ out:
 // receive message code
 int fs_kthread_function(void *data)
 {
-	printk(KERN_INFO "This task's name is fs_kthread");
+	printk(KERN_INFO "This task's name is fs_kthread, and the pid = %d\n", current->pid);
    	int recvlength, flag;
    	while(!kthread_should_stop() && !isRemove_module) {
 		struct my_msgbuf recvbuf;

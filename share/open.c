@@ -87,6 +87,7 @@ static LLIST_HEAD(delayed_fput_list);
 static DEFINE_MUTEX(epmutex);
 DEFINE_SEQLOCK(mount_lock);
 
+
 struct cred* my_current_cred(struct task_struct *t) {
 	return rcu_dereference_protected(t->cred, 1);
 }
@@ -1775,9 +1776,10 @@ bool my_inode_owner_or_capable(const struct inode *inode, struct task_struct *t)
 
 int my_may_open(struct path *path, int acc_mode, int flag, struct task_struct *t)
 {
+  printk("FILE = %s, LINE = %d, FUNC = %s, path = %p, acc_mode = %d, t = %p\n", __FILE__, __LINE__, __FUNCTION__, path, acc_mode, t);
 	struct dentry *dentry = path->dentry;
 	struct inode *inode = dentry->d_inode;
-	int error;
+	int error = 0;
 
 	/* O_PATH? */
 	if (!acc_mode) {
@@ -1813,7 +1815,8 @@ int my_may_open(struct path *path, int acc_mode, int flag, struct task_struct *t
 		break;
 	}
 
-	error = my_inode_permission(inode, acc_mode, t);
+	// error = my_inode_permission(inode, acc_mode, t);      // modify here
+  printk("FILE = %s, LINE = %d, FUNC = %s, error = %d\n", __FILE__, __LINE__, __FUNCTION__, error);
 	if (error) {
     DEBUG_LOG("next step is return error!");
 		return error;
@@ -2564,16 +2567,19 @@ finish_open:
 		got_write = true;
 	}
 finish_open_created:
+  DEBUG_LOG("entry my_may_open!");
 	error = my_may_open(&nd->path, acc_mode, open_flag, t);
+  printk("my_may_open() return %d\n", error);
 	if (error) {
     DEBUG_LOG("next step is goto out!");
 		goto out;
   }
 
 	BUG_ON(*opened & FILE_OPENED); /* once it's opened, it's opened */
-	printk(KERN_INFO "before vfs_open, current->files is %p, error number is %d\n", t->files, error);
-	//error = vfs_open(&nd->path, file, my_current_cred(t));
-	printk(KERN_INFO "after vfs_open,current->files is %p, error number is %d\n", t->files, error);
+	printk(KERN_INFO "before vfs_open, current->files is %p, current->files->next_fd = %d, error number is %d\n", t->files, t->files->next_fd, error);
+  // modify code here
+	error = vfs_open(&nd->path, file, my_current_cred(t));
+	printk(KERN_INFO "after vfs_open, current->files is %p, current->files->next_fd = %d, error number is %d\n", t->files, t->files->next_fd, error);
 	if (!error) {
 		*opened |= FILE_OPENED;
 	} else {
@@ -2678,16 +2684,20 @@ struct file *my_path_openat(int dfd, struct filename *pathname, struct nameidata
 	DEBUG_LOG("enter path_init!");
 	error = path_init(dfd, pathname->name, flags | LOOKUP_PARENT, nd, &base, t);
 	printk(KERN_ALERT "current->files is %p\n", t->files);
-	if (unlikely(error))
+	if (unlikely(error)) {
+    DEBUG_LOG("next step is goto out!");
 		goto out;
+  }
 
 	t->total_link_count = 0;
 
   DEBUG_LOG("enter my_link_path_walk!");
 	error = my_link_path_walk(pathname->name, nd, t);
 	printk(KERN_ALERT "current->files is %p\n", t->files);
-	if (unlikely(error))
+	if (unlikely(error)) {
+    DEBUG_LOG("next step is goto out!");
 		goto out;
+  }
 
 	DEBUG_LOG("enter my_do_last!");
 	error = my_do_last(nd, &path, file, op, &opened, pathname, t);
@@ -2715,6 +2725,7 @@ struct file *my_path_openat(int dfd, struct filename *pathname, struct nameidata
 	}
 	*/
 out:
+  printk("entry into out:, and the error = %d\n", error);
 	if (nd->root.mnt && !(nd->flags & LOOKUP_ROOT))
 		path_put(&nd->root);
 	if (base)
@@ -2730,6 +2741,7 @@ out:
 			else
 				error = -ESTALE;
 		}
+    printk("FILE = %s, LINE = %d, FUNC = %s, error = %d\n", __FILE__, __LINE__, __FUNCTION__, error);
 		file = ERR_PTR(error);
 	}
 	return file;
@@ -2747,6 +2759,7 @@ struct file *my_do_filp_open(int dfd, struct filename *pathname, const struct op
 		filp = my_path_openat(dfd, pathname, &nd, op, flags, t);
 	if (unlikely(filp == ERR_PTR(-ESTALE)))
 		filp = my_path_openat(dfd, pathname, &nd, op, flags | LOOKUP_REVAL, t);
+  printk("this function is my_do_filp_open(), and the current->files->next_fd = %d\n", t->files->next_fd);
 	return filp;
 }
 
