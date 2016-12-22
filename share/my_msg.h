@@ -1,8 +1,48 @@
-#include<linux/list.h>
+#ifndef _MY_MSG_H
+#define _MY_MSG_H 1
+
+// #include<linux/list.h>
+// #include<linux/security.h>
+// #include<linux/sched.h>
+// #include<linux/ipc.h>
+// #include<linux/kernel.h>
+#include<linux/init.h>
+#include<linux/module.h>
+#include<linux/nsproxy.h>
+#include<linux/kthread.h>
+#include<linux/err.h>
+#include<linux/types.h>
+#include<linux/unistd.h>
+#include<linux/msg.h>
 #include<linux/security.h>
-#include<linux/sched.h>
+#include<linux/ipc_namespace.h>
+#include<linux/proc_ns.h>
+#include<linux/spinlock.h>
+#include<linux/list.h>
 #include<linux/ipc.h>
+#include<linux/slab.h>
+#include<linux/cred.h>
+#include<linux/audit.h>
+#include<linux/uidgid.h>
+#include<linux/capability.h>
+#include<linux/rcupdate.h>
+#include<asm/unistd.h>
+#include<asm-generic/memory_model.h>
+#include<asm-generic/errno-base.h>
+#include<asm-generic/current.h>
+#include<linux/errno.h>
+#include<linux/mm.h>
+#include<linux/idr.h>
 #include<linux/kernel.h>
+#include<linux/pid.h>
+#include<linux/const.h>
+#include<linux/gfp.h>
+#include<linux/time.h>
+#include<linux/idr.h>
+#include<linux/gfp.h>
+#include<linux/rwsem.h>
+
+MODULE_LICENSE("Dual BSD/GPL");
 
 #define DATALEN_MSG ((size_t)PAGE_SIZE - sizeof(struct my_msg_msg))
 #define DATALEN_SEG ((size_t)PAGE_SIZE - sizeof(struct my_msg_msgseg))
@@ -39,27 +79,10 @@ struct  my_msg_receiver{
     struct my_msg_msg *volatile r_msg;
 };
 
-/*
 struct my_msgbuf{
     long mtype;
     char mtext[TEXT_SIZE];
 };
-*/
-
-struct my_msgbuf {
-    long mtype;
-    char mtext[1];
-    struct task_struct *tsk;
-    void (*deal_data_kernel_to_fs)(struct my_msgbuf *msgp, void **retpp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
-    void (*deal_data_fs_to_kernel)(struct my_msgbuf *msgp, void **retpp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
-    struct {
-        void *func_container_ptr;
-        void *object_ptr;
-    } data;
-};
-
-
-
 struct my_ipc_params{
     key_t key;
     int flg;
@@ -124,3 +147,5 @@ void my_free_copy(struct my_msg_msg *copy);
 struct my_msg_msg * my_find_msg(struct msg_queue *msq, long *msgtyp, int mode);
 struct my_msg_msg *my_copy_msg(struct my_msg_msg *src, struct my_msg_msg *dst);
 void my_ss_wakeup(struct list_head *h, int kill);
+
+#endif

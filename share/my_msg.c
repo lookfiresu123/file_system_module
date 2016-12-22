@@ -1,3 +1,4 @@
+/*
 #include<linux/init.h>
 #include<linux/module.h>
 #include<linux/nsproxy.h>
@@ -33,12 +34,13 @@
 #include<linux/idr.h>
 #include<linux/gfp.h>
 #include<linux/rwsem.h>
+*/
+
 #include "my_msg.h"
 
 
-MODULE_LICENSE("Dual BSD/GPL");
+// MODULE_LICENSE("Dual BSD/GPL");
 // create a message queue's main code
-
 int my_msgget(key_t key, int msgflg){
     struct ipc_namespace *ns;
     struct my_ipc_ops msg_ops;
@@ -281,10 +283,8 @@ struct kern_ipc_perm *my_ipc_findkey(struct ipc_ids *ids, key_t key)
 int my_ipc_check_perms(struct ipc_namespace *ns, struct kern_ipc_perm *ipcp, struct my_ipc_ops *ops, struct my_ipc_params *params){
 	int err;
 
-	if (my_ipcperms(ns, ipcp, params->flg)) {
-      printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
-      err = -EACCES;
-  }
+	if (my_ipcperms(ns, ipcp, params->flg))
+		err = -EACCES;
 	else {
 		err = ops->my_associate(ipcp, params->flg);
 		if (!err)
@@ -307,16 +307,10 @@ long my_do_msgsnd(int msqid, long mtype, void *mtext, size_t msgsz, int msgflg){
     int err;
     struct ipc_namespace *ns;
     ns = current->nsproxy->ipc_ns;
-    if(msgsz > ns->msg_ctlmax || (long) msgsz < 0 || msqid < 0) {
-        printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
-        // testFunc();
+    if(msgsz > ns->msg_ctlmax || (long) msgsz < 0 || msqid < 0)
         return -EINVAL;
-    }
-    if(mtype < 1) {
-        // testFunc();
-        printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
+    if(mtype < 1)
         return -EINVAL;
-    }
     msg = my_load_msg(mtext, msgsz);
     if(IS_ERR(msg))
         return PTR_ERR(msg);
@@ -332,23 +326,19 @@ long my_do_msgsnd(int msqid, long mtype, void *mtext, size_t msgsz, int msgflg){
     my_ipc_lock_object(&msq->q_perm);
     for(;;){
         struct my_msg_sender s;
-        printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
         err = -EACCES;
 
-        /*
         if(my_ipcperms(ns, &msq->q_perm, S_IWUGO))
             goto out_unlock0;
-        */
 
         if(msq->q_perm.deleted){
             err = -EIDRM;
             goto out_unlock0;
         }
-        /*
-        err = security_msg_queue_msgsnd(msq, msg, msgflg);
+        /*err = security_msg_queue_msgsnd(msq, msg, msgflg);
         if(err)
             goto out_unlock0;
-        */
+            */
         if(msgsz + msq->q_cbytes <= msq->q_qbytes && 1 + msq->q_qnum <= msq->q_qbytes){
             break;
         }
@@ -513,11 +503,8 @@ struct kern_ipc_perm *my_ipc_obtain_object(struct ipc_ids *ids, int id)
 	int lid = ipcid_to_idx(id);
 
 	out = idr_find(&ids->ipcs_idr, lid);
-	if (!out) {
-      // testFunc();
-      printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
-      return ERR_PTR(-EINVAL);
-  }
+	if (!out)
+		return ERR_PTR(-EINVAL);
 
 	return out;
 }
@@ -641,18 +628,12 @@ long my_do_msgrcv(int msqid, void *buf, size_t bufsz, long msgtyp, int msgflg,
 
 	ns = current->nsproxy->ipc_ns;
 
-	if (msqid < 0 || (long) bufsz < 0) {
-      // testFunc();
-      printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
-      return -EINVAL;
-  }
+	if (msqid < 0 || (long) bufsz < 0)
+		return -EINVAL;
 
 	if (msgflg & MSG_COPY) {
-      if ((msgflg & MSG_EXCEPT) || !(msgflg & IPC_NOWAIT)) {
-          // testFunc();
-          printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
-          return -EINVAL;
-      }
+		if ((msgflg & MSG_EXCEPT) || !(msgflg & IPC_NOWAIT))
+			return -EINVAL;
 		copy = my_prepare_copy(buf, min_t(size_t, bufsz, ns->msg_ctlmax));
 		if (IS_ERR(copy))
 			return PTR_ERR(copy);
@@ -669,12 +650,10 @@ long my_do_msgrcv(int msqid, void *buf, size_t bufsz, long msgtyp, int msgflg,
 
 	for (;;) {
 		struct my_msg_receiver msr_d;
-    // printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
+
 		msg = ERR_PTR(-EACCES);
-    /*
 		if (my_ipcperms(ns, &msq->q_perm, S_IRUGO))
 			goto out_unlock1;
-    */
 
 		my_ipc_lock_object(&msq->q_perm);
 
@@ -849,11 +828,8 @@ struct my_msg_msg *my_copy_msg(struct my_msg_msg *src, struct my_msg_msg *dst){
     size_t len = src->m_ts;
     size_t alen;
     BUG_ON(dst == NULL);
-    if(src->m_ts > dst->m_ts) {
-        // testFunc();
-        printk("File = %s, Line = %d, Func = %s\n", __FILE__, __LINE__, __FUNCTION__);
+    if(src->m_ts > dst->m_ts)
         return ERR_PTR(-EINVAL);
-    }
     alen = len < DATALEN_MSG ? len : DATALEN_MSG;
     memcpy(dst + 1, src + 1, alen);
     for(dst_pseg = dst->next, src_pseg = src->next; src_pseg != NULL; dst_pseg = dst_pseg->next, src_pseg = src_pseg->next){
