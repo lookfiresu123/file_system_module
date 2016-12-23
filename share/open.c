@@ -87,9 +87,271 @@ static LLIST_HEAD(delayed_fput_list);
 static DEFINE_MUTEX(epmutex);
 DEFINE_SEQLOCK(mount_lock);
 
+/*----------------------------  ext4 文件系统层 -------------------------------*/
+static int my_ext4_file_open(struct inode * inode, struct file * filp, struct task_struct *t)
+{
+  DEBUG_LOG("entry my_ext4_file_open()!");
+	struct super_block *sb = inode->i_sb;
+	struct ext4_sb_info *sbi = EXT4_SB(inode->i_sb);
+	struct vfsmount *mnt = filp->f_path.mnt;
+	struct path path;
+	char buf[64], *cp;
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+
+	if (unlikely(!(sbi->s_mount_flags & EXT4_MF_MNTDIR_SAMPLED) && !(sb->s_flags & MS_RDONLY))) {
+		sbi->s_mount_flags |= EXT4_MF_MNTDIR_SAMPLED;
+		/*
+		 * Sample where the filesystem has been mounted and
+		 * store it in the superblock for sysadmin convenience
+		 * when trying to sort through large numbers of block
+		 * devices or filesystem images.
+		 */
+    printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+		memset(buf, 0, sizeof(buf));
+		path.mnt = mnt;
+		path.dentry = mnt->mnt_root;
+		cp = d_path(&path, buf, sizeof(buf));
+		if (!IS_ERR(cp)) {
+			handle_t *handle;
+			int err;
+
+			handle = ext4_journal_start_sb(sb, EXT4_HT_MISC, 1);
+			if (IS_ERR(handle))
+				return PTR_ERR(handle);
+			err = ext4_journal_get_write_access(handle, sbi->s_sbh);
+			if (err) {
+				ext4_journal_stop(handle);
+				return err;
+			}
+			strlcpy(sbi->s_es->s_last_mounted, cp, sizeof(sbi->s_es->s_last_mounted));
+			ext4_handle_dirty_super(handle, sb);
+			ext4_journal_stop(handle);
+		}
+	}
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+	/*
+	 * Set up the jbd2_inode if we are opening the inode for
+	 * writing and the journal is present
+	 */
+	if (filp->f_mode & FMODE_WRITE) {
+		int ret = ext4_inode_attach_jinode(inode);
+		if (ret < 0)
+			return ret;
+	}
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+	return dquot_file_open(inode, filp);
+}
+
+
+/* ------------------      新加的函数（虚拟文件系统层）      ----------------------- */
+static inline void mnt_inc_writers(struct mount *mnt)
+{
+#ifdef CONFIG_SMP
+	this_cpu_inc(mnt->mnt_pcp->mnt_writers);
+#else
+	mnt->mnt_writers++;
+#endif
+}
+
+static int mnt_is_readonly(struct vfsmount *mnt)
+{
+	if (mnt->mnt_sb->s_readonly_remount)
+		return 1;
+	/* Order wrt setting s_flags/s_readonly_remount in do_remount() */
+	smp_rmb();
+	return __mnt_is_readonly(mnt);
+}
+
+static inline void mnt_dec_writers(struct mount *mnt)
+{
+#ifdef CONFIG_SMP
+	this_cpu_dec(mnt->mnt_pcp->mnt_writers);
+#else
+	mnt->mnt_writers--;
+#endif
+}
+
+int my__mnt_want_write(struct vfsmount *m)
+{
+	struct mount *mnt = real_mount(m);
+	int ret = 0;
+
+	preempt_disable();
+	mnt_inc_writers(mnt);
+	smp_mb();
+	while (ACCESS_ONCE(mnt->mnt.mnt_flags) & MNT_WRITE_HOLD)
+		cpu_relax();
+  smp_rmb();
+	if (mnt_is_readonly(m)) {
+		mnt_dec_writers(mnt);
+		ret = -EROFS;
+	}
+	preempt_enable();
+
+	return ret;
+}
+
+
+static inline int my__get_file_write_access(struct inode *inode,
+                                          struct vfsmount *mnt)
+{
+	int error = get_write_access(inode);
+	if (error)
+		return error;
+	error = my__mnt_want_write(mnt);
+	if (error)
+		put_write_access(inode);
+	return error;
+}
+
+static int my_do_dentry_open(struct file *f,
+                             int (*open)(struct inode *, struct file *),
+                             const struct cred *cred, struct task_struct *t)
+{
+  DEBUG_LOG("entry my_do_dentry_open()!");
+	static const struct file_operations empty_fops = {};
+	struct inode *inode;
+	int error;
+
+	f->f_mode = OPEN_FMODE(f->f_flags) | FMODE_LSEEK |
+				FMODE_PREAD | FMODE_PWRITE;
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+
+	if (unlikely(f->f_flags & O_PATH))
+		f->f_mode = FMODE_PATH;
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+
+	path_get(&f->f_path);
+	inode = f->f_inode = f->f_path.dentry->d_inode;
+	if (f->f_mode & FMODE_WRITE && !special_file(inode->i_mode)) {
+		error = my__get_file_write_access(inode, f->f_path.mnt);
+		if (error) {
+      DEBUG_LOG("next step is goto cleanup_file");
+			goto cleanup_file;
+    }
+		file_take_write(f);
+	}
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+
+	f->f_mapping = inode->i_mapping;
+
+	if (unlikely(f->f_mode & FMODE_PATH)) {
+		f->f_op = &empty_fops;
+    DEBUG_LOG("next step is return 0");
+		return 0;
+	}
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+
+	f->f_op = fops_get(inode->i_fop);
+	if (unlikely(WARN_ON(!f->f_op))) {
+		error = -ENODEV;
+    DEBUG_LOG("next step is goto cleanup_all");
+		goto cleanup_all;
+	}
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+
+	// error = security_file_open(f, cred);
+  // printk("FILE = %s, LINE = %d, FUNC = %s, error = %d\n", __FILE__, __LINE__, __FUNCTION__, error);
+	if (error) {
+    DEBUG_LOG("next step is goto cleanup_all");
+		goto cleanup_all;
+  }
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+
+	error = break_lease(inode, f->f_flags);
+	if (error) {
+    DEBUG_LOG("next step is goto cleanup_all");
+		goto cleanup_all;
+  }
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+
+  /*
+	if (!open)
+		open = f->f_op->open;
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+	if (open) {
+		error = open(inode, f);
+		if (error) {
+      DEBUG_LOG("next step is goto cleanup_all");
+			goto cleanup_all;
+    }
+    }
+  */
+  if (!open) {
+    error = my_ext4_file_open(inode, f, t);
+    printk("my_ext4_file_open() return %d\n", error);
+		if (error) {
+      DEBUG_LOG("next step is goto cleanup_all");
+			goto cleanup_all;
+    }
+  }
+
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+	if ((f->f_mode & (FMODE_READ | FMODE_WRITE)) == FMODE_READ)
+		i_readcount_inc(inode);
+
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+	f->f_flags &= ~(O_CREAT | O_EXCL | O_NOCTTY | O_TRUNC);
+
+	file_ra_state_init(&f->f_ra, f->f_mapping->host->i_mapping);
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
+
+  DEBUG_LOG("next step is return 0");
+	return 0;
+
+cleanup_all:
+	fops_put(f->f_op);
+	if (f->f_mode & FMODE_WRITE) {
+		if (!special_file(inode->i_mode)) {
+			/*
+			 * We don't consider this a real
+			 * mnt_want/drop_write() pair
+			 * because it all happenend right
+			 * here, so just reset the state.
+			 */
+			put_write_access(inode);
+			file_reset_write(f);
+			__mnt_drop_write(f->f_path.mnt);
+		}
+	}
+cleanup_file:
+	path_put(&f->f_path);
+	f->f_path.mnt = NULL;
+	f->f_path.dentry = NULL;
+	f->f_inode = NULL;
+  printk("FILE = %s, LINE = %d, FUNC = %s, next step is return %d\n", __FILE__, __LINE__, __FUNCTION__, error);
+	return error;
+}
+
+
+int my_vfs_open(const struct path *path, struct file *filp,
+                const struct cred *cred, struct task_struct *t)
+{
+	struct inode *inode = path->dentry->d_inode;
+
+	if (inode->i_op->dentry_open) {
+    DEBUG_LOG("next step is calling inode->i_op->dentry_open()!");
+    printk("inode->i_op->dentry_open(dentry = %p, file = %p, cred = %p)\n", path->dentry, filp, cred);
+		int error = inode->i_op->dentry_open(path->dentry, filp, cred);
+    printk("inode->i_op->dentry_open() return error = %d\n", error);
+    return error;
+  }
+	else {
+		filp->f_path = *path;
+    DEBUG_LOG("next step is calling do_dentry_open()!");
+    printk("my_do_dentry_open(file = %p, open = %p, cred = %p)\n", filp, NULL, cred);
+    printk("before call my_do_dentry_open(), current = %p, current->files = %p\n", t, t->files);
+		int error = my_do_dentry_open(filp, NULL, cred, t);
+    printk("after call my_do_dentry_open(), current = %p, current->files = %p\n", t, t->files);
+    printk("my_do_dentry_open() return error = %d\n", error);
+    return error;
+	}
+}
+
 
 struct cred* my_current_cred(struct task_struct *t) {
-	return rcu_dereference_protected(t->cred, 1);
+	// return rcu_dereference_protected(t->cred, 1);
+	return t->cred;
 }
 
 kuid_t my_current_fsuid(struct task_struct *t)
@@ -97,13 +359,12 @@ kuid_t my_current_fsuid(struct task_struct *t)
 	return my_current_cred(t)->fsuid;
 }
 
-void my_files_init(void)
-{ 
+void my_files_init(void){
 	filp_cachep = kmem_cache_create("filp", sizeof(struct file), 0,
 			SLAB_HWCACHE_ALIGN | SLAB_PANIC, NULL);
 	files_stat.max_files = NR_FILE;
 	percpu_counter_init(&nr_files, 0);
-} 
+}
 
 struct file* my_get_empty_filp(struct task_struct *t) {
 	const struct cred *cred = my_current_cred(t);
@@ -170,8 +431,7 @@ static int sb_permission(struct super_block *sb, struct inode *inode, int mask) 
 	return 0;
 }
 
-int groups_search(const struct group_info *group_info, kgid_t grp)
-{
+int groups_search(const struct group_info *group_info, kgid_t grp) {
 	unsigned int left, right;
 
 	if (!group_info)
@@ -195,8 +455,7 @@ int groups_search(const struct group_info *group_info, kgid_t grp)
 /*
  * Check whether we're fsgid/egid or in the supplemental group..
  */
-int my_in_group_p(kgid_t grp, struct task_struct *t)
-{
+int my_in_group_p(kgid_t grp, struct task_struct *t) {
 	const struct cred *cred = my_current_cred(t);
 	int retval = 1;
 
@@ -205,48 +464,47 @@ int my_in_group_p(kgid_t grp, struct task_struct *t)
 	return retval;
 }
 
-int my_posix_acl_permission(struct inode *inode, const struct posix_acl *acl, int want, struct task_struct *t)
-{
+int my_posix_acl_permission(struct inode *inode, const struct posix_acl *acl, int want, struct task_struct *t) {
 	const struct posix_acl_entry *pa, *pe, *mask_obj;
 	int found = 0;
 
 	want &= MAY_READ | MAY_WRITE | MAY_EXEC | MAY_NOT_BLOCK;
 
 	FOREACH_ACL_ENTRY(pa, acl, pe) {
-                switch(pa->e_tag) {
-                        case ACL_USER_OBJ:
-				if (uid_eq(inode->i_uid, my_current_fsuid(t)))
-                                        goto check_perm;
-                                break;
-                        case ACL_USER:
-				if (uid_eq(pa->e_uid, my_current_fsuid(t)))
-                                        goto mask;
-				break;
-                        case ACL_GROUP_OBJ:
-                                if (my_in_group_p(inode->i_gid, t)) {
-					found = 1;
-					if ((pa->e_perm & want) == want)
-						goto mask;
-                                }
-				break;
-                        case ACL_GROUP:
-				if (my_in_group_p(pa->e_gid, t)) {
-					found = 1;
-					if ((pa->e_perm & want) == want)
-						goto mask;
-                                }
-                                break;
-                        case ACL_MASK:
-                                break;
-                        case ACL_OTHER:
-				if (found)
-					return -EACCES;
-				else
-					goto check_perm;
-			default:
-				return -EIO;
-                }
-        }
+    switch(pa->e_tag) {
+    case ACL_USER_OBJ:
+      if (uid_eq(inode->i_uid, my_current_fsuid(t)))
+        goto check_perm;
+      break;
+    case ACL_USER:
+      if (uid_eq(pa->e_uid, my_current_fsuid(t)))
+        goto mask;
+      break;
+    case ACL_GROUP_OBJ:
+      if (my_in_group_p(inode->i_gid, t)) {
+        found = 1;
+        if ((pa->e_perm & want) == want)
+          goto mask;
+      }
+      break;
+    case ACL_GROUP:
+      if (my_in_group_p(pa->e_gid, t)) {
+        found = 1;
+        if ((pa->e_perm & want) == want)
+          goto mask;
+      }
+      break;
+    case ACL_MASK:
+      break;
+    case ACL_OTHER:
+      if (found)
+        return -EACCES;
+      else
+        goto check_perm;
+    default:
+      return -EIO;
+    }
+  }
 	return -EIO;
 
 mask:
@@ -271,11 +529,11 @@ static int my_check_acl(struct inode *inode, int mask, struct task_struct *t)
 
 	if (mask & MAY_NOT_BLOCK) {
 		acl = get_cached_acl_rcu(inode, ACL_TYPE_ACCESS);
-	        	if (!acl)
-	           	return -EAGAIN;
+    if (!acl)
+      return -EAGAIN;
 		if (acl == ACL_NOT_CACHED)
 			return -ECHILD;
-	           return my_posix_acl_permission(inode, acl, mask & ~MAY_NOT_BLOCK, t);
+    return my_posix_acl_permission(inode, acl, mask & ~MAY_NOT_BLOCK, t);
 	}
 
 	acl = get_cached_acl(inode, ACL_TYPE_ACCESS);
@@ -289,26 +547,25 @@ static int my_check_acl(struct inode *inode, int mask, struct task_struct *t)
 	 * just create the negative cache entry.
 	 */
 	if (acl == ACL_NOT_CACHED) {
-	        if (inode->i_op->get_acl) {
+    if (inode->i_op->get_acl) {
 			acl = inode->i_op->get_acl(inode, ACL_TYPE_ACCESS);
 			if (IS_ERR(acl))
 				return PTR_ERR(acl);
 		} else {
-		        set_cached_acl(inode, ACL_TYPE_ACCESS, NULL);
-		        return -EAGAIN;
+      set_cached_acl(inode, ACL_TYPE_ACCESS, NULL);
+      return -EAGAIN;
 		}
 	}
 
 	if (acl) {
-	        int error = my_posix_acl_permission(inode, acl, mask, t);
-	        posix_acl_release(acl);
-	        return error;
+    int error = my_posix_acl_permission(inode, acl, mask, t);
+    posix_acl_release(acl);
+    return error;
 	}
 }
 
 
-static int my_acl_permission_check(struct inode *inode, int mask, struct task_struct *t)
-{
+static int my_acl_permission_check(struct inode *inode, int mask, struct task_struct *t) {
 	unsigned int mode = inode->i_mode;
 
 	if (likely(uid_eq(my_current_fsuid(t), inode->i_uid)))
@@ -352,8 +609,7 @@ bool my_capable_wrt_inode_uidgid(const struct inode *inode, int cap, struct task
 {
 	struct user_namespace *ns = current_user_ns();
 
-	return my_ns_capable(ns, cap, t) && kuid_has_mapping(ns, inode->i_uid) &&
-		kgid_has_mapping(ns, inode->i_gid);
+	return my_ns_capable(ns, cap, t) && kuid_has_mapping(ns, inode->i_uid) && kgid_has_mapping(ns, inode->i_gid);
 }
 
 int my_generic_permission(struct inode *inode, int mask, struct task_struct *t)
@@ -372,8 +628,7 @@ int my_generic_permission(struct inode *inode, int mask, struct task_struct *t)
 		if (my_capable_wrt_inode_uidgid(inode, CAP_DAC_OVERRIDE, t))
 			return 0;
 		if (!(mask & MAY_WRITE))
-			if (my_capable_wrt_inode_uidgid(inode,
-						     CAP_DAC_READ_SEARCH, t))
+			if (my_capable_wrt_inode_uidgid(inode, CAP_DAC_READ_SEARCH, t))
 				return 0;
 		return -EACCES;
 	}
@@ -668,8 +923,7 @@ drop_root_mnt:
 	return -ECHILD;
 }
 
-static int my_may_lookup(struct nameidata *nd, struct task_struct *t)
-{
+static int my_may_lookup(struct nameidata *nd, struct task_struct *t) {
 	if (nd->flags & LOOKUP_RCU) {
 		int err = my_inode_permission(nd->inode, MAY_EXEC|MAY_NOT_BLOCK, t);
 		if (err != -ECHILD)
@@ -680,8 +934,7 @@ static int my_may_lookup(struct nameidata *nd, struct task_struct *t)
 	return my_inode_permission(nd->inode, MAY_EXEC, t);
 }
 
-static unsigned long my_hash_name(const char *name, unsigned int *hashp)
-{
+static unsigned long my_hash_name(const char *name, unsigned int *hashp) {
 	unsigned long hash = init_name_hash();
 	unsigned long len = 0, c;
 
@@ -697,8 +950,7 @@ static unsigned long my_hash_name(const char *name, unsigned int *hashp)
 
 DEFINE_SEQLOCK(rename_lock);
 
-struct dentry *d_ancestor(struct dentry *p1, struct dentry *p2)
-{
+struct dentry *d_ancestor(struct dentry *p1, struct dentry *p2) {
 	struct dentry *p;
 
 	for (p = p2; !IS_ROOT(p); p = p->d_parent) {
@@ -709,8 +961,7 @@ struct dentry *d_ancestor(struct dentry *p1, struct dentry *p2)
 }
 
 
-int is_subdir(struct dentry *new_dentry, struct dentry *old_dentry)
-{
+int is_subdir(struct dentry *new_dentry, struct dentry *old_dentry) {
 	int result;
 	unsigned seq;
 
@@ -736,8 +987,7 @@ int is_subdir(struct dentry *new_dentry, struct dentry *old_dentry)
 }
 
 
-static bool path_connected(const struct path *path)
-{
+static bool path_connected(const struct path *path) {
 	struct vfsmount *mnt = path->mnt;
 
 	if (mnt->mnt_root == mnt->mnt_sb->s_root)
@@ -746,8 +996,7 @@ static bool path_connected(const struct path *path)
 	return is_subdir(path->dentry, mnt->mnt_root);
 }
 
-static int follow_up_rcu(struct path *path)
-{
+static int follow_up_rcu(struct path *path) {
 	struct mount *mnt = real_mount(path->mnt);
 	struct mount *parent;
 	struct dentry *mountpoint;
@@ -761,8 +1010,7 @@ static int follow_up_rcu(struct path *path)
 	return 1;
 }
 
-static int my_follow_dotdot_rcu(struct nameidata *nd, struct task_struct *t)
-{
+static int my_follow_dotdot_rcu(struct nameidata *nd, struct task_struct *t) {
 	struct inode *inode = nd->inode;
 	if (!nd->root.mnt)
 		my_set_root_rcu(nd, t);
@@ -817,8 +1065,7 @@ failed:
 	return -ECHILD;
 }
 
-struct vfsmount *lookup_mnt(struct path *path)
-{
+struct vfsmount *lookup_mnt(struct path *path) {
 	struct mount *child_mnt;
 	struct vfsmount *m;
 	unsigned seq;
@@ -834,8 +1081,7 @@ struct vfsmount *lookup_mnt(struct path *path)
 }
 
 
-static void follow_mount(struct path *path)
-{
+static void follow_mount(struct path *path) {
 	while (d_mountpoint(path->dentry)) {
 		struct vfsmount *mounted = lookup_mnt(path);
 		if (!mounted)
@@ -847,8 +1093,7 @@ static void follow_mount(struct path *path)
 	}
 }
 
-static int my_follow_dotdot(struct nameidata *nd, struct task_struct *t)
-{
+static int my_follow_dotdot(struct nameidata *nd, struct task_struct *t) {
 	if (!nd->root.mnt)
 		my_set_root(nd, t);
 
@@ -877,8 +1122,7 @@ static int my_follow_dotdot(struct nameidata *nd, struct task_struct *t)
 }
 
 
-static int my_handle_dots(struct nameidata *nd, int type, struct task_struct *t)
-{
+static int my_handle_dots(struct nameidata *nd, int type, struct task_struct *t) {
 	if (type == LAST_DOTDOT) {
 		if (nd->flags & LOOKUP_RCU) {
 			if (my_follow_dotdot_rcu(nd, t))
@@ -889,14 +1133,12 @@ static int my_handle_dots(struct nameidata *nd, int type, struct task_struct *t)
 	return 0;
 }
 
-static bool managed_dentry_might_block(struct dentry *dentry)
-{
+static bool managed_dentry_might_block(struct dentry *dentry) {
 	return (dentry->d_flags & DCACHE_MANAGE_TRANSIT &&
 		dentry->d_op->d_manage(dentry, true) < 0);
 }
 
-struct hlist_head *m_hash(struct vfsmount *mnt, struct dentry *dentry)
-{
+struct hlist_head *m_hash(struct vfsmount *mnt, struct dentry *dentry) {
 	unsigned long tmp = ((unsigned long)mnt / L1_CACHE_BYTES);
 	tmp += ((unsigned long)dentry / L1_CACHE_BYTES);
 	tmp = tmp + (tmp >> m_hash_shift);
@@ -904,8 +1146,7 @@ struct hlist_head *m_hash(struct vfsmount *mnt, struct dentry *dentry)
 }
 
 
-struct mount *__lookup_mnt(struct vfsmount *mnt, struct dentry *dentry)
-{
+struct mount *__lookup_mnt(struct vfsmount *mnt, struct dentry *dentry) {
 	struct hlist_head *head = m_hash(mnt, dentry);
 	struct mount *p;
 
@@ -915,9 +1156,7 @@ struct mount *__lookup_mnt(struct vfsmount *mnt, struct dentry *dentry)
 	return NULL;
 }
 
-static bool __follow_mount_rcu(struct nameidata *nd, struct path *path,
-			       struct inode **inode)
-{
+static bool __follow_mount_rcu(struct nameidata *nd, struct path *path, struct inode **inode) {
 	for (;;) {
 		struct mount *mounted;
 		if (unlikely(managed_dentry_might_block(path->dentry)))
@@ -1901,8 +2140,7 @@ void locks_wake_up_blocks(struct file_lock *blocker)
 	spin_unlock(&blocked_lock_lock);
 }
 
-void locks_delete_lock(struct file_lock **thisfl_p)
-{
+void locks_delete_lock(struct file_lock **thisfl_p) {
 	struct file_lock *fl = *thisfl_p;
 
 	locks_delete_global_locks(fl);
@@ -1962,8 +2200,7 @@ void my_locks_remove_flock(struct file *filp, struct task_struct *t)
 	spin_unlock(&inode->i_lock);
 }
 
-void drop_file_write_access(struct file *file)
-{
+void drop_file_write_access(struct file *file) {
 	struct vfsmount *mnt = file->f_path.mnt;
 	struct dentry *dentry = file->f_path.dentry;
 	struct inode *inode = dentry->d_inode;
@@ -1978,8 +2215,7 @@ void drop_file_write_access(struct file *file)
 	file_release_write(file);
 }
 
-void file_free_rcu(struct rcu_head *head)
-{
+void file_free_rcu(struct rcu_head *head) {
 	struct file *f = container_of(head, struct file, f_u.fu_rcuhead);
 
 	put_cred(f->f_cred);
@@ -1988,8 +2224,7 @@ void file_free_rcu(struct rcu_head *head)
 
 int iint_initialized;
 
-void file_free(struct file *f)
-{
+void file_free(struct file *f) {
 	percpu_counter_dec(&nr_files);
 	file_check_state(f);
 	call_rcu(&f->f_u.fu_rcuhead, file_free_rcu);
@@ -1999,8 +2234,7 @@ static struct rb_root integrity_iint_tree = RB_ROOT;
 static DEFINE_RWLOCK(integrity_iint_lock);
 static struct kmem_cache *iint_cache __read_mostly;
 
-void my__fput(struct file *file, struct task_struct *t)
-{
+void my__fput(struct file *file, struct task_struct *t) {
 	struct dentry *dentry = file->f_path.dentry;
 	struct vfsmount *mnt = file->f_path.mnt;
 	struct inode *inode = file->f_inode;
@@ -2044,13 +2278,11 @@ void my__fput(struct file *file, struct task_struct *t)
 	mntput(mnt);
 }
 
-void ____fput(struct callback_head *work, struct task_struct *t)
-{
+void ____fput(struct callback_head *work, struct task_struct *t) {
 	my__fput(container_of(work, struct file, f_u.fu_rcuhead), t);
 }
 
-void delayed_fput(struct work_struct *unused, struct task_struct *t)
-{
+void delayed_fput(struct work_struct *unused, struct task_struct *t) {
 	struct llist_node *node = llist_del_all(&delayed_fput_list);
 	struct llist_node *next;
 
@@ -2065,8 +2297,7 @@ DECLARE_DELAYED_WORK(delayed_fput_work, delayed_fput);
 
 static struct callback_head work_exited; 
 
-void my_fput(struct file *file, struct task_struct *t)
-{
+void my_fput(struct file *file, struct task_struct *t) {
 	if (atomic_long_dec_and_test(&file->f_count)) {
 		struct task_struct *task = t;
 
@@ -2218,8 +2449,7 @@ looked_up:
 	return 1;
 }
 
-int my_may_create(struct inode *dir, struct dentry *child, struct task_struct *t)
-{
+int my_may_create(struct inode *dir, struct dentry *child, struct task_struct *t) {
 	//audit_inode_child(dir, child, AUDIT_TYPE_CHILD_CREATE);
 	if (child->d_inode)
 		return -EEXIST;
@@ -2229,8 +2459,8 @@ int my_may_create(struct inode *dir, struct dentry *child, struct task_struct *t
 }
 
 int my_vfs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
-		bool want_excl, struct task_struct *t)
-{
+		bool want_excl, struct task_struct *t) {
+
 	int error = my_may_create(dir, dentry, t);
 	if (error)
 		return error;
@@ -2251,8 +2481,8 @@ int my_vfs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
 int my_lookup_open(struct nameidata *nd, struct path *path,
 			struct file *file,
 			const struct open_flags *op,
-			bool got_write, int *opened, struct task_struct *t)
-{
+			bool got_write, int *opened, struct task_struct *t) {
+
 	struct dentry *dir = nd->path.dentry;
 	struct inode *dir_inode = dir->d_inode;
 	struct dentry *dentry;
@@ -2308,8 +2538,7 @@ out_dput:
 	return error;
 }
 
-int my_locks_mandatory_locked(struct inode *inode, struct task_struct *t)
-{
+int my_locks_mandatory_locked(struct inode *inode, struct task_struct *t) {
 	fl_owner_t owner = t->files;
 	struct file_lock *fl;
 
@@ -2327,8 +2556,7 @@ int my_locks_mandatory_locked(struct inode *inode, struct task_struct *t)
 	return fl ? -EAGAIN : 0;
 }
 
-int my_locks_verify_locked(struct inode *inode, struct task_struct *t)
-{
+int my_locks_verify_locked(struct inode *inode, struct task_struct *t) {
 	if (mandatory_lock(inode))
 		return my_locks_mandatory_locked(inode, t);
 	return 0;
@@ -2356,18 +2584,15 @@ int my_handle_truncate(struct file *filp, struct task_struct *t)
 	return error;
 }
 
-bool my_d_is_dir(const struct dentry *dentry)
-{
+bool my_d_is_dir(const struct dentry *dentry) {
 	return ((dentry->d_flags & DCACHE_ENTRY_TYPE)== DCACHE_DIRECTORY_TYPE) || d_is_autodir(dentry);
 }
 
-bool my_d_can_lookup(const struct dentry *dentry)
-{
+bool my_d_can_lookup(const struct dentry *dentry) {
 	return (dentry->d_flags & DCACHE_ENTRY_TYPE) == DCACHE_DIRECTORY_TYPE;
 }
 
-int open_check_o_direct(struct file *f)
-{
+int open_check_o_direct(struct file *f) {
 	/* NB: we're sure to have correct a_ops only after f_op->open */
 	if (f->f_flags & O_DIRECT) {
 		if (!f->f_mapping->a_ops ||
@@ -2381,8 +2606,8 @@ int open_check_o_direct(struct file *f)
 
 int my_do_last(struct nameidata *nd, struct path *path,
 		   struct file *file, const struct open_flags *op,
-		   int *opened, struct filename *name, struct task_struct *t)
-{
+		   int *opened, struct filename *name, struct task_struct *t) {
+
 	struct dentry *dir = nd->path.dentry;
 	int open_flag = op->open_flag;
 	bool will_truncate = (open_flag & O_TRUNC) != 0;
@@ -2576,10 +2801,11 @@ finish_open_created:
   }
 
 	BUG_ON(*opened & FILE_OPENED); /* once it's opened, it's opened */
-	printk(KERN_INFO "before vfs_open, current->files is %p, current->files->next_fd = %d, error number is %d\n", t->files, t->files->next_fd, error);
+	printk(KERN_INFO "before my_vfs_open, current = %p, current->files is %p, current->files->next_fd = %d, current->cred = %p, error number is %d\n", t, t->files, t->files->next_fd, t->cred, error);
   // modify code here
-	error = vfs_open(&nd->path, file, my_current_cred(t));
-	printk(KERN_INFO "after vfs_open, current->files is %p, current->files->next_fd = %d, error number is %d\n", t->files, t->files->next_fd, error);
+	error = my_vfs_open(&nd->path, file, my_current_cred(t), t);
+  printk(KERN_INFO "after my_vfs_open, current = %p, current->files = %p, current->cred = %p\n", t, t->files, t->cred);
+	// printk(KERN_INFO "after my_vfs_open, current->files is %p, current->files->next_fd = %d, error number is %d\n", t->files, t->files->next_fd, error);
 	if (!error) {
 		*opened |= FILE_OPENED;
 	} else {
@@ -2650,16 +2876,14 @@ stale_open:
 	goto retry_lookup;
 }
 
-void put_filp(struct file *file)
-{
+void put_filp(struct file *file) {
 	if (atomic_long_dec_and_test(&file->f_count)) {
 		//security_file_free(file);
 		file_free(file);
 	}
 }
 
-struct file *my_path_openat(int dfd, struct filename *pathname, struct nameidata *nd, const struct open_flags *op, int flags, struct task_struct *t)
-{
+struct file *my_path_openat(int dfd, struct filename *pathname, struct nameidata *nd, const struct open_flags *op, int flags, struct task_struct *t) {
 	struct file *base = NULL;
 	struct file *file;
 	struct path path;
@@ -2747,8 +2971,7 @@ out:
 	return file;
 }
 
-struct file *my_do_filp_open(int dfd, struct filename *pathname, const struct open_flags *op, struct task_struct *t) 
-{
+struct file *my_do_filp_open(int dfd, struct filename *pathname, const struct open_flags *op, struct task_struct *t) {
 	struct nameidata nd;
 	int flags = op->lookup_flags;
 	struct file *filp;
