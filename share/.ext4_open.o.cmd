@@ -933,6 +933,8 @@ deps_/mnt/hgfs/shared_directory/file_system_module/share/ext4_open.o := \
   /usr/src/linux-headers-3.13.0-24-generic/include/uapi/linux/tty_flags.h \
   include/uapi/linux/tty.h \
   include/linux/proc_fs.h \
+  include/linux/vermagic.h \
+  include/generated/utsrelease.h \
   /mnt/hgfs/shared_directory/file_system_module/share/log.h \
   /mnt/hgfs/shared_directory/file_system_module/share/ext4.h \
   include/linux/blkdev.h \

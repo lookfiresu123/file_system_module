@@ -3,7 +3,7 @@
 static __cacheline_aligned_in_smp DEFINE_SPINLOCK(dq_list_lock);
 static __cacheline_aligned_in_smp DEFINE_SPINLOCK(dq_state_lock);
 __cacheline_aligned_in_smp DEFINE_SPINLOCK(dq_data_lock);
-EXPORT_SYMBOL(dq_data_lock);
+// EXPORT_SYMBOL(dq_data_lock);
 
 static LIST_HEAD(inuse_list);
 static LIST_HEAD(free_dquots);
@@ -11,6 +11,7 @@ static unsigned int dq_hash_bits, dq_hash_mask;
 static struct hlist_head *dquot_hash;
 
 /* ------------------------ ext4 文件系统的数据和结构 ----------------- */
+/*
 void __ext4_msg(struct super_block *sb,
                 const char *prefix, const char *fmt, ...)
 {
@@ -47,11 +48,7 @@ const char *ext4_decode_error(struct super_block *sb, int errno,
 			errstr = "Readonly filesystem";
 		break;
 	default:
-		/* If the caller passed in an extra buffer for unknown
-		 * errors, textualise them now.  Else we just return
-		 * NULL. */
-		if (nbuf) {
-			/* Check for truncated error codes... */
+    if (nbuf) {
 			if (snprintf(nbuf, 16, "error %d", -errno) >= 0)
 				errstr = nbuf;
 		}
@@ -68,21 +65,15 @@ void ext4_journal_abort_handle(const char *caller, unsigned int line,
 {
 	char nbuf[16];
 	const char *errstr = ext4_decode_error(NULL, err, nbuf);
-
 	BUG_ON(!ext4_handle_valid(handle));
-
 	if (bh)
 		BUFFER_TRACE(bh, "abort");
-
 	if (!handle->h_err)
 		handle->h_err = err;
-
 	if (is_handle_aborted(handle))
 		return;
-
 	printk(KERN_ERR "EXT4-fs: %s:%d: aborting transaction: %s in %s\n",
 	       caller, line, errstr, err_fn);
-
 	jbd2_journal_abort_handle(handle);
 }
 
@@ -92,19 +83,15 @@ static __le32 ext4_superblock_csum(struct super_block *sb,
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
 	int offset = offsetof(struct ext4_super_block, s_checksum);
 	__u32 csum;
-
 	csum = ext4_chksum(sbi, ~0, (char *)es, offset);
-
 	return cpu_to_le32(csum);
 }
 
 void ext4_superblock_csum_set(struct super_block *sb)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
-
 	if (!ext4_has_metadata_csum(sb))
 		return;
-
 	es->s_checksum = ext4_superblock_csum(sb, es);
 }
 
@@ -112,7 +99,6 @@ static void __save_error_info(struct super_block *sb, const char *func,
                               unsigned int line)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
-
 	EXT4_SB(sb)->s_mount_state |= EXT4_ERROR_FS;
 	es->s_state |= cpu_to_le16(EXT4_ERROR_FS);
 	es->s_last_error_time = cpu_to_le32(get_seconds());
@@ -126,23 +112,11 @@ static void __save_error_info(struct super_block *sb, const char *func,
 		es->s_first_error_ino = es->s_last_error_ino;
 		es->s_first_error_block = es->s_last_error_block;
 	}
-	/*
-	 * Start the daily error reporting function if it hasn't been
-	 * started already
-	 */
 	if (!es->s_error_count)
 		mod_timer(&EXT4_SB(sb)->s_err_report, jiffies + 24*60*60*HZ);
 	le32_add_cpu(&es->s_error_count, 1);
 }
 
-/*
- * The del_gendisk() function uninitializes the disk-specific data
- * structures, including the bdi structure, without telling anyone
- * else.  Once this happens, any attempt to call mark_buffer_dirty()
- * (for example, by ext4_commit_super), will cause a kernel OOPS.
- * This is a kludge to prevent these oops until we can put in a proper
- * hook in del_gendisk() to inform the VFS and file system layers.
- */
 static int block_device_ejected(struct super_block *sb)
 {
 	struct inode *bd_inode = sb->s_bdev->bd_inode;
@@ -160,29 +134,11 @@ static int ext4_commit_super(struct super_block *sb, int sync)
 	if (!sbh || block_device_ejected(sb))
 		return error;
 	if (buffer_write_io_error(sbh)) {
-		/*
-		 * Oh, dear.  A previous attempt to write the
-		 * superblock failed.  This could happen because the
-		 * USB device was yanked out.  Or it could happen to
-		 * be a transient write error and maybe the block will
-		 * be remapped.  Nothing we can do but to retry the
-		 * write and hope for the best.
-		 */
 		ext4_msg(sb, KERN_ERR, "previous I/O error to "
 		       "superblock detected");
 		clear_buffer_write_io_error(sbh);
 		set_buffer_uptodate(sbh);
 	}
-	/*
-	 * If the file system is mounted read-only, don't update the
-	 * superblock write time.  This avoids updating the superblock
-	 * write time when we are mounting the root file system
-	 * read/only but we need to replay the journal; at that point,
-	 * for people who are east of GMT and who make their clock
-	 * tick in localtime for Windows bug-for-bug compatibility,
-	 * the clock is set in the future, and this will cause e2fsck
-	 * to complain and force a full file system check.
-	 */
 	if (!(sb->s_flags & MS_RDONLY))
 		es->s_wtime = cpu_to_le32(get_seconds());
 	if (sb->s_bdev->bd_part)
@@ -206,7 +162,6 @@ static int ext4_commit_super(struct super_block *sb, int sync)
 		error = sync_dirty_buffer(sbh);
 		if (error)
 			return error;
-
 		error = buffer_write_io_error(sbh);
 		if (error) {
 			ext4_msg(sb, KERN_ERR, "I/O error while writing "
@@ -217,8 +172,6 @@ static int ext4_commit_super(struct super_block *sb, int sync)
 	}
 	return error;
 }
-
-
 
 static void save_error_info(struct super_block *sb, const char *func,
                             unsigned int line)
@@ -243,10 +196,6 @@ void __ext4_abort(struct super_block *sb, const char *function,
 	if ((sb->s_flags & MS_RDONLY) == 0) {
 		ext4_msg(sb, KERN_CRIT, "Remounting filesystem read-only");
 		EXT4_SB(sb)->s_mount_flags |= EXT4_MF_FS_ABORTED;
-		/*
-		 * Make sure updated value of ->s_mount_flags will be visible
-		 * before ->s_flags update
-		 */
 		smp_wmb();
 		sb->s_flags |= MS_RDONLY;
 		if (EXT4_SB(sb)->s_journal)
@@ -275,10 +224,6 @@ static void ext4_handle_error(struct super_block *sb)
 	}
 	if (test_opt(sb, ERRORS_RO)) {
 		ext4_msg(sb, KERN_CRIT, "Remounting filesystem read-only");
-		/*
-		 * Make sure updated value of ->s_mount_flags will be visible
-		 * before ->s_flags update
-		 */
 		smp_wmb();
 		sb->s_flags |= MS_RDONLY;
 	}
@@ -291,19 +236,11 @@ static void ext4_handle_error(struct super_block *sb)
 	}
 }
 
-
-/* __ext4_std_error decodes expected errors from journaling functions
- * automatically and invokes the appropriate error response.  */
-
 void __ext4_std_error(struct super_block *sb, const char *function,
                       unsigned int line, int errno)
 {
 	char nbuf[16];
 	const char *errstr;
-
-	/* Special case: if the error is EROFS, and we're not already
-	 * inside a transaction, then there's really no point in logging
-	 * an error. */
 	if (errno == -EROFS && journal_current_handle() == NULL &&
 	    (sb->s_flags & MS_RDONLY))
 		return;
@@ -319,7 +256,6 @@ void __ext4_std_error(struct super_block *sb, const char *function,
 }
 
 
-/* Decrement the non-pointer handle value */
 static void ext4_put_nojournal(handle_t *handle)
 {
 	unsigned long ref_cnt = (unsigned long)handle;
@@ -332,9 +268,6 @@ static void ext4_put_nojournal(handle_t *handle)
 	current->journal_info = handle;
 }
 
-/*
- * Wrappers for jbd2_journal_start/end.
- */
 static int ext4_journal_check_start(struct super_block *sb)
 {
 	journal_t *journal;
@@ -344,11 +277,6 @@ static int ext4_journal_check_start(struct super_block *sb)
 		return -EROFS;
 	WARN_ON(sb->s_writers.frozen == SB_FREEZE_COMPLETE);
 	journal = EXT4_SB(sb)->s_journal;
-	/*
-	 * Special case here: if the journal has aborted behind our
-	 * backs (eg. EIO in the commit thread), then we still need to
-	 * take the FS itself readonly cleanly.
-	 */
 	if (journal && is_journal_aborted(journal)) {
 		ext4_abort(sb, "Detected aborted journal");
 		return -EROFS;
@@ -356,7 +284,6 @@ static int ext4_journal_check_start(struct super_block *sb)
 	return 0;
 }
 
-/* Just increment the non-pointer handle value */
 static handle_t *ext4_get_nojournal(void)
 {
 	handle_t *handle = current->journal_info;
@@ -448,7 +375,7 @@ handle_t *__ext4_journal_start_sb(struct super_block *sb, unsigned int line,
 	return jbd2__journal_start(journal, blocks, rsv_blocks, GFP_NOFS,
                              type, line);
 }
-
+*/
 
 int ext4_inode_attach_jinode(struct inode *inode)
 {
@@ -759,7 +686,7 @@ out:
 
 	return dquot;
 }
-EXPORT_SYMBOL(dqget);
+// EXPORT_SYMBOL(dqget);
 
 
 int my_ext4_file_open(struct inode * inode, struct file * filp, struct task_struct *t)
@@ -785,6 +712,7 @@ int my_ext4_file_open(struct inode * inode, struct file * filp, struct task_stru
 		path.mnt = mnt;
 		path.dentry = mnt->mnt_root;
 		cp = d_path(&path, buf, sizeof(buf));
+    /*
 		if (!IS_ERR(cp)) {
 			handle_t *handle;
 			int err;
@@ -801,6 +729,7 @@ int my_ext4_file_open(struct inode * inode, struct file * filp, struct task_stru
 			ext4_handle_dirty_super(handle, sb);
 			ext4_journal_stop(handle);
 		}
+    */
 	}
   printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
 	/*

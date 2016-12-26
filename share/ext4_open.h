@@ -39,6 +39,7 @@
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/export.h>
+#include <linux/tracepoint.h>
 #include <linux/security.h>
 #include <linux/syscalls.h>
 #include <linux/sched.h>
@@ -80,6 +81,7 @@
 #include <linux/uaccess.h>
 #include <linux/ratelimit.h>
 // #include <trace/events/ext4.h>
+#include <linux/vermagic.h>
 
 // #include "internal.h"
 #include "log.h"
