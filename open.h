@@ -91,6 +91,8 @@
 #define IS_FLOCK(fl)	(fl->fl_flags & FL_FLOCK)
 #define IS_LEASE(fl)	(fl->fl_flags & (FL_LEASE|FL_DELEG))
 
+#define EMBEDDED_NAME_MAX	(PATH_MAX - sizeof(struct filename))
+
 extern struct files_stat_struct files_stat;
 extern seqlock_t mount_lock;
 
@@ -336,5 +338,7 @@ extern void my_files_init(void);
 // extern int my_vfs_open(const struct path*, struct file *, const struct cred *);
 
 extern struct file *my_do_filp_open(int , struct filename *, const struct open_flags *, struct task_struct *);
+
+int my_open(const char *filename, int flags, umode_t mode, struct task_struct *get_current);
 
 #endif

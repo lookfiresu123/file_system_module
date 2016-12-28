@@ -1,23 +1,25 @@
-cmd_/mnt/hgfs/shared_directory/file_system_module/my_msg.o := gcc -Wp,-MD,/mnt/hgfs/shared_directory/file_system_module/.my_msg.o.d  -nostdinc -isystem /usr/lib/gcc/x86_64-linux-gnu/4.8/include  -I/usr/src/linux-headers-3.13.0-24-generic/arch/x86/include -Iarch/x86/include/generated  -Iinclude -I/usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I/usr/src/linux-headers-3.13.0-24-generic/include/uapi -Iinclude/generated/uapi -include /usr/src/linux-headers-3.13.0-24-generic/include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m64 -mno-mmx -mno-sse -mpreferred-stack-boundary=3 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -fstack-protector -DCONFIG_X86_X32_ABI -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -Wframe-larger-than=1024 -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -DCC_HAVE_ASM_GOTO  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(my_msg)"  -D"KBUILD_MODNAME=KBUILD_STR(mfs_kthread)" -c -o /mnt/hgfs/shared_directory/file_system_module/.tmp_my_msg.o /mnt/hgfs/shared_directory/file_system_module/my_msg.c
+cmd_/mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.o := gcc -Wp,-MD,/mnt/hgfs/shared_directory/file_system_module/.mfs_kthread.mod.o.d  -nostdinc -isystem /usr/lib/gcc/x86_64-linux-gnu/4.8/include  -I/usr/src/linux-headers-3.13.0-24-generic/arch/x86/include -Iarch/x86/include/generated  -Iinclude -I/usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I/usr/src/linux-headers-3.13.0-24-generic/include/uapi -Iinclude/generated/uapi -include /usr/src/linux-headers-3.13.0-24-generic/include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m64 -mno-mmx -mno-sse -mpreferred-stack-boundary=3 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -fstack-protector -DCONFIG_X86_X32_ABI -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -Wframe-larger-than=1024 -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -DCC_HAVE_ASM_GOTO  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(mfs_kthread.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(mfs_kthread)" -DMODULE  -c -o /mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.o /mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.c
 
-source_/mnt/hgfs/shared_directory/file_system_module/my_msg.o := /mnt/hgfs/shared_directory/file_system_module/my_msg.c
+source_/mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.o := /mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.c
 
-deps_/mnt/hgfs/shared_directory/file_system_module/my_msg.o := \
-  include/linux/init.h \
-    $(wildcard include/config/broken/rodata.h) \
+deps_/mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.o := \
+    $(wildcard include/config/module/unload.h) \
+  include/linux/module.h \
+    $(wildcard include/config/sysfs.h) \
     $(wildcard include/config/modules.h) \
-  include/linux/compiler.h \
-    $(wildcard include/config/sparse/rcu/pointer.h) \
-    $(wildcard include/config/trace/branch/profiling.h) \
-    $(wildcard include/config/profile/all/branches.h) \
-    $(wildcard include/config/enable/must/check.h) \
-    $(wildcard include/config/enable/warn/deprecated.h) \
-    $(wildcard include/config/kprobes.h) \
-  include/linux/compiler-gcc.h \
-    $(wildcard include/config/arch/supports/optimized/inlining.h) \
-    $(wildcard include/config/optimize/inlining.h) \
-  include/linux/compiler-gcc4.h \
-    $(wildcard include/config/arch/use/builtin/bswap.h) \
+    $(wildcard include/config/unused/symbols.h) \
+    $(wildcard include/config/module/sig.h) \
+    $(wildcard include/config/generic/bug.h) \
+    $(wildcard include/config/kallsyms.h) \
+    $(wildcard include/config/smp.h) \
+    $(wildcard include/config/tracepoints.h) \
+    $(wildcard include/config/tracing.h) \
+    $(wildcard include/config/event/tracing.h) \
+    $(wildcard include/config/ftrace/mcount/record.h) \
+    $(wildcard include/config/constructors.h) \
+    $(wildcard include/config/debug/set/module/ronx.h) \
+  include/linux/list.h \
+    $(wildcard include/config/debug/list.h) \
   include/linux/types.h \
     $(wildcard include/config/uid16.h) \
     $(wildcard include/config/lbdaf.h) \
@@ -35,26 +37,22 @@ deps_/mnt/hgfs/shared_directory/file_system_module/my_msg.o := \
   /usr/src/linux-headers-3.13.0-24-generic/include/uapi/linux/posix_types.h \
   include/linux/stddef.h \
   include/uapi/linux/stddef.h \
+  include/linux/compiler.h \
+    $(wildcard include/config/sparse/rcu/pointer.h) \
+    $(wildcard include/config/trace/branch/profiling.h) \
+    $(wildcard include/config/profile/all/branches.h) \
+    $(wildcard include/config/enable/must/check.h) \
+    $(wildcard include/config/enable/warn/deprecated.h) \
+    $(wildcard include/config/kprobes.h) \
+  include/linux/compiler-gcc.h \
+    $(wildcard include/config/arch/supports/optimized/inlining.h) \
+    $(wildcard include/config/optimize/inlining.h) \
+  include/linux/compiler-gcc4.h \
+    $(wildcard include/config/arch/use/builtin/bswap.h) \
   /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/posix_types.h \
     $(wildcard include/config/x86/32.h) \
   /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/posix_types_64.h \
   /usr/src/linux-headers-3.13.0-24-generic/include/uapi/asm-generic/posix_types.h \
-  include/linux/module.h \
-    $(wildcard include/config/sysfs.h) \
-    $(wildcard include/config/unused/symbols.h) \
-    $(wildcard include/config/module/sig.h) \
-    $(wildcard include/config/generic/bug.h) \
-    $(wildcard include/config/kallsyms.h) \
-    $(wildcard include/config/smp.h) \
-    $(wildcard include/config/tracepoints.h) \
-    $(wildcard include/config/tracing.h) \
-    $(wildcard include/config/event/tracing.h) \
-    $(wildcard include/config/ftrace/mcount/record.h) \
-    $(wildcard include/config/module/unload.h) \
-    $(wildcard include/config/constructors.h) \
-    $(wildcard include/config/debug/set/module/ronx.h) \
-  include/linux/list.h \
-    $(wildcard include/config/debug/list.h) \
   include/linux/poison.h \
     $(wildcard include/config/illegal/pointer/value.h) \
   /usr/src/linux-headers-3.13.0-24-generic/include/uapi/linux/const.h \
@@ -104,6 +102,8 @@ deps_/mnt/hgfs/shared_directory/file_system_module/my_msg.o := \
   /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/processor-flags.h \
     $(wildcard include/config/vm86.h) \
   /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/processor-flags.h \
+  include/linux/init.h \
+    $(wildcard include/config/broken/rodata.h) \
   /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/paravirt_types.h \
     $(wildcard include/config/x86/local/apic.h) \
     $(wildcard include/config/x86/pae.h) \
@@ -544,268 +544,9 @@ deps_/mnt/hgfs/shared_directory/file_system_module/my_msg.o := \
     $(wildcard include/config/have/mod/arch/specific.h) \
     $(wildcard include/config/modules/use/elf/rel.h) \
     $(wildcard include/config/modules/use/elf/rela.h) \
-  include/linux/nsproxy.h \
-  include/linux/sched.h \
-    $(wildcard include/config/sched/debug.h) \
-    $(wildcard include/config/no/hz/common.h) \
-    $(wildcard include/config/lockup/detector.h) \
-    $(wildcard include/config/detect/hung/task.h) \
-    $(wildcard include/config/core/dump/default/elf/headers.h) \
-    $(wildcard include/config/sched/autogroup.h) \
-    $(wildcard include/config/virt/cpu/accounting/native.h) \
-    $(wildcard include/config/bsd/process/acct.h) \
-    $(wildcard include/config/taskstats.h) \
-    $(wildcard include/config/audit.h) \
-    $(wildcard include/config/cgroups.h) \
-    $(wildcard include/config/inotify/user.h) \
-    $(wildcard include/config/fanotify.h) \
-    $(wildcard include/config/epoll.h) \
-    $(wildcard include/config/posix/mqueue.h) \
-    $(wildcard include/config/keys.h) \
-    $(wildcard include/config/perf/events.h) \
-    $(wildcard include/config/schedstats.h) \
-    $(wildcard include/config/task/delay/acct.h) \
-    $(wildcard include/config/fair/group/sched.h) \
-    $(wildcard include/config/rt/group/sched.h) \
-    $(wildcard include/config/cgroup/sched.h) \
-    $(wildcard include/config/blk/dev/io/trace.h) \
-    $(wildcard include/config/rcu/boost.h) \
-    $(wildcard include/config/compat/brk.h) \
-    $(wildcard include/config/virt/cpu/accounting/gen.h) \
-    $(wildcard include/config/sysvipc.h) \
-    $(wildcard include/config/auditsyscall.h) \
-    $(wildcard include/config/rt/mutexes.h) \
-    $(wildcard include/config/block.h) \
-    $(wildcard include/config/task/xacct.h) \
-    $(wildcard include/config/cpusets.h) \
-    $(wildcard include/config/futex.h) \
-    $(wildcard include/config/fault/injection.h) \
-    $(wildcard include/config/latencytop.h) \
-    $(wildcard include/config/function/graph/tracer.h) \
-    $(wildcard include/config/uprobes.h) \
-    $(wildcard include/config/bcache.h) \
-    $(wildcard include/config/have/unstable/sched/clock.h) \
-    $(wildcard include/config/irq/time/accounting.h) \
-    $(wildcard include/config/no/hz/full.h) \
-    $(wildcard include/config/stack/growsup.h) \
-    $(wildcard include/config/mm/owner.h) \
-  include/uapi/linux/sched.h \
-  include/linux/capability.h \
-  include/uapi/linux/capability.h \
-  include/linux/mm_types.h \
-    $(wildcard include/config/split/ptlock/cpus.h) \
-    $(wildcard include/config/arch/enable/split/pmd/ptlock.h) \
-    $(wildcard include/config/have/cmpxchg/double.h) \
-    $(wildcard include/config/have/aligned/struct/page.h) \
-    $(wildcard include/config/transparent/hugepage.h) \
-    $(wildcard include/config/want/page/debug/flags.h) \
-    $(wildcard include/config/aio.h) \
-    $(wildcard include/config/mmu/notifier.h) \
-  include/linux/auxvec.h \
-  include/uapi/linux/auxvec.h \
-  include/linux/page-debug-flags.h \
-    $(wildcard include/config/page/poisoning.h) \
-    $(wildcard include/config/page/guard.h) \
-    $(wildcard include/config/page/debug/something/else.h) \
-  include/linux/uprobes.h \
-    $(wildcard include/config/arch/supports/uprobes.h) \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/uprobes.h \
-  include/linux/preempt_mask.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/hardirq.h \
-    $(wildcard include/config/x86/thermal/vector.h) \
-    $(wildcard include/config/x86/mce/threshold.h) \
-  include/linux/irq.h \
-    $(wildcard include/config/generic/pending/irq.h) \
-    $(wildcard include/config/hardirqs/sw/resend.h) \
-  include/linux/irqreturn.h \
-  include/linux/irqnr.h \
-  include/uapi/linux/irqnr.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/irq.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/irq_regs.h \
-  include/linux/irqdesc.h \
-    $(wildcard include/config/irq/preflow/fasteoi.h) \
-    $(wildcard include/config/sparse/irq.h) \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/hw_irq.h \
-    $(wildcard include/config/irq/remap.h) \
-  include/linux/profile.h \
-    $(wildcard include/config/profiling.h) \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/sections.h \
-    $(wildcard include/config/debug/rodata.h) \
-  include/asm-generic/sections.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/uaccess.h \
-    $(wildcard include/config/x86/intel/usercopy.h) \
-    $(wildcard include/config/debug/strict/user/copy/checks.h) \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/smap.h \
-    $(wildcard include/config/x86/smap.h) \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/uaccess_64.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/cputime.h \
-  include/asm-generic/cputime.h \
-    $(wildcard include/config/virt/cpu/accounting.h) \
-  include/asm-generic/cputime_nsecs.h \
-  include/linux/sem.h \
-  include/uapi/linux/sem.h \
-  include/linux/ipc.h \
-  include/uapi/linux/ipc.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/ipcbuf.h \
-  /usr/src/linux-headers-3.13.0-24-generic/include/uapi/asm-generic/ipcbuf.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/sembuf.h \
-  include/linux/signal.h \
-    $(wildcard include/config/old/sigaction.h) \
-  include/uapi/linux/signal.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/signal.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/signal.h \
-  /usr/src/linux-headers-3.13.0-24-generic/include/uapi/asm-generic/signal-defs.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/siginfo.h \
-  include/asm-generic/siginfo.h \
-  include/uapi/asm-generic/siginfo.h \
-  include/linux/pid.h \
-  include/linux/proportions.h \
-  include/linux/percpu_counter.h \
-  include/linux/seccomp.h \
-    $(wildcard include/config/seccomp.h) \
-    $(wildcard include/config/seccomp/filter.h) \
-  include/uapi/linux/seccomp.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/seccomp.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/seccomp_64.h \
-  /usr/src/linux-headers-3.13.0-24-generic/include/uapi/linux/unistd.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/unistd.h \
-    $(wildcard include/config/x86/x32/abi.h) \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/unistd.h \
-  arch/x86/include/generated/uapi/asm/unistd_64.h \
-  arch/x86/include/generated/asm/unistd_64_x32.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/ia32_unistd.h \
-  arch/x86/include/generated/asm/unistd_32_ia32.h \
-  include/linux/rculist.h \
-  include/linux/rtmutex.h \
-    $(wildcard include/config/debug/rt/mutexes.h) \
-  include/linux/plist.h \
-    $(wildcard include/config/debug/pi/list.h) \
-  include/linux/resource.h \
-  include/uapi/linux/resource.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/resource.h \
-  include/asm-generic/resource.h \
-  include/uapi/asm-generic/resource.h \
-  include/linux/hrtimer.h \
-    $(wildcard include/config/high/res/timers.h) \
-    $(wildcard include/config/timerfd.h) \
-  include/linux/timerqueue.h \
-  include/linux/task_io_accounting.h \
-    $(wildcard include/config/task/io/accounting.h) \
-  include/linux/latencytop.h \
-  include/linux/cred.h \
-    $(wildcard include/config/debug/credentials.h) \
-    $(wildcard include/config/security.h) \
-  include/linux/key.h \
-  include/linux/assoc_array.h \
-    $(wildcard include/config/associative/array.h) \
-  include/linux/selinux.h \
-    $(wildcard include/config/security/selinux.h) \
-  include/linux/llist.h \
-    $(wildcard include/config/arch/have/nmi/safe/cmpxchg.h) \
-  include/linux/kthread.h \
-  include/linux/msg.h \
-  include/uapi/linux/msg.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/msgbuf.h \
-  /usr/src/linux-headers-3.13.0-24-generic/include/uapi/asm-generic/msgbuf.h \
-  include/linux/security.h \
-    $(wildcard include/config/security/path.h) \
-    $(wildcard include/config/security/network.h) \
-    $(wildcard include/config/security/network/xfrm.h) \
-    $(wildcard include/config/securityfs.h) \
-    $(wildcard include/config/security/yama.h) \
-  include/linux/slab.h \
-    $(wildcard include/config/slab/debug.h) \
-    $(wildcard include/config/failslab.h) \
-    $(wildcard include/config/slob.h) \
-    $(wildcard include/config/slab.h) \
-    $(wildcard include/config/slub.h) \
-    $(wildcard include/config/debug/slab.h) \
-  include/linux/kmemleak.h \
-    $(wildcard include/config/debug/kmemleak.h) \
-  include/linux/slub_def.h \
-    $(wildcard include/config/slub/stats.h) \
-    $(wildcard include/config/memcg/kmem.h) \
-  include/linux/ipc_namespace.h \
-    $(wildcard include/config/ipc/ns.h) \
-    $(wildcard include/config/posix/mqueue/sysctl.h) \
-  include/linux/idr.h \
-  include/linux/proc_ns.h \
-  include/linux/audit.h \
-  include/linux/ptrace.h \
-  include/uapi/linux/ptrace.h \
-  include/uapi/linux/audit.h \
-    $(wildcard include/config/change.h) \
-  include/asm-generic/current.h \
-  include/linux/mm.h \
-    $(wildcard include/config/ppc.h) \
-    $(wildcard include/config/parisc.h) \
-    $(wildcard include/config/metag.h) \
-    $(wildcard include/config/ksm.h) \
-    $(wildcard include/config/debug/vm/rb.h) \
-    $(wildcard include/config/arch/uses/numa/prot/none.h) \
-    $(wildcard include/config/debug/pagealloc.h) \
-    $(wildcard include/config/hugetlbfs.h) \
-  include/linux/debug_locks.h \
-    $(wildcard include/config/debug/locking/api/selftests.h) \
-  include/linux/bit_spinlock.h \
-  include/linux/shrinker.h \
-  include/linux/dcache.h \
-  include/linux/rculist_bl.h \
-  include/linux/list_bl.h \
-  include/linux/lockref.h \
-    $(wildcard include/config/arch/use/cmpxchg/lockref.h) \
-  include/linux/file.h \
-  include/linux/fs.h \
-    $(wildcard include/config/fs/posix/acl.h) \
-    $(wildcard include/config/quota.h) \
-    $(wildcard include/config/fsnotify.h) \
-    $(wildcard include/config/ima.h) \
-    $(wildcard include/config/debug/writecount.h) \
-    $(wildcard include/config/file/locking.h) \
-    $(wildcard include/config/fs/xip.h) \
-    $(wildcard include/config/migration.h) \
-  include/linux/kdev_t.h \
-  include/uapi/linux/kdev_t.h \
-  include/linux/path.h \
-  include/linux/list_lru.h \
-  include/linux/radix-tree.h \
-  include/linux/semaphore.h \
-  /usr/src/linux-headers-3.13.0-24-generic/include/uapi/linux/fiemap.h \
-  include/linux/migrate_mode.h \
-  include/linux/percpu-rwsem.h \
-  include/linux/blk_types.h \
-    $(wildcard include/config/blk/cgroup.h) \
-    $(wildcard include/config/blk/dev/integrity.h) \
-  include/uapi/linux/fs.h \
-  /usr/src/linux-headers-3.13.0-24-generic/include/uapi/linux/limits.h \
-  include/linux/quota.h \
-    $(wildcard include/config/quota/netlink/interface.h) \
-  /usr/src/linux-headers-3.13.0-24-generic/include/uapi/linux/dqblk_xfs.h \
-  include/linux/dqblk_v1.h \
-  include/linux/dqblk_v2.h \
-  include/linux/dqblk_qtree.h \
-  include/linux/projid.h \
-  include/uapi/linux/quota.h \
-  include/linux/nfs_fs_i.h \
-  include/linux/fcntl.h \
-  include/uapi/linux/fcntl.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi/asm/fcntl.h \
-  /usr/src/linux-headers-3.13.0-24-generic/include/uapi/asm-generic/fcntl.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/pgtable.h \
-  /usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/asm/pgtable_64.h \
-  include/asm-generic/pgtable.h \
-    $(wildcard include/config/have/arch/soft/dirty.h) \
-  include/linux/page-flags.h \
-    $(wildcard include/config/pageflags/extended.h) \
-    $(wildcard include/config/arch/uses/pg/uncached.h) \
-    $(wildcard include/config/memory/failure.h) \
-    $(wildcard include/config/swap.h) \
-  include/linux/huge_mm.h \
-  include/linux/vmstat.h \
-    $(wildcard include/config/vm/event/counters.h) \
-  include/linux/vm_event_item.h \
-  /mnt/hgfs/shared_directory/file_system_module/my_msg.h \
+  include/linux/vermagic.h \
+  include/generated/utsrelease.h \
 
-/mnt/hgfs/shared_directory/file_system_module/my_msg.o: $(deps_/mnt/hgfs/shared_directory/file_system_module/my_msg.o)
+/mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.o: $(deps_/mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.o)
 
-$(deps_/mnt/hgfs/shared_directory/file_system_module/my_msg.o):
+$(deps_/mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.o):

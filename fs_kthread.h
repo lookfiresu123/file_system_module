@@ -20,12 +20,29 @@
 #include <linux/sched.h>
 #include <linux/ipc_namespace.h>
 #include <linux/nsproxy.h>
-// #include <linux/msg.h>
 #include <linux/kthread.h>
 #include <linux/unistd.h>
 #include <linux/err.h>
+#include <linux/fs_struct.h>
+#include <linux/path.h>
+#include <linux/dcache.h>
+#include <linux/fdtable.h>
+#include <linux/fcntl.h>
+#include <linux/fs.h>
+#include <uapi/asm-generic/fcntl.h>
+#include <uapi/linux/fcntl.h>
+#include <uapi/asm-generic/errno.h>
+#include <uapi/asm-generic/resource.h>
+#include <linux/spinlock.h>
+#include <linux/namei.h>
+#include <uapi/linux/limits.h>
+#include <linux/compiler.h>
+#include <linux/fsnotify.h>
 #include <linux/time.h>
+
 #include "my_msg.h"
+#include "open.h"
+
 
 MODULE_LICENSE("GPL");
 

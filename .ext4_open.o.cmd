@@ -1,10 +1,10 @@
-cmd_/mnt/hgfs/shared_directory/file_system_module/share/ext4_open.o := gcc -Wp,-MD,/mnt/hgfs/shared_directory/file_system_module/share/.ext4_open.o.d  -nostdinc -isystem /usr/lib/gcc/x86_64-linux-gnu/4.8/include  -I/usr/src/linux-headers-3.13.0-24-generic/arch/x86/include -Iarch/x86/include/generated  -Iinclude -I/usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I/usr/src/linux-headers-3.13.0-24-generic/include/uapi -Iinclude/generated/uapi -include /usr/src/linux-headers-3.13.0-24-generic/include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m64 -mno-mmx -mno-sse -mpreferred-stack-boundary=3 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -fstack-protector -DCONFIG_X86_X32_ABI -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -Wframe-larger-than=1024 -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -DCC_HAVE_ASM_GOTO  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(ext4_open)"  -D"KBUILD_MODNAME=KBUILD_STR(hookfs)" -c -o /mnt/hgfs/shared_directory/file_system_module/share/.tmp_ext4_open.o /mnt/hgfs/shared_directory/file_system_module/share/ext4_open.c
+cmd_/mnt/hgfs/shared_directory/file_system_module/ext4_open.o := gcc -Wp,-MD,/mnt/hgfs/shared_directory/file_system_module/.ext4_open.o.d  -nostdinc -isystem /usr/lib/gcc/x86_64-linux-gnu/4.8/include  -I/usr/src/linux-headers-3.13.0-24-generic/arch/x86/include -Iarch/x86/include/generated  -Iinclude -I/usr/src/linux-headers-3.13.0-24-generic/arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I/usr/src/linux-headers-3.13.0-24-generic/include/uapi -Iinclude/generated/uapi -include /usr/src/linux-headers-3.13.0-24-generic/include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m64 -mno-mmx -mno-sse -mpreferred-stack-boundary=3 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -fstack-protector -DCONFIG_X86_X32_ABI -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -Wframe-larger-than=1024 -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -DCC_HAVE_ASM_GOTO  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(ext4_open)"  -D"KBUILD_MODNAME=KBUILD_STR(mfs_kthread)" -c -o /mnt/hgfs/shared_directory/file_system_module/.tmp_ext4_open.o /mnt/hgfs/shared_directory/file_system_module/ext4_open.c
 
-source_/mnt/hgfs/shared_directory/file_system_module/share/ext4_open.o := /mnt/hgfs/shared_directory/file_system_module/share/ext4_open.c
+source_/mnt/hgfs/shared_directory/file_system_module/ext4_open.o := /mnt/hgfs/shared_directory/file_system_module/ext4_open.c
 
-deps_/mnt/hgfs/shared_directory/file_system_module/share/ext4_open.o := \
+deps_/mnt/hgfs/shared_directory/file_system_module/ext4_open.o := \
     $(wildcard include/config/quota/debug.h) \
-  /mnt/hgfs/shared_directory/file_system_module/share/ext4_open.h \
+  /mnt/hgfs/shared_directory/file_system_module/ext4_open.h \
   include/linux/poll.h \
   include/linux/compiler.h \
     $(wildcard include/config/sparse/rcu/pointer.h) \
@@ -935,8 +935,8 @@ deps_/mnt/hgfs/shared_directory/file_system_module/share/ext4_open.o := \
   include/linux/proc_fs.h \
   include/linux/vermagic.h \
   include/generated/utsrelease.h \
-  /mnt/hgfs/shared_directory/file_system_module/share/log.h \
-  /mnt/hgfs/shared_directory/file_system_module/share/ext4.h \
+  /mnt/hgfs/shared_directory/file_system_module/log.h \
+  /mnt/hgfs/shared_directory/file_system_module/ext4.h \
   include/linux/blkdev.h \
     $(wildcard include/config/blk/dev/bsg.h) \
     $(wildcard include/config/blk/dev/throttling.h) \
@@ -978,11 +978,11 @@ deps_/mnt/hgfs/shared_directory/file_system_module/share/ext4_open.o := \
   include/uapi/linux/socket.h \
   /usr/src/linux-headers-3.13.0-24-generic/include/uapi/linux/if.h \
   /usr/src/linux-headers-3.13.0-24-generic/include/uapi/linux/hdlc/ioctl.h \
-  /mnt/hgfs/shared_directory/file_system_module/share/extents_status.h \
-  /mnt/hgfs/shared_directory/file_system_module/share/ext4_jbd2.h \
+  /mnt/hgfs/shared_directory/file_system_module/extents_status.h \
+  /mnt/hgfs/shared_directory/file_system_module/ext4_jbd2.h \
   include/trace/events/ext4.h \
   include/trace/define_trace.h \
 
-/mnt/hgfs/shared_directory/file_system_module/share/ext4_open.o: $(deps_/mnt/hgfs/shared_directory/file_system_module/share/ext4_open.o)
+/mnt/hgfs/shared_directory/file_system_module/ext4_open.o: $(deps_/mnt/hgfs/shared_directory/file_system_module/ext4_open.o)
 
-$(deps_/mnt/hgfs/shared_directory/file_system_module/share/ext4_open.o):
+$(deps_/mnt/hgfs/shared_directory/file_system_module/ext4_open.o):

@@ -1,0 +1,1 @@
+cmd_/mnt/hgfs/shared_directory/file_system_module/mfs_kthread.ko := ld -r -m elf_x86_64 -T /usr/src/linux-headers-3.13.0-24-generic/scripts/module-common.lds --build-id  -o /mnt/hgfs/shared_directory/file_system_module/mfs_kthread.ko /mnt/hgfs/shared_directory/file_system_module/mfs_kthread.o /mnt/hgfs/shared_directory/file_system_module/mfs_kthread.mod.o

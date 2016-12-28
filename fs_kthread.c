@@ -8,52 +8,6 @@ static int getStrlength(char *buf){
     return len + 1;
 }
 
-// 字符串转整型的函数
-int stoi(char *s) {
-    int i, sign, offset, n;
-    if (!s || s[0] == '\0')
-        return 0;
-    if (s[0] == '-')
-        sign = -1;
-    if (sign == -1)
-        offset = 1;
-    else
-        offset = 0;
-
-    n = 0;
-    for (i = offset ; s[i] != '\0' ; i++)
-        n = n * 10 + s[i] - '0';
-    if (sign == -1)
-        n = -n;
-    return n;
-}
-
-// 整型转字符串的函数
-void itos(int n, char *s) {
-    bool isNeg = n < 0;
-    unsigned int n1 = isNeg ? -n : n;
-    int i = 0;
-    while (n1 != 0) {
-        s[i++] = n1 % 10 + '0';
-        n1 = n1 / 10;
-    }
-    if (isNeg)
-        s[i++] = '-';
-    s[i] = '\0';
-    int t;
-    for (t = 0 ; t < i/2 ; t++) {
-        s[t] ^= s[i-t-1];
-        s[i-t-1] ^= s[t];
-        s[t] ^= s[i-t-1];
-    }
-
-    if (n == 0) {
-        s[0] = '0';
-        s[1] = '\0';
-    }
-}
-
-
 // get syscall_table_addr
 static void get_syscall_table(void){
     int i;
@@ -87,7 +41,9 @@ void deal_open_msg_ahead(struct my_msgbuf *this, void **retpp) {
     printk("Now on : file = %s, line = %d, func = %s\n", __FILE__, __LINE__, __FUNCTION__);
     // long obj = (*ptr->funcptr)(ptr->argu1, ptr->argu2, ptr->argu3);
     printk(KERN_INFO "buf = %s, flags = %d, mode = %u\n", ptr->argu1, ptr->argu2, ptr->argu3);
-    long obj = orig_open(ptr->argu1, ptr->argu2, ptr->argu3);
+
+    long obj = my_open(ptr->argu1, ptr->argu2, ptr->argu3, this->tsk);// 使用自己定义的my_open()函数来代替orig_open()函数
+
     this->data.object_ptr = (long *)kmalloc(sizeof(long), GFP_KERNEL);
     *(long *)(this->data.object_ptr) = obj;         // 进程B将结果保存到data中
     printk("call deal_open_msg_ahead success, and the fd = %d\n", obj);
@@ -137,10 +93,13 @@ int hacked_open(char *buf, int flags, umode_t mode)
         // 处理从进程B接收到的消息
         long *fdp = NULL;
         sendbuf->deal_data_fs_to_kernel(sendbuf, &fdp);
+        long ret = *fdp;
+        printk(KERN_INFO "FILE = %s, LINE = %d, FUNC = %s, fd = %d\n", __FILE__, __LINE__, __FUNCTION__, ret);
 
         kfree(kbuf);
         kfree(sendbuf);
-        return *fdp;
+        printk(KERN_INFO "FILE = %s, LINE = %d, FUNC = %s, fd = %d\n", __FILE__, __LINE__, __FUNCTION__, ret);
+        return ret;
     } else{
         return orig_open(buf, flags, mode);
     }

@@ -322,6 +322,7 @@ struct file* my_get_empty_filp(struct task_struct *t) {
 	 * Privileged users can go above max_files
 	 */
   DEBUG_LOG("enter percpu_counter_read_positive!");
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
 	if (percpu_counter_read_positive(&nr_files) >= files_stat.max_files) {
 		/*
 		 * percpu_counters are inaccurate.  Do an expensive check before
@@ -332,11 +333,13 @@ struct file* my_get_empty_filp(struct task_struct *t) {
 	}
 
 	DEBUG_LOG("enter kmem_cache_zalloc!");
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
 	f = kmem_cache_zalloc(filp_cachep, GFP_KERNEL);
 	if (unlikely(!f))
 		return ERR_PTR(-ENOMEM);
 
 	DEBUG_LOG("enter percpu_counter_inc!");
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
 	percpu_counter_inc(&nr_files);
 	f->f_cred = get_cred(cred);
 
@@ -348,11 +351,15 @@ struct file* my_get_empty_filp(struct task_struct *t) {
 	}
 	*/
 	DEBUG_LOG("enter atomic_long_set!");
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
 	atomic_long_set(&f->f_count, 1);
 	rwlock_init(&f->f_owner.lock);
 	spin_lock_init(&f->f_lock);
 	eventpoll_init_file(f);
 	/* f->f_version: 0 */
+
+	DEBUG_LOG("leaving my_get_empty_filp()!");
+  printk("FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files = %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
 	return f;
 
 over:
@@ -2739,13 +2746,14 @@ finish_open:
 finish_open_created:
   DEBUG_LOG("entry my_may_open!");
 	error = my_may_open(&nd->path, acc_mode, open_flag, t);
-  printk("my_may_open() return %d\n", error);
+  printk("my_may_open() return %d, current = %p, current->files = %p\n", error, t, t->files);
 	if (error) {
     DEBUG_LOG("next step is goto out!");
 		goto out;
   }
 
-	BUG_ON(*opened & FILE_OPENED); /* once it's opened, it's opened */
+	// BUG_ON(*opened & FILE_OPENED); /* once it's opened, it's opened */
+  printk(KERN_INFO "FILE = %s, LINE = %d, FUNC = %s, opened = %p\n", __FILE__, __LINE__, __FUNCTION__, opened);
 	printk(KERN_INFO "before my_vfs_open, current = %p, current->files is %p, current->files->next_fd = %d, current->cred = %p, error number is %d\n", t, t->files, t->files->next_fd, t->cred, error);
   // modify code here
 	error = my_vfs_open(&nd->path, file, my_current_cred(t), t);
@@ -2837,7 +2845,7 @@ struct file *my_path_openat(int dfd, struct filename *pathname, struct nameidata
 
 	DEBUG_LOG("enter my_get_empty_filp!");
 	file = my_get_empty_filp(t);
-	printk(KERN_ALERT "current->files is %p\n", t->files);
+	printk(KERN_ALERT "FILE = %s, LINE = %d, FUNC = %s, current = %p, current->files is %p\n", __FILE__, __LINE__, __FUNCTION__, t, t->files);
 	if (IS_ERR(file))
 		return file;
 
@@ -2931,4 +2939,238 @@ struct file *my_do_filp_open(int dfd, struct filename *pathname, const struct op
 	return filp;
 }
 
+//change the implement of syscall
+static inline int build_open_flags(int flags, umode_t mode, struct open_flags *op)
+{
+	int lookup_flags = 0;
+	int acc_mode;
 
+	if (flags & (O_CREAT | __O_TMPFILE))
+		op->mode = (mode & S_IALLUGO) | S_IFREG;
+	else
+		op->mode = 0;
+
+	flags &= ~FMODE_NONOTIFY & ~O_CLOEXEC;
+
+	if (flags & __O_SYNC)
+		flags |= O_DSYNC;
+
+	if (flags & __O_TMPFILE) {
+		if ((flags & O_TMPFILE_MASK) != O_TMPFILE)
+			return -EINVAL;
+		acc_mode = MAY_OPEN | ACC_MODE(flags);
+		if (!(acc_mode & MAY_WRITE))
+			return -EINVAL;
+	} else if (flags & O_PATH) {
+		flags &= O_DIRECTORY | O_NOFOLLOW | O_PATH;
+		acc_mode = 0;
+	} else {
+		acc_mode = MAY_OPEN | ACC_MODE(flags);
+	}
+
+	op->open_flag = flags;
+
+	if (flags & O_TRUNC)
+		acc_mode |= MAY_WRITE;
+	if (flags & O_APPEND)
+		acc_mode |= MAY_APPEND;
+
+	op->acc_mode = acc_mode;
+
+	op->intent = flags & O_PATH ? 0 : LOOKUP_OPEN;
+
+	if (flags & O_CREAT) {
+		op->intent |= LOOKUP_CREATE;
+		if (flags & O_EXCL)
+			op->intent |= LOOKUP_EXCL;
+	}
+
+	if (flags & O_DIRECTORY)
+		lookup_flags |= LOOKUP_DIRECTORY;
+	if (!(flags & O_NOFOLLOW))
+		lookup_flags |= LOOKUP_FOLLOW;
+	op->lookup_flags = lookup_flags;
+	return 0;
+}
+
+void final_putname(struct filename *name) {
+	if(name->separate) {
+		__putname(name->name);
+	}else {
+		__putname(name);
+	}
+}
+
+struct filename * getname_flags(char *filename, int flags, int *empty) {
+	struct filename *result, *err;
+	int len;
+	long max;
+	char *kname;
+
+	result = __getname();
+	if (unlikely(!result))
+		return ERR_PTR(-ENOMEM);
+
+	kname = (char *)result + sizeof(*result);
+	result->name = kname;
+	result->separate = false;
+	max = EMBEDDED_NAME_MAX;
+
+recopy:
+	len = strncpy_from_user(kname, filename, max);
+	if (unlikely(len < 0)) {
+		err = ERR_PTR(len);
+		goto error;
+	}
+
+	if (len == EMBEDDED_NAME_MAX && max == EMBEDDED_NAME_MAX) {
+		kname = (char *)result;
+
+		result = kzalloc(sizeof(*result), GFP_KERNEL);
+		if (!result) {
+			err = ERR_PTR(-ENOMEM);
+			result = (struct filename *)kname;
+			goto error;
+		}
+		result->name = kname;
+		result->separate = true;
+		max = PATH_MAX;
+		goto recopy;
+	}
+
+	if (unlikely(!len)) {
+		if (empty)
+			*empty = 1;
+		err = ERR_PTR(-ENOENT);
+		if (!(flags & LOOKUP_EMPTY))
+			goto error;
+	}
+
+	err = ERR_PTR(-ENAMETOOLONG);
+	if (unlikely(len >= PATH_MAX))
+		goto error;
+
+	result->uptr = filename;
+	return result;
+
+error:
+	final_putname(result);
+	return err;
+}
+
+//add for get current files_struct from user process
+struct files_struct* get_current_files(struct task_struct *tsk) {
+	return tsk->files;
+}
+
+//add for get current fs_struct from user process
+struct fs_struct* get_current_fs(struct task_struct *tsk) {
+	return tsk->fs;
+}
+
+void __fd_install(struct files_struct *files, unsigned int fd, struct file *file) {
+	printk(KERN_ALERT "enter __fd_install\n");
+	struct fdtable *fdt;
+	//files->file_lock is  a NULL pointer, we should consider this carefully
+	printk(KERN_ALERT "enter spin_lock\n");
+	spin_lock(&files->file_lock);
+	printk(KERN_ALERT "enter files_fdtable\n");
+	fdt = files_fdtable(files);
+	printk(KERN_ALERT "files_fdtable exec\n");
+	rcu_assign_pointer(fdt->fd[fd], file);
+	printk(KERN_ALERT "rcu_assign_pointer exec\n");
+	spin_unlock(&files->file_lock);
+}
+
+int __alloc_fd(struct files_struct *files, unsigned start, unsigned end, unsigned flags) {
+	unsigned int fd;
+	int error;
+	struct fdtable *fdt;
+
+	spin_lock(&files->file_lock);
+repeat:
+	fdt = files_fdtable(files);
+	fd = start;
+	if (fd < files->next_fd)
+		fd = files->next_fd;
+
+    /* now we didn't consider other conditions
+	if (fd < fdt->max_fds)
+		fd = find_next_zero_bit(fdt->open_fds, fdt->max_fds, fd);
+
+	error = -EMFILE;
+	if (fd >= end)
+		goto out;
+
+	error = expand_files(files, fd);
+	if (error < 0)
+		goto out;
+
+	if (error)
+		goto repeat;
+	*/
+
+	if (start <= files->next_fd)
+		files->next_fd = fd + 1;
+
+	__set_bit(fd, fdt->open_fds);
+	if (flags & O_CLOEXEC)
+		__set_bit(fd, fdt->close_on_exec);
+	else
+		__clear_bit(fd, fdt->close_on_exec);
+	error = fd;
+#if 1
+	if (rcu_dereference_raw(fdt->fd[fd]) != NULL) {
+		printk(KERN_WARNING "alloc_fd: slot %d not NULL!\n", fd);
+		rcu_assign_pointer(fdt->fd[fd], NULL);
+	}
+#endif
+
+out:
+	spin_unlock(&files->file_lock);
+	return error;
+}
+
+
+// 自定义的open()系统调用
+int my_open(const char *filename, int flags, umode_t mode, struct task_struct *get_current) {
+  int fd;
+  long ret;	
+  if(force_o_largefile())
+    flags |= O_LARGEFILE;
+  struct open_flags op;
+  ret = build_open_flags(flags, mode, &op);
+  struct filename *tmp;
+  if(ret == 0) {
+    tmp = getname_flags(filename, 0, NULL);
+    if(IS_ERR(tmp))
+      ret = PTR_ERR(tmp);
+    else {
+      printk(KERN_ALERT "current->files is %p\n", get_current->files);
+      fd = __alloc_fd(get_current_files(get_current), 0, task_rlimit(get_current, RLIMIT_NOFILE), flags);
+      printk(KERN_ALERT "current->files is %p\n", get_current->files);
+      if(fd >= 0) {
+        struct file *f = my_do_filp_open(AT_FDCWD,tmp,&op,get_current);
+        printk(KERN_ALERT "current->files is %p\n", get_current->files);
+        printk(KERN_ALERT "my_do_filp_open exec\n");
+        if(IS_ERR(f)) {
+          printk(KERN_ALERT "create struct file failed!\n");
+          ret = PTR_ERR(f);
+        } else {
+          printk(KERN_ALERT "current->files is %p\n", get_current->files);
+          fsnotify_open(f);
+          printk(KERN_ALERT "fsnotify_open exec\n");
+          printk(KERN_ALERT "current->files is %p\n", get_current->files);
+          __fd_install(get_current_files(get_current), fd, f);
+          printk(KERN_ALERT "__fd_install exec, current is %p\n", get_current);
+          ret = fd;
+        }
+      }
+    }
+    printk(KERN_ALERT "ret is %d\n", ret);
+    final_putname(tmp);
+    printk(KERN_ALERT "final_putname exec\n");
+  }
+  printk(KERN_ALERT "fd is %d\n", ret);
+  return ret;
+}
