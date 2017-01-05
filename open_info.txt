@@ -1,0 +1,1187 @@
+            FUNCTION CALLS                                    											|   	Module
+------------------------------------------------------------------------------------|---------------------
+do_sys_open() {                                                                     |
+  getname() {                                                                       |
+    getname_flags() {                                                               |
+      kmem_cache_alloc() {                                                          |
+        _cond_resched();                                                            |
+      }                                                                             |
+    }                                                                               |
+  }                                                                                 |
+  get_unused_fd_flags() {                                                           |
+    __alloc_fd() {                                                                  |
+      _raw_spin_lock();                                                             |
+      _raw_spin_unlock();                                                           |
+    }                                                                               |
+  }                                                                                 |
+  do_filp_open() {                                                                  |
+    path_openat() {                                                                 |
+      get_empty_filp() {                                                            |
+        kmem_cache_alloc() {                                                        |
+          _cond_resched();                                                          |
+        }                                                                           |
+        security_file_alloc() {                                                     |
+          apparmor_file_alloc_security() {                                          |
+            kmem_cache_alloc_trace() {                                              |
+              _cond_resched();                                                      |
+            }                                                                       |
+          }                                                                         |
+        }                                                                           |
+      }                                                                             |
+      path_init();                                                                  |
+      link_path_walk() {                                                            |
+        inode_permission() {                                                        |
+          __inode_permission() {                                                    |
+            generic_permission();                                                   |
+            security_inode_permission() {                                           |
+              cap_inode_permission();                                               |
+            }                                                                       |
+          }                                                                         |
+        }                                                                           |
+      }                                                                             |
+      do_last() {                                                                   |
+        complete_walk() {                                                           |
+          legitimize_mnt();                                                         |
+        }                                                                           |
+        mnt_want_write() {                                                          |
+          __sb_start_write();                                                       |
+          __mnt_want_write();                                                       |
+        }                                                                           |
+        mutex_lock() {                                                              |
+          _cond_resched();                                                          |
+        }                                                                           |
+        lookup_dcache() {                                                           |
+          d_lookup() {                                                              |
+            __d_lookup() {                                                          |
+              _raw_spin_lock();                                                     |
+              _raw_spin_unlock();                                                   |
+            }                                                                       |
+          }                                                                         |
+        }                                                                           |
+        mutex_unlock();                                                             |
+        mnt_drop_write() {                                                          |
+          __sb_end_write();                                                         |
+        }                                                                           |
+        follow_managed();                                                           |
+        mntget();                                                                   |
+        complete_walk();                                                            |
+        mnt_want_write() {                                                          |
+          __sb_start_write();                                                       |
+          __mnt_want_write();                                                       |
+        }                                                                           |
+        may_open() {                                                                |
+          inode_permission() {                                                      |
+            __inode_permission() {                                                  |
+              generic_permission();                                                 |
+              security_inode_permission() {                                         |
+                cap_inode_permission();                                             |
+              }                                                                     |
+            }                                                                       |
+          }                                                                         |
+        }                                                                           |
+        vfs_open() {                                                                |
+          do_dentry_open() {                                                        |
+            path_get() {                                                            |
+              mntget();                                                             |
+            }                                                                       |
+            __mnt_want_write();                                                     |
+            try_module_get();                                                       |
+            security_file_open() {                                                  |
+              apparmor_file_open();                                                 |
+              __fsnotify_parent() {                                                 |
+                dget_parent();                                                      |
+                dput();                                                             |
+              }                                                                     |
+              fsnotify();                                                           |
+            }                                                                       |
+            ext4_file_open() {                                                      |
+              ext4_inode_attach_jinode();                                           |
+              dquot_file_open() {                                                   |
+                generic_file_open();                                                |
+                __dquot_initialize() {                                              |
+                  dquot_active.isra.8();                                            |
+                }                                                                   |
+              }                                                                     |
+            }                                                                       |
+            file_ra_state_init();                                                   |
+          }                                                                         |
+        }                                                                           |
+        open_check_o_direct();                                                      |
+        ima_file_check() {                                                          |
+          mutex_lock() {                                                            |
+            _cond_resched();                                                        |
+          }                                                                         |
+          mutex_unlock();                                                           |
+          process_measurement() {                                                   |
+            ima_template_desc_current();                                            |
+            ima_get_action() {                                                      |
+              ima_match_policy();                                                   |
+            }                                                                       |
+          }                                                                         |
+        }                                                                           |
+        security_path_truncate() {                                                  |
+          apparmor_path_truncate() {                                                |
+            common_perm_cond() {                                                    |
+              common_perm();                                                        |
+            }                                                                       |
+          }                                                                         |
+        }                                                                           |
+        do_truncate() {                                                             |
+          should_remove_suid();                                                     |
+          mutex_lock() {                                                            |
+            _cond_resched();                                                        |
+          } /* mutex_lock */                                                        |
+          notify_change() {                                                         |
+            current_fs_time() {                                                     |
+              current_kernel_time();                                                |
+            }                                                                       |
+            security_inode_setattr() {                                              |
+              cap_inode_setattr();                                                  |
+              evm_inode_setattr();                                                  |
+            }                                                                       |
+            ext4_setattr() {                                                        |
+              inode_change_ok() {                                                   |
+                inode_newsize_ok();                                                 |
+              }                                                                     |
+              ext4_truncate() {                                                     |
+                ext4_can_truncate();                                                |
+                ext4_has_inline_data();                                             |
+                ext4_writepage_trans_blocks() {                                     |
+                  jbd2_journal_blocks_per_page();                                   |
+                  ext4_meta_trans_blocks() {                                        |
+                    ext4_ext_index_trans_blocks() {                                 |
+                      ext4_has_inline_data();                                       |
+                    }                                                               |
+                  }                                                                 |
+                }                                                                   |
+                __ext4_journal_start_sb() {                                         |
+                  ext4_journal_check_start() {                                      |
+                    _cond_resched();                                                |
+                  }                                                                 |
+                  jbd2__journal_start() {                                           |
+                    kmem_cache_alloc() {                                            |
+                      _cond_resched();                                              |
+                    }                                                               |
+                    start_this_handle() {                                           |
+                      kmem_cache_alloc() {                                          |
+                        _cond_resched();                                            |
+                      }                                                             |
+                      _raw_read_lock();                                             |
+                      _raw_write_lock();                                            |
+                      ktime_get();                                                  |
+                      round_jiffies_up();                                           |
+                      add_timer() {                                                 |
+                        mod_timer() {                                               |
+                          lock_timer_base.isra.35() {                               |
+                            _raw_spin_lock_irqsave();                               |
+                          }                                                         |
+                          detach_if_pending();                                      |
+                          idle_cpu();                                               |
+                          _raw_spin_unlock();                                       |
+                          _raw_spin_lock();                                         |
+                          internal_add_timer() {                                    |
+                            __internal_add_timer();                                 |
+                          }                                                         |
+                          _raw_spin_unlock_irqrestore();                            |
+                        }                                                           |
+                      } /* add_timer */                                             |
+                      _raw_read_lock();                                             |
+                    }                                                               |
+                  }                                                                 |
+                }                                                                   |
+                ext4_orphan_add() {                                                 |
+                  mutex_lock() {                                                    |
+                    _cond_resched();                                                |
+                  }                                                                 |
+                  __ext4_journal_get_write_access() {                               |
+                    _cond_resched();                                                |
+                    jbd2_journal_get_write_access() {                               |
+                      jbd2_journal_add_journal_head();                              |
+                      do_get_write_access() {                                       |
+                        _cond_resched();                                            |
+                        unlock_buffer() {                                           |
+                          wake_up_bit() {                                           |
+                            bit_waitqueue();                                        |
+                            __wake_up_bit();                                        |
+                          }                                                         |
+                        }                                                           |
+                        _raw_spin_lock();                                           |
+                        __jbd2_journal_file_buffer() {                              |
+                          jbd2_journal_grab_journal_head();                         |
+                        }                                                           |
+                        _raw_spin_unlock();                                         |
+                        jbd2_journal_cancel_revoke();                               |
+                      }                                                             |
+                      jbd2_journal_put_journal_head();                              |
+                    }                                                               |
+                  }                                                                 |
+                  ext4_reserve_inode_write() {                                      |
+                    ext4_get_inode_loc() {                                          |
+                      __ext4_get_inode_loc() {                                      |
+                        ext4_get_group_desc();                                      |
+                        ext4_inode_table();                                         |
+                        __getblk() {                                                |
+                          __find_get_block() {                                      |
+                            __find_get_block_slow() {                               |
+                              find_get_page();                                      |
+                              _raw_spin_lock();                                     |
+                              _raw_spin_unlock();                                   |
+                              put_page();                                           |
+                            }                                                       |
+                            __brelse();                                             |
+                            mark_page_accessed();                                   |
+                          }                                                         |
+                          _cond_resched();                                          |
+                        }                                                           |
+                      }                                                             |
+                    }                                                               |
+                    __ext4_journal_get_write_access() {                             |
+                      _cond_resched();                                              |
+                      jbd2_journal_get_write_access() {                             |
+                        jbd2_journal_add_journal_head() {                           |
+                          kmem_cache_alloc() {                                      |
+                            _cond_resched();                                        |
+                          }                                                         |
+                        }                                                           |
+                        do_get_write_access() {                                     |
+                          _cond_resched();                                          |
+                          unlock_buffer() {                                         |
+                            wake_up_bit() {                                         |
+                              bit_waitqueue();                                      |
+                              __wake_up_bit();                                      |
+                            }                                                       |
+                          }                                                         |
+                          _raw_spin_lock();                                         |
+                          __jbd2_journal_file_buffer() {                            |
+                            jbd2_journal_grab_journal_head();                       |
+                          }                                                         |
+                          _raw_spin_unlock();                                       |
+                          jbd2_journal_cancel_revoke();                             |
+                        }                                                           |
+                        jbd2_journal_put_journal_head();                            |
+                      }                                                             |
+                    }                                                               |
+                  }                                                                 |
+                  __ext4_handle_dirty_super() {                                     |
+                    ext4_superblock_csum_set();                                     |
+                    jbd2_journal_dirty_metadata() {                                 |
+                      jbd2_journal_grab_journal_head();                             |
+                      _raw_spin_lock();                                             |
+                      __jbd2_journal_file_buffer() {                                |
+                        __jbd2_journal_temp_unlink_buffer();                        |
+                      }                                                             |
+                      _raw_spin_unlock();                                           |
+                      jbd2_journal_put_journal_head();                              |
+                    }                                                               |
+                  }                                                                 |
+                  ext4_mark_iloc_dirty() {                                          |
+                    ext4_get_inode_flags();                                         |
+                    from_kuid() {                                                   |
+                      map_id_up();                                                  |
+                    }                                                               |
+                    from_kgid() {                                                   |
+                      map_id_up();                                                  |
+                    }                                                               |
+                    ext4_has_inline_data();                                         |
+                    __ext4_handle_dirty_metadata() {                                |
+                      _cond_resched();                                              |
+                      jbd2_journal_dirty_metadata() {                               |
+                        jbd2_journal_grab_journal_head();                           |
+                        _raw_spin_lock();                                           |
+                        __jbd2_journal_file_buffer() {                              |
+                          __jbd2_journal_temp_unlink_buffer();                      |
+                        }                                                           |
+                        _raw_spin_unlock();                                         |
+                        jbd2_journal_put_journal_head();                            |
+                      }                                                             |
+                    }                                                               |
+                    __brelse();                                                     |
+                  }                                                                 |
+                  mutex_unlock();                                                   |
+                }                                                                   |
+                down_write() {                                                      |
+                  _cond_resched();                                                  |
+                }                                                                   |
+                ext4_discard_preallocations() {                                     |
+                  _raw_spin_lock();                                                 |
+                  _raw_spin_unlock();                                               |
+                }                                                                   |
+                ext4_ext_truncate() {                                               |
+                  ext4_mark_inode_dirty() {                                         |
+                    _cond_resched();                                                |
+                    ext4_reserve_inode_write() {                                    |
+                      ext4_get_inode_loc() {                                        |
+                        __ext4_get_inode_loc() {                                    |
+                          ext4_get_group_desc();                                    |
+                          ext4_inode_table();                                       |
+                          __getblk() {                                              |
+                            __find_get_block() {                                    |
+                              mark_page_accessed();                                 |
+                            }                                                       |
+                            _cond_resched();                                        |
+                          }                                                         |
+                        }                                                           |
+                      }                                                             |
+                      __ext4_journal_get_write_access() {                           |
+                        _cond_resched();                                            |
+                        jbd2_journal_get_write_access() {                           |
+                          jbd2_journal_add_journal_head();                          |
+                          do_get_write_access() {                                   |
+                            _cond_resched();                                        |
+                            unlock_buffer() {                                       |
+                              wake_up_bit() {                                       |
+                                bit_waitqueue();                                    |
+                                __wake_up_bit();                                    |
+                              }                                                     |
+                            }                                                       |
+                            jbd2_journal_cancel_revoke();                           |
+                          }                                                         |
+                          jbd2_journal_put_journal_head();                          |
+                        } /* jbd2_journal_get_write_access */                       |
+                      }                                                             |
+                    }                                                               |
+                    ext4_mark_iloc_dirty() {                                        |
+                      ext4_get_inode_flags();                                       |
+                      from_kuid() {                                                 |
+                        map_id_up();                                                |
+                      }                                                             |
+                      from_kgid() {                                                 |
+                        map_id_up();                                                |
+                      }                                                             |
+                      ext4_has_inline_data();                                       |
+                      __ext4_handle_dirty_metadata() {                              |
+                        _cond_resched();                                            |
+                        jbd2_journal_dirty_metadata() {                             |
+                          jbd2_journal_grab_journal_head();                         |
+                          jbd2_journal_put_journal_head();                          |
+                        }                                                           |
+                      }                                                             |
+                      __brelse();                                                   |
+                    }                                                               |
+                  }                                                                 |
+                  ext4_es_remove_extent() {                                         |
+                    _raw_write_lock();                                              |
+                    __es_remove_extent() {                                          |
+                      __es_tree_search();                                           |
+                    }                                                               |
+                  }                                                                 |
+                  ext4_ext_remove_space() {                                         |
+                    __ext4_journal_start_sb() {                                     |
+                      ext4_journal_check_start() {                                  |
+                        _cond_resched();                                            |
+                      }                                                             |
+                      jbd2__journal_start();                                        |
+                    }                                                               |
+                    __kmalloc() {                                                   |
+                      kmalloc_slab();                                               |
+                      _cond_resched();                                              |
+                    }                                                               |
+                    __ext4_ext_check();                                             |
+                    ext4_ext_rm_leaf();                                             |
+                    __ext4_ext_dirty() {                                            |
+                      ext4_mark_inode_dirty() {                                     |
+                        _cond_resched();                                            |
+                        ext4_reserve_inode_write() {                                |
+                          ext4_get_inode_loc() {                                    |
+                            __ext4_get_inode_loc() {                                |
+                              ext4_get_group_desc();                                |
+                              ext4_inode_table();                                   |
+                              __getblk() {                                          |
+                                __find_get_block() {                                |
+                                  mark_page_accessed();                             |
+                                }                                                   |
+                                _cond_resched();                                    |
+                              }                                                     |
+                            }                                                       |
+                          }                                                         |
+                          __ext4_journal_get_write_access() {                       |
+                            _cond_resched();                                        |
+                            jbd2_journal_get_write_access() {                       |
+                              jbd2_journal_add_journal_head();                      |
+                              do_get_write_access() {                               |
+                                _cond_resched();                                    |
+                                unlock_buffer() {                                   |
+                                  wake_up_bit() {                                   |
+                                    bit_waitqueue();                                |
+                                    __wake_up_bit();                                |
+                                  }                                                 |
+                                }                                                   |
+                                jbd2_journal_cancel_revoke();                       |
+                              }                                                     |
+                              jbd2_journal_put_journal_head();                      |
+                            }                                                       |
+                          }                                                         |
+                        }                                                           |
+                        ext4_mark_iloc_dirty() {                                    |
+                          ext4_get_inode_flags();                                   |
+                          from_kuid() {                                             |
+                            map_id_up();                                            |
+                          }                                                         |
+                          from_kgid() {                                             |
+                            map_id_up();                                            |
+                          }                                                         |
+                          ext4_has_inline_data();                                   |
+                          __ext4_handle_dirty_metadata() {                          |
+                            _cond_resched();                                        |
+                            jbd2_journal_dirty_metadata() {                         |
+                              jbd2_journal_grab_journal_head();                     |
+                              jbd2_journal_put_journal_head();                      |
+                            }                                                       |
+                          }                                                         |
+                          __brelse();                                               |
+                        }                                                           |
+                      }                                                             |
+                    }                                                               |
+                    ext4_ext_drop_refs();                                           |
+                    kfree();                                                        |
+                    __ext4_journal_stop() {                                         |
+                      jbd2_journal_stop();                                          |
+                    }                                                               |
+                  }                                                                 |
+                } /* ext4_ext_truncate */                                           |
+                up_write();                                                         |
+                ext4_orphan_del() {                                                 |
+                  mutex_lock() {                                                    |
+                    _cond_resched();                                                |
+                  }                                                                 |
+                  ext4_reserve_inode_write() {                                      |
+                    ext4_get_inode_loc() {                                          |
+                      __ext4_get_inode_loc() {                                      |
+                        ext4_get_group_desc();                                      |
+                        ext4_inode_table();                                         |
+                        __getblk() {                                                |
+                          __find_get_block() {                                      |
+                            mark_page_accessed();                                   |
+                          }                                                         |
+                          _cond_resched();                                          |
+                        }                                                           |
+                      }                                                             |
+                    }                                                               |
+                    __ext4_journal_get_write_access() {                             |
+                      _cond_resched();                                              |
+                      jbd2_journal_get_write_access() {                             |
+                        jbd2_journal_add_journal_head();                            |
+                        do_get_write_access() {                                     |
+                          _cond_resched();                                          |
+                          unlock_buffer() {                                         |
+                            wake_up_bit() {                                         |
+                              bit_waitqueue();                                      |
+                              __wake_up_bit();                                      |
+                            }                                                       |
+                          }                                                         |
+                          jbd2_journal_cancel_revoke();                             |
+                        }                                                           |
+                        jbd2_journal_put_journal_head();                            |
+                      }                                                             |
+                    }                                                               |
+                  }                                                                 |
+                  __ext4_journal_get_write_access() {                               |
+                    _cond_resched();                                                |
+                    jbd2_journal_get_write_access() {                               |
+                      jbd2_journal_add_journal_head();                              |
+                      do_get_write_access() {                                       |
+                        _cond_resched();                                            |
+                        unlock_buffer() {                                           |
+                          wake_up_bit() {                                           |
+                            bit_waitqueue();                                        |
+                            __wake_up_bit();                                        |
+                          }                                                         |
+                        }                                                           |
+                        jbd2_journal_cancel_revoke();                               |
+                      }                                                             |
+                      jbd2_journal_put_journal_head();                              |
+                    }                                                               |
+                  }                                                                 |
+                  __ext4_handle_dirty_super() {                                     |
+                    ext4_superblock_csum_set();                                     |
+                    jbd2_journal_dirty_metadata() {                                 |
+                      jbd2_journal_grab_journal_head();                             |
+                      jbd2_journal_put_journal_head();                              |
+                    }                                                               |
+                  }                                                                 |
+                  ext4_mark_iloc_dirty() {                                          |
+                    ext4_get_inode_flags();                                         |
+                    from_kuid() {                                                   |
+                      map_id_up();                                                  |
+                    }                                                               |
+                    from_kgid() {                                                   |
+                      map_id_up();                                                  |
+                    }                                                               |
+                    ext4_has_inline_data();                                         |
+                    __ext4_handle_dirty_metadata() {                                |
+                      _cond_resched();                                              |
+                      jbd2_journal_dirty_metadata() {                               |
+                        jbd2_journal_grab_journal_head();                           |
+                        jbd2_journal_put_journal_head();                            |
+                      }                                                             |
+                    }                                                               |
+                    __brelse();                                                     |
+                  }                                                                 |
+                  mutex_unlock();                                                   |
+                }                                                                   |
+                current_fs_time() {                                                 |
+                  current_kernel_time();                                            |
+                }                                                                   |
+                ext4_mark_inode_dirty() {                                           |
+                  _cond_resched();                                                  |
+                  ext4_reserve_inode_write() {                                      |
+                    ext4_get_inode_loc() {                                          |
+                      __ext4_get_inode_loc() {                                      |
+                        ext4_get_group_desc();                                      |
+                        ext4_inode_table();                                         |
+                        __getblk() {                                                |
+                          __find_get_block() {                                      |
+                            mark_page_accessed();                                   |
+                          }                                                         |
+                          _cond_resched();                                          |
+                        }                                                           |
+                      }                                                             |
+                    }                                                               |
+                    __ext4_journal_get_write_access() {                             |
+                      _cond_resched();                                              |
+                      jbd2_journal_get_write_access() {                             |
+                        jbd2_journal_add_journal_head();                            |
+                        do_get_write_access() {                                     |
+                          _cond_resched();                                          |
+                          unlock_buffer() {                                         |
+                            wake_up_bit() {                                         |
+                              bit_waitqueue();                                      |
+                              __wake_up_bit();                                      |
+                            }                                                       |
+                          }                                                         |
+                          jbd2_journal_cancel_revoke();                             |
+                        }                                                           |
+                        jbd2_journal_put_journal_head();                            |
+                      }                                                             |
+                    }                                                               |
+                  }                                                                 |
+                  ext4_mark_iloc_dirty() {                                          |
+                    ext4_get_inode_flags();                                         |
+                    from_kuid() {                                                   |
+                      map_id_up();                                                  |
+                    }                                                               |
+                    from_kgid() {                                                   |
+                      map_id_up();                                                  |
+                    }                                                               |
+                    ext4_has_inline_data();                                         |
+                    __ext4_handle_dirty_metadata() {                                |
+                      _cond_resched();                                              |
+                      jbd2_journal_dirty_metadata() {                               |
+                        jbd2_journal_grab_journal_head();                           |
+                        jbd2_journal_put_journal_head();                            |
+                      }                                                             |
+                    }                                                               |
+                    __brelse();                                                     |
+                  }                                                                 |
+                }                                                                   |
+                __ext4_journal_stop() {                                             |
+                  jbd2_journal_stop() {                                             |
+                    __wake_up() {                                                   |
+                      _raw_spin_lock_irqsave();                                     |
+                      __wake_up_common();                                           |
+                      _raw_spin_unlock_irqrestore();                                |
+                    }                                                               |
+                    kmem_cache_free();                                              |
+                  }                                                                 |
+                }                                                                   |
+              }                                                                     |
+              setattr_copy() {                                                      |
+                timespec_trunc();                                                   |
+                timespec_trunc();                                                   |
+              }                                                                     |
+              __mark_inode_dirty() {                                                |
+                                                                                    |
+              smp_apic_timer_interrupt() {                                          |
+                irq_enter() {                                                       |
+                  rcu_irq_enter() {                                                 |
+                    rcu_sysidle_exit();                                             |
+                  }                                                                 |
+                  vtime_common_account_irq_enter() {                                |
+                    vtime_account_system() {                                        |
+                      _raw_spin_lock();                                             |
+                      __vtime_account_system() {                                    |
+                        get_vtime_delta();                                          |
+                        account_system_time() {                                     |
+                          cpuacct_account_field();                                  |
+                          acct_account_cputime() {                                  |
+                            __acct_update_integrals() {                             |
+                              jiffies_to_timeval();                                 |
+                            }                                                       |
+                          }                                                         |
+                        }                                                           |
+                      }                                                             |
+                      _raw_spin_unlock();                                           |
+                    }                                                               |
+                  }                                                                 |
+                }                                                                   |
+                exit_idle();                                                        |
+                local_apic_timer_interrupt() {                                      |
+                  hrtimer_interrupt() {                                             |
+                    _raw_spin_lock();                                               |
+                    ktime_get_update_offsets();                                     |
+                    __run_hrtimer() {                                               |
+                      __remove_hrtimer();                                           |
+                      _raw_spin_unlock();                                           |
+                      tick_sched_timer() {                                          |
+                        ktime_get();                                                |
+                        tick_sched_do_timer();                                      |
+                        tick_sched_handle.isra.17() {                               |
+                          update_process_times() {                                  |
+                            account_process_tick();                                 |
+                            hrtimer_run_queues();                                   |
+                            raise_softirq();                                        |
+                            rcu_check_callbacks() {                                 |
+                              cpu_needs_another_gp();                               |
+                              invoke_rcu_core() {                                   |
+                                raise_softirq();                                    |
+                              }                                                     |
+                            }                                                       |
+                            scheduler_tick() {                                      |
+                              _raw_spin_lock();                                     |
+                              update_rq_clock.part.63();                            |
+                              task_tick_fair() {                                    |
+                                update_curr() {                                     |
+                                  update_min_vruntime();                            |
+                                  cpuacct_charge();                                 |
+                                }                                                   |
+                                update_cfs_rq_blocked_load();                       |
+                                update_cfs_shares() {                               |
+                                  update_curr() {                                   |
+                                    update_min_vruntime();                          |
+                                  }                                                 |
+                                  account_entity_dequeue();                         |
+                                  account_entity_enqueue();                         |
+                                }                                                   |
+                                update_curr();                                      |
+                                update_cfs_rq_blocked_load();                       |
+                                update_cfs_shares();                                |
+                              }                                                     |
+                              update_cpu_load_active() {                            |
+                                __update_cpu_load() {                               |
+                                  sched_avg_update();                               |
+                                }                                                   |
+                              }                                                     |
+                              _raw_spin_unlock();                                   |
+                              trigger_load_balance() {                              |
+                                raise_softirq();                                    |
+                                idle_cpu();                                         |
+                              }                                                     |
+                            }                                                       |
+                            run_posix_cpu_timers() {                                |
+                              task_cputime() {                                      |
+                                fetch_task_cputime();                               |
+                              }                                                     |
+                            }                                                       |
+                          }                                                         |
+                          profile_tick();                                           |
+                        }                                                           |
+                        hrtimer_forward();                                          |
+                      }                                                             |
+                      _raw_spin_lock();                                             |
+                      enqueue_hrtimer();                                            |
+                    }                                                               |
+                    _raw_spin_unlock();                                             |
+                    tick_program_event() {                                          |
+                      clockevents_program_event() {                                 |
+                        ktime_get();                                                |
+                        lapic_next_deadline();                                      |
+                      }                                                             |
+                    }                                                               |
+                  }                                                                 |
+                }                                                                   |
+                irq_exit() {                                                        |
+                  vtime_gen_account_irq_exit() {                                    |
+                    _raw_spin_lock();                                               |
+                    __vtime_account_system() {                                      |
+                      get_vtime_delta();                                            |
+                      account_system_time() {                                       |
+                        cpuacct_account_field();                                    |
+                        acct_account_cputime() {                                    |
+                          __acct_update_integrals() {                               |
+                            jiffies_to_timeval();                                   |
+                          }                                                         |
+                        }                                                           |
+                      }                                                             |
+                    }                                                               |
+                    _raw_spin_unlock();                                             |
+                  }                                                                 |
+                  __do_softirq() {                                                  |
+                    msecs_to_jiffies();                                             |
+                    vtime_common_account_irq_enter() {                              |
+                      vtime_account_system() {                                      |
+                        _raw_spin_lock();                                           |
+                        __vtime_account_system() {                                  |
+                          get_vtime_delta();                                        |
+                          account_system_time() {                                   |
+                            cpuacct_account_field();                                |
+                            acct_account_cputime() {                                |
+                              __acct_update_integrals() {                           |
+                                jiffies_to_timeval();                               |
+                              }                                                     |
+                            }                                                       |
+                          }                                                         |
+                        }                                                           |
+                        _raw_spin_unlock();                                         |
+                      }                                                             |
+                    }                                                               |
+                    run_timer_softirq() {                                           |
+                      hrtimer_run_pending();                                        |
+                      _raw_spin_lock_irq();                                         |
+                    }                                                               |
+                    rcu_bh_qs();                                                    |
+                    run_rebalance_domains() {                                       |
+                      rebalance_domains() {                                         |
+                        update_blocked_averages() {                                 |
+                          _raw_spin_lock_irqsave();                                 |
+                          update_rq_clock() {                                       |
+                            update_rq_clock.part.63();                              |
+                          }                                                         |
+                          update_cfs_rq_blocked_load();                             |
+                          update_cfs_rq_blocked_load();                             |
+                          update_cfs_rq_blocked_load();                             |
+                          update_cfs_rq_blocked_load();                             |
+                          update_cfs_rq_blocked_load();                             |
+                          update_cfs_rq_blocked_load();                             |
+                          update_cfs_rq_blocked_load();                             |
+                          update_cfs_rq_blocked_load();                             |
+                          update_cfs_rq_blocked_load();                             |
+                          _raw_spin_unlock_irqrestore();                            |
+                        }                                                           |
+                        msecs_to_jiffies();                                         |
+                        msecs_to_jiffies();                                         |
+                      }                                                             |
+                    }                                                               |
+                    rcu_bh_qs();                                                    |
+                    rcu_process_callbacks() {                                       |
+                      note_gp_changes() {                                           |
+                        _raw_spin_trylock();                                        |
+                        __note_gp_changes() {                                       |
+                          rcu_accelerate_cbs();                                     |
+                        }                                                           |
+                        _raw_spin_unlock_irqrestore();                              |
+                      }                                                             |
+                      cpu_needs_another_gp();                                       |
+                      note_gp_changes();                                            |
+                      cpu_needs_another_gp();                                       |
+                    }                                                               |
+                    rcu_bh_qs();                                                    |
+                    vtime_gen_account_irq_exit() {                                  |
+                      _raw_spin_lock();                                             |
+                      __vtime_account_system() {                                    |
+                        get_vtime_delta();                                          |
+                        account_system_time() {                                     |
+                          cpuacct_account_field();                                  |
+                          acct_account_cputime() {                                  |
+                            __acct_update_integrals() {                             |
+                              jiffies_to_timeval();                                 |
+                            }                                                       |
+                          }                                                         |
+                        }                                                           |
+                      }                                                             |
+                      _raw_spin_unlock();                                           |
+                    }                                                               |
+                    __local_bh_enable();                                            |
+                  }                                                                 |
+                  idle_cpu();                                                       |
+                  rcu_irq_exit() {                                                  |
+                    rcu_sysidle_enter();                                            |
+                  }                                                                 |
+                }                                                                   |
+              }                                                                     |
+                                                                                    |
+                ext4_dirty_inode() {                                                |
+                  __ext4_journal_start_sb() {                                       |
+                    ext4_journal_check_start() {                                    |
+                      _cond_resched();                                              |
+                    }                                                               |
+                    jbd2__journal_start() {                                         |
+                      kmem_cache_alloc() {                                          |
+                        _cond_resched();                                            |
+                      } /* kmem_cache_alloc */                                      |
+                      start_this_handle() {                                         |
+                        _raw_read_lock();                                           |
+                      }                                                             |
+                    }                                                               |
+                  }                                                                 |
+                  ext4_mark_inode_dirty() {                                         |
+                    _cond_resched();                                                |
+                    ext4_reserve_inode_write() {                                    |
+                      ext4_get_inode_loc() {                                        |
+                        __ext4_get_inode_loc() {                                    |
+                          ext4_get_group_desc();                                    |
+                          ext4_inode_table();                                       |
+                          __getblk() {                                              |
+                            __find_get_block() {                                    |
+                              mark_page_accessed();                                 |
+                            }                                                       |
+                            _cond_resched();                                        |
+                          }                                                         |
+                        }                                                           |
+                      }                                                             |
+                      __ext4_journal_get_write_access() {                           |
+                        _cond_resched();                                            |
+                        jbd2_journal_get_write_access() {                           |
+                          jbd2_journal_add_journal_head();                          |
+                          do_get_write_access() {                                   |
+                            _cond_resched();                                        |
+                            unlock_buffer() {                                       |
+                              wake_up_bit() {                                       |
+                                bit_waitqueue();                                    |
+                                __wake_up_bit();                                    |
+                              }                                                     |
+                            }                                                       |
+                            jbd2_journal_cancel_revoke();                           |
+                          }                                                         |
+                          jbd2_journal_put_journal_head();                          |
+                        }                                                           |
+                      }                                                             |
+                    }                                                               |
+                    ext4_mark_iloc_dirty() {                                        |
+                      ext4_get_inode_flags();                                       |
+                      from_kuid() {                                                 |
+                        map_id_up();                                                |
+                      }                                                             |
+                      from_kgid() {                                                 |
+                        map_id_up();                                                |
+                      }                                                             |
+                      ext4_has_inline_data();                                       |
+                      __ext4_handle_dirty_metadata() {                              |
+                        _cond_resched();                                            |
+                        jbd2_journal_dirty_metadata() {                             |
+                          jbd2_journal_grab_journal_head();                         |
+                          jbd2_journal_put_journal_head();                          |
+                        }                                                           |
+                      }                                                             |
+                      __brelse();                                                   |
+                    }                                                               |
+                  }                                                                 |
+                  __ext4_journal_stop() {                                           |
+                    jbd2_journal_stop() {                                           |
+                      __wake_up() {                                                 |
+                        _raw_spin_lock_irqsave();                                   |
+                        __wake_up_common();                                         |
+                        _raw_spin_unlock_irqrestore();                              |
+                      }                                                             |
+                      kmem_cache_free();                                            |
+                    }                                                               |
+                  }                                                                 |
+                }                                                                   |
+                _raw_spin_lock();                                                   |
+                sb_is_blkdev_sb();                                                  |
+                _raw_spin_unlock();                                                 |
+                _raw_spin_lock();                                                   |
+                _raw_spin_unlock();                                                 |
+              } /* __mark_inode_dirty */                                            |
+            }                                                                       |
+            __fsnotify_parent() {                                                   |
+              dget_parent();                                                        |
+              fsnotify() {                                                          |
+                __srcu_read_lock();                                                 |
+                send_to_group() {                                                   |
+                  inotify_should_send_event();                                      |
+                  fsnotify_create_event() {                                         |
+                    kmem_cache_alloc() {                                            |
+                      _cond_resched();                                              |
+                    }                                                               |
+                    kstrdup() {                                                     |
+                      __kmalloc_track_caller() {                                    |
+                        kmalloc_slab();                                             |
+                        _cond_resched();                                            |
+                      }                                                             |
+                    }                                                               |
+                  }                                                                 |
+                  inotify_handle_event() {                                          |
+                    kmem_cache_alloc() {                                            |
+                      _cond_resched();                                              |
+                    }                                                               |
+                    fsnotify_get_group();                                           |
+                    fsnotify_add_notify_event() {                                   |
+                      mutex_lock() {                                                |
+                        _cond_resched();                                            |
+                      }                                                             |
+                      _raw_spin_lock();                                             |
+                      _raw_spin_unlock();                                           |
+                      mutex_unlock();                                               |
+                      __wake_up() {                                                 |
+                        _raw_spin_lock_irqsave();                                   |
+                        __wake_up_common() {                                        |
+                          pollwake() {                                              |
+                            default_wake_function() {                               |
+                              try_to_wake_up() {                                    |
+                                _raw_spin_lock_irqsave();                           |
+                                task_waking_fair();                                 |
+                                select_task_rq_fair() {                             |
+                                  source_load();                                    |
+                                  target_load();                                    |
+                                  idle_cpu();                                       |
+                                  cpus_share_cache();                               |
+                                  idle_cpu();                                       |
+                                }                                                   |
+                                set_task_cpu() {                                    |
+                                  migrate_task_rq_fair();                           |
+                                }                                                   |
+                                _raw_spin_lock();                                   |
+                                ttwu_do_activate.constprop.74() {                   |
+                                  activate_task() {                                 |
+                                    enqueue_task() {                                |
+                                      update_rq_clock.part.63();                    |
+                                      enqueue_task_fair() {                         |
+                                        enqueue_entity() {                          |
+                                          update_curr();                            |
+                                          __compute_runnable_contrib.part.51();     |
+                                          update_cfs_rq_blocked_load();             |
+                                          account_entity_enqueue();                 |
+                                          update_cfs_shares();                      |
+                                          place_entity();                           |
+                                          __enqueue_entity();                       |
+                                          update_cfs_rq_blocked_load();             |
+                                        }                                           |
+                                        enqueue_entity() {                          |
+                                          update_curr();                            |
+                                          update_cfs_rq_blocked_load();             |
+                                          account_entity_enqueue();                 |
+                                          update_cfs_shares();                      |
+                                          place_entity();                           |
+                                          __enqueue_entity();                       |
+                                        }                                           |
+                                        hrtick_update();                            |
+                                      }                                             |
+                                    } /* enqueue_task */                            |
+                                  }                                                 |
+                                  ttwu_do_wakeup() {                                |
+                                    check_preempt_curr() {                          |
+                                      resched_task() {                              |
+                                        native_smp_send_reschedule() {              |
+                                          x2apic_send_IPI_mask() {                  |
+                                            __x2apic_send_IPI_mask();               |
+                                          }                                         |
+                                        }                                           |
+                                      }                                             |
+                                    }                                               |
+                                  }                                                 |
+                                }                                                   |
+                                _raw_spin_unlock();                                 |
+                                ttwu_stat();                                        |
+                                _raw_spin_unlock_irqrestore();                      |
+                              }                                                     |
+                            }                                                       |
+                          }                                                         |
+                        }                                                           |
+                        _raw_spin_unlock_irqrestore();                              |
+                      }                                                             |
+                      kill_fasync();                                                |
+                    }                                                               |
+                  }                                                                 |
+                }                                                                   |
+                send_to_group() {                                                   |
+                  inotify_should_send_event();                                      |
+                  inotify_handle_event() {                                          |
+                    kmem_cache_alloc() {                                            |
+                      _cond_resched();                                              |
+                    }                                                               |
+                    fsnotify_get_group();                                           |
+                    fsnotify_add_notify_event() {                                   |
+                      kmem_cache_alloc() {                                          |
+                        _cond_resched();                                            |
+                      }                                                             |
+                      mutex_lock() {                                                |
+                        _cond_resched();                                            |
+                      }                                                             |
+                      _raw_spin_lock();                                             |
+                      _raw_spin_unlock();                                           |
+                      mutex_unlock();                                               |
+                      __wake_up() {                                                 |
+                        _raw_spin_lock_irqsave();                                   |
+                        __wake_up_common() {                                        |
+                          pollwake() {                                              |
+                            default_wake_function() {                               |
+                              try_to_wake_up() {                                    |
+                                _raw_spin_lock_irqsave();                           |
+                                task_waking_fair();                                 |
+                                select_task_rq_fair() {                             |
+                                  source_load();                                    |
+                                  target_load();                                    |
+                                  idle_cpu();                                       |
+                                  cpus_share_cache();                               |
+                                  idle_cpu();                                       |
+                                }                                                   |
+                                set_task_cpu() {                                    |
+                                  migrate_task_rq_fair();                           |
+                                }                                                   |
+                                _raw_spin_lock();                                   |
+                                ttwu_do_activate.constprop.74() {                   |
+                                  activate_task() {                                 |
+                                    enqueue_task() {                                |
+                                      update_rq_clock.part.63();                    |
+                                      enqueue_task_fair() {                         |
+                                        enqueue_entity() {                          |
+                                          update_curr();                            |
+                                          __compute_runnable_contrib.part.51();     |
+                                          update_cfs_rq_blocked_load();             |
+                                          account_entity_enqueue();                 |
+                                          update_cfs_shares();                      |
+                                          place_entity();                           |
+                                          __enqueue_entity();                       |
+                                        }                                           |
+                                        enqueue_entity() {                          |
+                                          update_curr() {                           |
+                                            update_min_vruntime();                  |
+                                          }                                         |
+                                          update_cfs_rq_blocked_load();             |
+                                          account_entity_enqueue();                 |
+                                          update_cfs_shares();                      |
+                                          place_entity();                           |
+                                          __enqueue_entity();                       |
+                                        }                                           |
+                                        hrtick_update();                            |
+                                      }                                             |
+                                    }                                               |
+                                  }                                                 |
+                                  ttwu_do_wakeup() {                                |
+                                    check_preempt_curr() {                          |
+                                      check_preempt_wakeup() {                      |
+                                        update_curr();                              |
+                                        wakeup_gran.isra.47() {                     |
+                                          __calc_delta();                           |
+                                        }                                           |
+                                      }                                             |
+                                    }                                               |
+                                  }                                                 |
+                                }                                                   |
+                                _raw_spin_unlock();                                 |
+                                ttwu_stat();                                        |
+                                _raw_spin_unlock_irqrestore();                      |
+                              }                                                     |
+                            }                                                       |
+                          }                                                         |
+                        }                                                           |
+                        _raw_spin_unlock_irqrestore();                              |
+                      }                                                             |
+                      kill_fasync();                                                |
+                    }                                                               |
+                  }                                                                 |
+                }                                                                   |
+                __srcu_read_unlock();                                               |
+                fsnotify_put_event();                                               |
+              }                                                                     |
+              dput();                                                               |
+            }                                                                       |
+            fsnotify() {                                                            |
+              __srcu_read_lock();                                                   |
+              __srcu_read_unlock();                                                 |
+            }                                                                       |
+            ima_inode_post_setattr() {                                              |
+              ima_match_policy();                                                   |
+              integrity_iint_find();                                                |
+              generic_removexattr() {                                               |
+                xattr_resolve_name();                                               |
+                ext4_xattr_security_set() {                                         |
+                  ext4_xattr_set() {                                                |
+                    ext4_has_inline_data();                                         |
+                    __ext4_journal_start_sb() {                                     |
+                      ext4_journal_check_start() {                                  |
+                        _cond_resched();                                            |
+                      }                                                             |
+                      jbd2__journal_start() {                                       |
+                        kmem_cache_alloc() {                                        |
+                          _cond_resched();                                          |
+                        }                                                           |
+                        start_this_handle() {                                       |
+                          _raw_read_lock();                                         |
+                        }                                                           |
+                      }                                                             |
+                    }                                                               |
+                    ext4_xattr_set_handle() {                                       |
+                      down_write() {                                                |
+                        _cond_resched();                                            |
+                      }                                                             |
+                      ext4_reserve_inode_write() {                                  |
+                        ext4_get_inode_loc() {                                      |
+                          __ext4_get_inode_loc() {                                  |
+                            ext4_get_group_desc();                                  |
+                            ext4_inode_table();                                     |
+                            __getblk() {                                            |
+                              __find_get_block() {                                  |
+                                mark_page_accessed();                               |
+                              }                                                     |
+                              _cond_resched();                                      |
+                            }                                                       |
+                          }                                                         |
+                        }                                                           |
+                        __ext4_journal_get_write_access() {                         |
+                          _cond_resched();                                          |
+                          jbd2_journal_get_write_access() {                         |
+                            jbd2_journal_add_journal_head();                        |
+                            do_get_write_access() {                                 |
+                              _cond_resched();                                      |
+                              unlock_buffer() {                                     |
+                                wake_up_bit() {                                     |
+                                  bit_waitqueue();                                  |
+                                  __wake_up_bit();                                  |
+                                }                                                   |
+                              }                                                     |
+                              jbd2_journal_cancel_revoke();                         |
+                            }                                                       |
+                            jbd2_journal_put_journal_head();                        |
+                          }                                                         |
+                        }                                                           |
+                      }                                                             |
+                      ext4_xattr_ibody_find();                                      |
+                      ext4_xattr_block_find.isra.8();                               |
+                      __brelse();                                                   |
+                      up_write();                                                   |
+                    }                                                               |
+                    __ext4_journal_stop() {                                         |
+                      jbd2_journal_stop() {                                         |
+                        __wake_up() {                                               |
+                          _raw_spin_lock_irqsave();                                 |
+                          __wake_up_common();                                       |
+                          _raw_spin_unlock_irqrestore();                            |
+                        }                                                           |
+                        kmem_cache_free();                                          |
+                      }                                                             |
+                    }                                                               |
+                  }                                                                 |
+                }                                                                   |
+              } /* generic_removexattr */                                           |
+            }                                                                       |
+            evm_inode_post_setattr();                                               |
+          }                                                                         |
+          mutex_unlock();                                                           |
+        }                                                                           |
+        mnt_drop_write() {                                                          |
+          __sb_end_write();                                                         |
+        }                                                                           |
+        dput();                                                                     |
+        mntput() {                                                                  |
+          mntput_no_expire();                                                       |
+        }                                                                           |
+        terminate_walk() {                                                          |
+          dput();                                                                   |
+          mntput() {                                                                |
+            mntput_no_expire();                                                     |
+          }                                                                         |
+        }                                                                           |
+      }                                                                             |
+    }                                                                               |
+  }                                                                                 |
+  __fsnotify_parent() {                                                             |
+    dget_parent();                                                                  |
+    dput();                                                                         |
+  }                                                                                 |
+  fsnotify();                                                                       |
+  fd_install() {                                                                    |
+    __fd_install() {                                                                |
+      _raw_spin_lock();                                                             |
+      _raw_spin_unlock();                                                           |
+    }                                                                               |
+  }                                                                                 |
+  putname() {                                                                       |
+    final_putname() {                                                               |
+      kmem_cache_free();                                                            |
+    }                                                                               |
+  }                                                                                 |
+}                                                                                   |
+                                                                                    |
+                                                                                    |
+                                                                                    |
