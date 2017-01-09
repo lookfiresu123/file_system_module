@@ -1,159 +1,430 @@
            FUNCTION CALLS																										        |   							Defined files						            |										注释											    |															结论
 ------------------------------------------------------------------------------------|-----------------------------------------------------|-------------------------------------------------|----------------------------------------------------------------
-do_sys_open(): 																															        |   	fs/namei.c                                      |                                                 |
+do_sys_open(): 																															        |       fs/namei.c                                    |                                                 |
                                                                                     |                                                     |                                                 |
   **********************************************************************************|*****************************************************|*************************************************|****************************************************************
-  build_open_flags()																												        |			fs/open.c                                       |                                                 |
+  build_open_flags()																												        |			  fs/open.c                                     |                                                 |
   **********************************************************************************|*****************************************************|*************************************************|****************************************************************
 	                                                                                  |                                                     |																							    |
   **********************************************************************************|*****************************************************|*************************************************|****************************************************************
-  getname():																																        |			fs/namei.c	                                    |                                                 |
+  getname():																																        |			  fs/namei.c	                                  |                                                 |
 		getname_flags():																												        |	                                                    |                                                 |
-			audit_reusename()                                                             |			include/linux/audit.h                           | 内部调用若干定义在kernel中的函数                |     在getname_flags()内发送关于audit_reusename()的消息
-			kmem_cache_alloc()																										        |			mm/slub.c  								                      |	宏定义为kmem_cache_alloc()								 	    |			在getname_flags()内发送关于kmem_cache_alloc()的消息
-			strncpy_from_user()																										        |			lib/string.c							                      |                                                 |			在getname_flags()内发送关于strncpy_from_user()的消息
-			kzalloc() 																														        |			include/linux/slab.h			                      | 内部调用kmalloc()                               |			在getname_flags()内发送关于kzalloc()的消息
-			audit_getname()                                                               |			include/linux/audit.h			                      |	内部调用若干定义在kernel中的函数                |     在getname_flags()内发送关于audit_getname()的消息               
-			final_putname(): 																											        |			fs/namei.c								                      |																							    |			
-				kmem_cache_free() 																									        |			mm/slub.c 								                      |	宏定义为kmem_cache_free()										    |			在final_putname()内发送关于kmem_cache_free()的消息
-				kfree() 																														        |			mm/slub.c 								                      |																							    |			在final_putname()内发送关于kfree()的消息
-				kmem_cache_free() 																									        |			mm/slub.c									                      |	宏定义为kmem_cache_free()										    |			在final_putname()内发送关于kmem_cache_free()的消息
+			audit_reusename()                                                             |				include/linux/audit.h                         | 内部调用若干定义在kernel中的函数                |     在getname_flags()内发送关于audit_reusename()的消息
+			kmem_cache_alloc()																										        |				mm/slub.c  								                    |	宏定义为kmem_cache_alloc()								 	    |			在getname_flags()内发送关于kmem_cache_alloc()的消息
+			strncpy_from_user()																										        |				lib/string.c							                    |                                                 |			在getname_flags()内发送关于strncpy_from_user()的消息
+			kzalloc() 																														        |				include/linux/slab.h			                    | 内部调用kmalloc()                               |			在getname_flags()内发送关于kzalloc()的消息
+			audit_getname()                                                               |				include/linux/audit.h			                    |	内部调用若干定义在kernel中的函数                |     在getname_flags()内发送关于audit_getname()的消息               
+			final_putname(): 																											        |				fs/namei.c								                    |																							    |			
+				kmem_cache_free() 																									        |				mm/slub.c 								                    |	宏定义为kmem_cache_free()										    |			在final_putname()内发送关于kmem_cache_free()的消息
+				kfree() 																														        |				mm/slub.c 								                    |																							    |			在final_putname()内发送关于kfree()的消息
+				kmem_cache_free() 																									        |				mm/slub.c									                    |	宏定义为kmem_cache_free()										    |			在final_putname()内发送关于kmem_cache_free()的消息
   **********************************************************************************|*****************************************************|*************************************************|****************************************************************
 	                                                                                  |                                                     |                                                 |
   **********************************************************************************|*****************************************************|*************************************************|****************************************************************
-  get_unused_fd_flags():                                	                	        |     fs/file.c                                       |                                                 |
-    __alloc_fd():                                                                   |    	fs/file.c                                       |                                                 |
-			spin_lock()                                                                   |			include/linux/spinlock.h                        | 调用定义在kernel模块中的_raw_spin_lock()        |			在__alloc_fd()内发送关于spin_lock()的消息
-			find_next_zero_bit()                                                          |			lib/find_next_bit.c                             |                                                 |			在__alloc_fd()内发送关于find_next_zero_bit()的消息
+  get_unused_fd_flags():                                	                	        |     	fs/file.c                                     |                                                 |
+    __alloc_fd():                                                                   |    		fs/file.c                                     |                                                 |
+			spin_lock()                                                                   |				include/linux/spinlock.h                      | 调用定义在kernel模块中的_raw_spin_lock()        |			在__alloc_fd()内发送关于spin_lock()的消息
+			find_next_zero_bit()                                                          |				lib/find_next_bit.c                           |                                                 |			在__alloc_fd()内发送关于find_next_zero_bit()的消息
       ******************************************************************************|*****************************************************|*************************************************|****************************************************************
-			expand_files():                                                               |			fs/file.c                                       |                                                 |
-        expand_fdtable():                                                           |			fs/file.c                                       |                                                 |
-          spin_unlock()                                                             |   	include/linux/spinlock.h                        |	调用定义在kernel模块中的_raw_spin_unlock()	    |   	在expand_fdtable()内发送关于spin_unlock()的消息
-          alloc_fdtable():                                                          |			fs/file.c                                       |                                                 |
-            __builtin_constant_p()                                                  |			drivers/net/wireless/rt2x00/rt2800lib.c	        |                                                 |			在alloc_fdtable()内发送关于__builtin_constant_p()的消息
-            kmalloc()                                                               |			include/linux/slab.h                            |                                                 |			在alloc_fdtable()内发送关于kmalloc()的消息
-            alloc_fdmem():                                                          |			fs/file.c                                       |                                                 |
-              kmalloc()                                                             |			include/linux/slab.h                            |                                                 |			在alloc_fdmem()内发送关于kmalloc()的消息
-              vmalloc()                                                             |			include/linux/slab.h                            |                                                 |			在alloc_fdmem()内发送关于vmalloc()的消息
-            free_fdmem():                                                           |			fs/file.c                                       |                                                 |
-              is_vmalloc_addr()                                                     |			include/linux/mm.h                              |                                                 |			在free_fdmem()内发送关于is_vmalloc_addr()的消息
-              vfree()                                                               |			mm/vmalloc.c                                    |                                                 |			在free_fdmem()内发送关于vfree()的消息
-              kfree()                                                               |			mm/slub.c                                       |                                                 |			在free_fdmem()内发送关于kfree()的消息
-            kfree()                                                                 |			mm/slub.c                                       |                                                 |			在alloc_fdtable()内发送关于kfree()的消息
-          spin_lock()                                                               |   	include/linux/spinlock.h                        | 调用定义在kernel模块中的_raw_spin_lock()		    |			在expand_fdtable()内发送关于spin_lock()的消息
-         __free_fdtable():                                                          |			fs/file.c                                       |                                                 |
-            free_fdmem():                                                           |			fs/file.c                                       |                                                 |
-              is_vmalloc_addr()                                                     |			include/linux/mm.h                              |                                                 |			在free_fdmem()内发送关于is_vmalloc_addr()的消息
-              vfree()                                                               |			mm/vmalloc.c                                    |                                                 |			在free_fdmem()内发送关于vfree()的消息
-              kfree()                                                               |			mm/slub.c                                       |                                                 |			在free_fdmem()内发送关于kfree()的消息
-            kfree()                                                                 |			mm/slub.c                                       |                                                 |			在__free_fdtable()内发送关于kfree()的消息
-          copy_fdtable():                                                           |			fs/file.c                                       |                                                 |
-            memcpy()                                                                |			lib/string.c                                    |                                                 |			在copy_fdtable()内发送关于memcpy()的消息
-            memset()                                                                |			lib/string.c                                    |                                                 |			在copy_fdtable()内发送关于memset()的消息
-          free_fdtable_rcu():                                                       |			fs/file.c                                       |                                                 |
-            __free_fdtable():                                                       |			fs/file.c                                       |                                                 |
-              free_fdmem():                                                         |			fs/file.c                                       |                                                 |
-                is_vmalloc_addr()                                                   |			include/linux/mm.h                              |                                                 |			在free_fdmem()内发送关于is_vmalloc_addr()的消息
-                vfree()                                                             |			mm/vmalloc.c                                    |                                                 |			在free_fdmem()内发送关于vfree()的消息
-                kfree()                                                             |			mm/slub.c                                       |                                                 |			在free_fdmem()内发送关于kfree()的消息
-              kfree()                                                               |			mm/slub.c                                       |                                                 |			在__free_fdtable()内发送关于kfree()的消息
+			expand_files():                                                               |				fs/file.c                                     |                                                 |
+        expand_fdtable():                                                           |				fs/file.c                                     |                                                 |
+          spin_unlock()                                                             |   		include/linux/spinlock.h                      |	调用定义在kernel模块中的_raw_spin_unlock()	    |   	在expand_fdtable()内发送关于spin_unlock()的消息
+          alloc_fdtable():                                                          |				fs/file.c                                     |                                                 |
+            __builtin_constant_p()                                                  |				drivers/net/wireless/rt2x00/rt2800lib.c	      |                                                 |			在alloc_fdtable()内发送关于__builtin_constant_p()的消息
+            kmalloc()                                                               |				include/linux/slab.h                          |                                                 |			在alloc_fdtable()内发送关于kmalloc()的消息
+            alloc_fdmem():                                                          |				fs/file.c                                     |                                                 |
+              kmalloc()                                                             |				include/linux/slab.h                          |                                                 |			在alloc_fdmem()内发送关于kmalloc()的消息
+              vmalloc()                                                             |				include/linux/slab.h                          |                                                 |			在alloc_fdmem()内发送关于vmalloc()的消息
+            free_fdmem():                                                           |				fs/file.c                                     |                                                 |
+              is_vmalloc_addr()                                                     |				include/linux/mm.h                            |                                                 |			在free_fdmem()内发送关于is_vmalloc_addr()的消息
+              vfree()                                                               |				mm/vmalloc.c                                  |                                                 |			在free_fdmem()内发送关于vfree()的消息
+              kfree()                                                               |				mm/slub.c                                     |                                                 |			在free_fdmem()内发送关于kfree()的消息
+            kfree()                                                                 |				mm/slub.c                                     |                                                 |			在alloc_fdtable()内发送关于kfree()的消息
+          spin_lock()                                                               |   		include/linux/spinlock.h                      | 调用定义在kernel模块中的_raw_spin_lock()		    |			在expand_fdtable()内发送关于spin_lock()的消息
+         __free_fdtable():                                                          |				fs/file.c                                     |                                                 |
+            free_fdmem():                                                           |				fs/file.c                                     |                                                 |
+              is_vmalloc_addr()                                                     |				include/linux/mm.h                            |                                                 |			在free_fdmem()内发送关于is_vmalloc_addr()的消息
+              vfree()                                                               |				mm/vmalloc.c                                  |                                                 |			在free_fdmem()内发送关于vfree()的消息
+              kfree()                                                               |				mm/slub.c                                     |                                                 |			在free_fdmem()内发送关于kfree()的消息
+            kfree()                                                                 |				mm/slub.c                                     |                                                 |			在__free_fdtable()内发送关于kfree()的消息
+          copy_fdtable():                                                           |				fs/file.c                                     |                                                 |
+            memcpy()                                                                |				lib/string.c                                  |                                                 |			在copy_fdtable()内发送关于memcpy()的消息
+            memset()                                                                |				lib/string.c                                  |                                                 |			在copy_fdtable()内发送关于memset()的消息
+          free_fdtable_rcu():                                                       |				fs/file.c                                     |                                                 |
+            __free_fdtable():                                                       |				fs/file.c                                     |                                                 |
+              free_fdmem():                                                         |				fs/file.c                                     |                                                 |
+                is_vmalloc_addr()                                                   |				include/linux/mm.h                            |                                                 |			在free_fdmem()内发送关于is_vmalloc_addr()的消息
+                vfree()                                                             |				mm/vmalloc.c                                  |                                                 |			在free_fdmem()内发送关于vfree()的消息
+                kfree()                                                             |				mm/slub.c                                     |                                                 |			在free_fdmem()内发送关于kfree()的消息
+              kfree()                                                               |				mm/slub.c                                     |                                                 |			在__free_fdtable()内发送关于kfree()的消息
       ******************************************************************************|*****************************************************|*************************************************|****************************************************************
-			__set_open_fd():                                                              |			fs/file.c                                       |                                                 |
-				__set_bit()                                                                 |			arch/x86/include/asm/bitops.h                   |                                                 |			在__set_open_fd()内发送关于__set_bit()的消息
-			__set_close_on_exec():                                                        |			fs/file.c                                       |                                                 |
-				__set_bit()                                                                 |			arch/x86/include/asm/bitops.h                   |                                                 |			在__set_close_on_exec()内发送关于__set_bit()的消息
-			__clear_close_on_exec():                                                      |			fs/file.c                                       |                                                 |
-				__clear_bit()                                                               |			arch/x86/include/asm/bitops.h                   |                                                 |			在__clear_close_on_exec()内发送关于__clear_bit()的消息
-      printk()                                                                      |			kernel/printk/printk.c                          |                                                 |			在expand_files()内发送关于printk()的消息
-      spin_unlock()                                                                 |   	include/linux/spinlock.h                        |	调用定义在kernel模块中的_raw_spin_unlock()	    |			在expand_files()内发送关于spin_unlock()的消息
-			rlimit():																															        |			include/linux/sched.h														|																							    |
-				task_limit()																												        |			include/linux/sched.h														|																							    |
+			__set_open_fd():                                                              |				fs/file.c                                     |                                                 |
+				__set_bit()                                                                 |				arch/x86/include/asm/bitops.h                 |                                                 |			在__set_open_fd()内发送关于__set_bit()的消息
+			__set_close_on_exec():                                                        |				fs/file.c                                     |                                                 |
+				__set_bit()                                                                 |				arch/x86/include/asm/bitops.h                 |                                                 |			在__set_close_on_exec()内发送关于__set_bit()的消息
+			__clear_close_on_exec():                                                      |				fs/file.c                                     |                                                 |
+				__clear_bit()                                                               |				arch/x86/include/asm/bitops.h                 |                                                 |			在__clear_close_on_exec()内发送关于__clear_bit()的消息
+      printk()                                                                      |				kernel/printk/printk.c                        |                                                 |			在expand_files()内发送关于printk()的消息
+      spin_unlock()                                                                 |   		include/linux/spinlock.h                      |	调用定义在kernel模块中的_raw_spin_unlock()	    |			在expand_files()内发送关于spin_unlock()的消息
+			rlimit():																															        |				include/linux/sched.h													|																							    |
+				task_limit()																												        |				include/linux/sched.h													|																							    |
   **********************************************************************************|*****************************************************|*************************************************|****************************************************************
 	                                                                                  |                                                     |																							    |
   **********************************************************************************|*****************************************************|*************************************************|****************************************************************
-  do_filp_open():                                                                   | 
-    path_openat():                                                                  | 
-      get_empty_filp():                                                             | 
-        kmem_cache_alloc():                                                         | 
-          _cond_resched()                                                           | 
-        security_file_alloc():                                                      | 
-          apparmor_file_alloc_security():                                           | 
-            kmem_cache_alloc_trace():                                               | 
-              _cond_resched()                                                       | 
-      path_init()                                                                   | 
-      link_path_walk():                                                             | 
-        inode_permission():                                                         | 
-          __inode_permission():                                                     | 
-            generic_permission()                                                    | 
-            security_inode_permission():                                            | 
-              cap_inode_permission()                                                | 
-      do_last():                                                                    | 
-        complete_walk():                                                            | 
-          legitimize_mnt()                                                          | 
-        mnt_want_write():                                                           |
-          __sb_start_write()                                                        | 
-          __mnt_want_write()                                                        | 
-        mutex_lock():                                                               | 
-          _cond_resched()                                                           | 
-        lookup_dcache():                                                            | 
-          d_lookup():                                                               | 
-            __d_lookup():                                                           | 
-              _raw_spin_lock()                                                      | 
-              _raw_spin_unlock()                                                    | 
-        security_path_mknod():                                                      | 
-          apparmor_path_mknod():                                                    | 
-            common_perm_create.constprop.23():                                      | 
-              common_perm()                                                         | 
-        vfs_create():                                                               | 
-          inode_permission():                                                       | 
-            __inode_permission():                                                   | 
-              generic_permission()                                                  | 
-              security_inode_permission():                                          | 
-                cap_inode_permission()                                              | 
-          security_inode_create():                                                  | 
-            cap_inode_create()                                                      | 
-          ext4_create():                                                            | 
-            dquot_initialize():                                                     | 
-              __dquot_initialize():                                                 | 
-                dquot_active.isra.8()                                               | 
-            __ext4_new_inode():                                                     | 
-              new_inode():                                                          | 
-                new_inode_pseudo():                                                 | 
-                  alloc_inode():                                                    | 
-                    ext4_alloc_inode():                                             | 
-                      kmem_cache_alloc()                                            | 
-                      ext4_es_init_tree()                                           | 
-                    inode_init_always():                                            | 
-                      make_kuid():                                                  | 
-                        map_id_down()                                               | 
-                      make_kgid():                                                  | 
-                        map_id_down()                                               | 
-                      security_inode_alloc():                                       | 
-                        cap_inode_alloc_security()                                  | 
-                      __mutex_init()                                                | 
-                  _raw_spin_lock()                                                  | 
-                  _raw_spin_unlock()                                                | 
-                inode_sb_list_add():                                                | 
-                  _raw_spin_lock()                                                  | 
-                  _raw_spin_unlock()                                                | 
-              inode_init_owner()                                                    | 
-              dquot_initialize():                                                   | 
-                __dquot_initialize():                                               | 
-                  dquot_active.isra.8()                                             | 
-              ext4_get_group_desc()                                                 | 
-              ext4_free_inodes_count()                                              | 
-              ext4_get_group_desc()                                                 | 
-              ext4_free_inodes_count()                                              | 
-              ext4_read_inode_bitmap():                                             | 
-                ext4_get_group_desc()                                               | 
-                ext4_inode_bitmap()                                                 | 
-                __getblk():                                                         | 
-                  __find_get_block():                                               | 
-                    mark_page_accessed()                                            | 
-                  _cond_resched()                                                   | 
-                _raw_spin_trylock()                                                 | 
-                _raw_spin_unlock()                                                  | 
-              __ext4_journal_start_sb():                                            | 
+  do_filp_open():                                                                   | 			fs/namei.c                                    |
+    path_openat():                                                                  | 			fs/namei.c                                    |
+      
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			get_empty_filp():                                                             | 			fs/file_table.c                               |
+        current_cred()																															|				include/linux/cred.h													|	宏展开后可能会使用到kernel下的相关函数					|			在get_empty_filp()内发送关于current_cred()的消息
+				get_nr_files():                                                             | 			fs/file_table.c                               |
+					percpu_counter_read_positive()																						|				include/linux/percpu_counter.h                |
+				capable()                                                                   |				kernel/capability.c														|																									|			在get_empty_filp()内发送关于capable()的消息
+				percpu_counter_sum_positive()                                               |				include/linux/percpu_counter.h								|	有可能会使用到lib下的相关函数										|			在get_empty_filp()内发送关于percpu_counter_sum_positive()的消息
+				kmem_cache_zalloc()                                                         | 			include/linux/slab.h													|	调用定义在mm下的kmem_cache_alloc()							|			在get_empty_filp()内发送关于kmem_cache_zalloc()的消息
+				ERR_PTR()                                                                   |     	include/linux/err.h
+				percpu_counter_inc()                                                        |  			include/linux/percpu_counter.h   							|	可能会调用定义在kernel和lib下的一些函数					|			在get_empty_filp()内发送关于percpu_counter_inc()的消息        									                                       
+				get_cred()                                                                  |     	include/linux/cred.h													| 调用定义在kernel模块中的creds_are_invalid()等		|			在get_empty_filp()内发送关于get_cred()的消息
+				security_file_alloc()                                                       |     	security/security.c														|																									|     在get_empty_filp()内发送关于security_file_alloc()的消息                                                   
+				file_free():                                                                |     	fs/file_table.c
+					percpu_counter_dec()																											|  			include/linux/percpu_counter.h   							|	可能会调用定义在kernel和lib下的一些函数					|			在file_free()内发送关于percpu_counter_dec()的消息
+					file_check_state()                                                        |				include/linux/fs.h
+					call_rcu()                                                                |				kernel/rcu/tree_plugin.h											|																									|			在file_free()内发送关于call_rcu()的消息
+				atomic_long_set()                                                           |  			include/asm-generic/atomic-long.h							|	调用定义在arch下的atomi_set()										|			在get_empty_filp()内发送关于atomic_long_set()的消息                                         
+				rwlock_init()                                                               |    		include/linux/rwlock.h												|	内部调用定义在kernel下的__rwlock_init()					|			在get_empty_filp()内发送关于rwlock_init()的消息                                              
+				spin_lock_init()                                                            | 			include/linux/spinlock.h											| 调用定义在kernel模块中的__raw_spin_lock_init()  |			在get_empty_filp()内发送关于spin_lock_init()的消息                                                     
+				eventpoll_init_file()                                                       | 			include/linux/eventpoll.h                                                    
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			do_tmpfile():																																	|				fs/namei.c
+				path_lookupat():                                                            |				fs/namei.c
+					path_init():                                                              |				fs/namei.c
+						d_is_directory()                                                        |				include/linux/dcache.h
+						inode_permission():                                                     |				fs/namei.c
+							sb_permission()                                                       |				fs/namei.c
+							__inode_permission():                                                 |				fs/namei.c
+								do_inode_permission():                                              |				fs/namei.c
+									inode->i_op->permission()																					|																											|	待定																						|
+									spin_lock()                                                       |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在do_inode_permission()内发送关于spin_lock()的消息
+									spin_unlock()                                                     |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在do_inode_permission()内发送关于spin_unlock()的消息
+									generic_permission():                                             |				fs/namei.c
+										acl_permission_check():                                         |				fs/namei.c
+											current_fsuid()                                               |				include/linux/cred.h													|	宏展开后可能会使用到kernel下的相关函数					|			在acl_permission_check()内发送关于current_fsuid()的消息
+											uid_eq()                                                      |				include/linux/uidgid.h
+											IS_POSIXACL()                                                 |				include/linux/fs.h
+											check_acl():                                                  |				fs/namei.c
+												get_cached_acl_rcu()                                        |				include/linux/posix_acl.h											|	有可能会调用kernel下的一些函数									|			在check_acl()内发送关于get_cached_acl_rcu()的消息
+												posix_acl_permission():                                     |				fs/posix_acl.c
+													FOREACH_ACL_ENTRY()                                       |				include/linux/posix_acl.h
+													current_fsuid()                                           |				include/linux/cred.h													|	宏展开后可能会使用到kernel下的相关函数					|			在posix_acl_permission()内发送关于current_fsuid()的消息			
+													uid_eq()                                                  |				include/linux/uidgid.h
+													in_group_p()													                    |				kernel/groups.c																|																									|			在posix_acl_permission()内发送关于in_group_p()的消息
+												get_cached_acl():                                           |				include/linux/posix_acl.h											|	调用定义在arch下的一些函数											|			在check_acl()内发送关于get_cached_acl()的消息
+												inode->i_op->get_acl()                                      |																											|	待定																						|
+												set_cached_acl()                                            |				include/linux/posix_acl.h											|	调用定义在arch下的一些函数											|			在check_acl()内发送关于set_cached_acl()的消息
+												posix_acl_release()                                         |				include/linux/posix_acl.h											|	调用定义在arch和kernel下的一些函数							|			在check_acl()内发送关于posix_acl_release()的消息
+											in_group_p()                                                  |				kernel/groups.c																|																									|			在acl_permission_check()内发送关于in_group_p()的消息
+										inode_capable()                                                 |				kernel/capability.c														|																									|			在generic_permission()内发送关于inode_capable()的消息
+								devcgroup_inode_permission()                                        |				include/linux/device_cgroup.h									|	调用security下的__devcgroup_inode_permission()	|			在__inode_permission()内发送关于devcgroup_inode_permission()的消息
+								security_inode_permission()                                         |				security/security.c														|																									|			在__inode_permission()内发送关于security_inode_permission()的消息
+						rcu_read_lock()                                                         |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在inode_permission()内发送关于rcu_read_lock()的消息
+						__read_seqcount_begin()                                                 |				include/linux/seqlock.h												|	调用arch下的cpu_relax()													|			在inode_permission()内发送关于__read_seqcount_begin()的消息
+						read_seqbegin()                                                         |				include/linux/seqlock.h												|	内部可能会调用kernel下的一些函数								|			在inode_permission()内发送关于read_seqbegin()的消息
+						path_get():                                                             |       fs/namei.c
+							......																																|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息				
+						set_root_rcu():                                                         |				fs/namei.c
+							read_seqcount_begin()                                                 |				include/linux/seqlock.h												|	宏展开后会使用到kernel下的lock_release()				|			在set_root_rcu()内发送关于read_seqcount_begin()的消息
+							__read_seqcount_begin()                                               |				include/linux/seqlock.h												|	调用arch下的cpu_relax()													|			在set_root_rcu()内发送关于__read_seqcount_begin()的消息
+							read_seqcount_retry()                                                 |				include/linux/seqlock.h												|	调用arch下的smp_rmb()														|			在set_root_rcu()内发送关于read_seqcount_retry()的消息
+						set_root():                                                             |				fs/namei.c
+							get_fs_root()																													|				include/linux/fs_struct.h											|	内部调用一些定义在arch下的函数以及path_get()		|			在set_root()内发送关于get_fs_root()的消息
+						read_seqcount_begin()                                                   |				include/linux/seqlock.h												|	宏展开后会使用到kernel下的lock_release()				|			在path_init()内发送关于read_seqcount_begin()的消息
+						read_seqcount_retry()                                                   |				include/linux/seqlock.h												|	调用arch下的smp_rmb()														|			在path_init()内发送关于read_seqcount_retry()的消息
+						get_fs_pwd()                                                            |				include/linux/fs_struct.h											|	内部调用一些定义在arch下的函数以及path_get()		|			在path_init()内发送关于get_fs_pwd()的消息
+						fdget_raw():                                                            |				include/linux/file.h
+							fget_raw_light():																											|				fs/file.c
+								atomic_read()														                            |				arch/x86/include/asm/atomic.h									|																									|			在fget_raw_light()内发送关于atomic_read()的消息
+								fcheck_files():                                                     |				include/linux/fdtable.h												|	内部调用files_fdtable()，它调用kernel下的函数		|			在fget_raw_light()内发送关于fcheck_files()的消息
+								rcu_read_lock()                                                     |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在fget_raw_light()内发送关于rcu_read_lock()的消息
+								atomic_long_inc_not_zero()                                          |				include/asm-generic/atomic-long.h							|	调用定义在arch中的atomic64_inc_not_zero()				|			在fget_raw_light()内发送关于atomic_long_inc_not_zero()的消息
+								rcu_read_unlock()                                                   |				include/linux/rcupdate.h                      | 内部会调用若干定义在kernel和lib中的函数         |			在fget_raw_light()内发送关于rcu_read_unlock()的消息
+						fdput():                                                                |				include/linux/file.h
+							fput(): 																															|				fs/file_table.c
+								atomic_long_dec_and_test()                                          |				include/asm-generic/atomic-long.h							|	调用定义在arch下的atomic_dec_and_test()					|			在fput()内发送关于atomic_long_dec_and_test()的消息
+								in_interrupt()                                                      |				include/linux/preempt_mask.h									| 宏展开后会使用到arch下的preempt_count()					|			在fput()内发送关于in_interrupt()的消息
+								init_task_work()                                                    |				include/linux/task_work.h
+								task_work_add()                                                     |				kernel/task_work.c														|																									|			在fput()内发送关于task_work_add()的消息
+								llist_add()                                                         |				include/linux/list.h													|	内部会调用lib中的llist_add_batch()							|			在fput()内发送关于llist_add()的消息
+								schedule_delayed_work()                                             |				include/linux/workqueue.h											|	内部会调用kernel中的queue_delayd_work_on()			|			在fput()内发送关于schedule_delayed_work()的消息
+					link_path_walk():                                                         |				fs/namei.c
+						may_lookup():                                                           |				fs/namei.c
+							inode_permission():																										|				fs/namei.c
+								......																															|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+							unlazy_walk():                                                        |				fs/namei.c
+								legitimize_mnt():                                                   |				fs/namespace.c
+									read_seqretry()                                                   |				include/linux/seqlock.h												|	最终会调用arch下的smp_rmb()											|			在legitimize_mnt()内发送关于read_seqretry()的消息
+									real_mount()                                                      |				fs/mount.h
+									mnt_add_count():                                                  |				fs/namespace.c
+										......																													|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+									rcu_read_unlock()                                                 |				include/linux/rcupdate.h                      | 内部会调用若干定义在kernel和lib中的函数         |			在legitimize_mnt()内发送关于rcu_read_unlock()的消息
+									mntput():                                               	        |				fs/namespace.c
+										......																													|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+									rcu_read_lock()                                                   |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在legitimize_mnt()内发送关于rcu_read_lock()的消息
+								lockref_get_not_dead()                                              |				lib/lockref.c																	|																									|			在unlazy_walk()内发送关于lockref_get_not_dead()的消息
+								read_seqcount_retry()                                               |				include/linux/seqlock.h												|	调用arch下的smp_rmb()														|			在unlazy_walk()内发送关于read_seqcount_retry()的消息
+								spin_lock()                                                         |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在unlazy_walk()内发送关于spin_lock()的消息
+								path_get():                                                         |       fs/namei.c
+									......																														|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+								spin_unlock()                                                       |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在unlazy_walk()内发送关于spin_unlock()的消息
+								rcu_read_unlock()                                                   |				include/linux/rcupdate.h                      | 内部会调用若干定义在kernel和lib中的函数         |			在unlazy_walk()内发送关于rcu_read_unlock()的消息				
+								dput():                                                             |				fs/dcache.c
+									......																														|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+						hash_name()                                                             |				fs/namei.c
+						parent->d_op->d_hash()                                                  |																											|	待定																						|
+						walk_component():                                                       |				fs/namei.c
+							handle_dots():                                                        |				fs/namei.c
+								follow_dotdot_rcu():                                                |				fs/namei.c
+									set_root_rcu():                                                   |				fs/namei.c
+										......																													|				......																				| 之前已经解释过了，同上													|			部分后代函数需要发消息
+									read_seqcount_begin()                                             |				include/linux/seqlock.h												|	宏展开后会使用到kernel下的lock_release()				|			在follow_dotdot_rcu()内发送关于read_seqcount_begin()的消息
+									read_seqcount_retry()                                             |				include/linux/seqlock.h												|	调用arch下的smp_rmb()														|			在follow_dotdot_rcu()内发送关于read_seqcount_retry()的消息
+									follow_up_rcu()                                                   |				fs/namei.c
+									follow_mount_rcu():                                               |				fs/namei.c
+										d_mountpoint()                                                  |				include/linux/dcache.h
+										__lookup_mnt():                                                 |				fs/namei.c
+											hash()                                                        |				fs/namespace.c
+											list_for_each_entry_rcu()                                     |				include/linux/rculist.h												|	宏展开后会使用到kernel下的一些函数							|			在__lookup_mnt()内发送关于list_for_each_entry_rcu()的消息
+										read_seqcount_begin()                                           |				include/linux/seqlock.h												|	宏展开后会使用到kernel下的lock_release()				|			在follow_mount_rcu()内发送关于read_seqcount_begin()的消息
+									rcu_read_unlock()                                                 |				include/linux/rcupdate.h                      | 内部会调用若干定义在kernel和lib中的函数         |			在follow_dotdot_rcu()内发送关于rcu_read_unlock()的消息
+								follow_dotdot():                                                    |				fs/namei.c
+									set_root():                                                       |				fs/namei.c
+										......																													|				......																				| 之前已经解释过了，同上													|			部分后代函数需要发消息
+									dget_parent():                                                    |				fs/dcache.c
+										......																													|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+									follow_up():                                                      |				fs/namei.c
+										real_mount()                                                    |				fs/mount.h
+										read_seqlock_excl()                                             |				include/linux/seqlock.h												|	调用spin_lock()，而该函数会调用kernel中的函数		|			在follow_up()内发送关于read_seqlock_excl()的消息
+										read_sequnlock_excl()                                           |				include/linux/seqlock.h												|	调用spin_unlock()，而该函数会调用kernel中的函数	|			在follow_up()内发送关于read_sequnlock_excl()的消息
+										mntget():                                                       |				fs/namespace.c
+											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+										dget():                                                         |				include/linux/dcache.h
+											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+										dput():                                                         |				include/linux/dcache.c
+											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+										mntput():                                                       |				fs/namespace.c
+											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+									follow_mount():                                                   |				fs/namei.c
+										d_mountpoint()                                                  |				include/linux/dcache.h
+										lookup_mnt()                                                    |				fs/namespace.c
+											rcu_read_lock()                                               |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在lookup_mnt()内发送关于rcu_read_lock()的消息
+											read_seqbegin()                                               |				include/linux/seqlock.h												|	内部可能会调用kernel下的一些函数								|			在lookup_mnt()内发送关于read_seqbegin()的消息
+											__lookup_mnt():                                               |				fs/namei.c
+												......																											|				......																				| 之前已经解释过了，同上													|			部分后代函数需要发消息
+											legitimize_mnt():                                             |				fs/namespace.c
+												......																											|				......																				| 之前已经解释过了，同上													|			部分后代函数需要发消息
+											rcu_read_unlock()                                             |				include/linux/rcupdate.h                      | 内部会调用若干定义在kernel和lib中的函数         |			在lookup_mnt()内发送关于rcu_read_unlock()的消息
+										dput():                                                         |				include/linux/dcache.c
+											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息                                                       
+										mntput():                                                       |				fs/namespace.c
+											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+										dget():                                                         |				include/linux/dcache.h
+											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息                                                         
+							lookup_fast():                                                        |				fs/namei.c
+								__d_lookup_rcu():                                                   |				fs/dcache.c
+									d_hash()                                                          |				fs/dcache.c
+									rcu_read_lock()                                                   |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在__d_lookup_rcu()内发送关于rcu_read_lock()的消息
+									hlist_bl_for_each_entry_rcu()                                     |				include/linux/rculist_bl.h										|	宏展开后会调用arch和kernel下的函数							|			在__d_lookup_rcu()内发送关于hlist_bl_for_each_entry_rcu()的消息
+									spin_lock()                                                       |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在__d_lookup_rcu()内发送关于spin_lock()的消息
+									d_unhashed()                                                      |				include/linux/dcache.h
+									parent->d_op->d_compare()                                         |																											|	待定																						|
+									dentry_cmp()                                                      |				fs/dcache.c
+										smp_read_barrier_depends()                                      |				arch/x86/include/asm/barrier.h								|																									|			在dentry_cmp()内发送关于smp_read_barrier_depends()的消息
+										dentry_string_cmp()                                             |				fs/dcache.c
+									spin_unlock()                                                     |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在__d_lookup_rcu()内发送关于spin_unlock()的消息
+									rcu_read_unlock()                                                 |				include/linux/rcupdate.h                      | 内部会调用若干定义在kernel和lib中的函数         |			在__d_lookup_rcu()内发送关于rcu_read_unlock()的消息
+								read_seqcount_retry()                                               |				include/linux/seqlock.h												|	调用arch下的smp_rmb()														|			在lookup_fast()内发送关于read_seqcount_retry()的消息
+								__read_seqcount_retry()                                             |				include/linux/seqlock.h
+								d_revalidate():                                                     |				fs/namei.c			
+									dentry->d_op->d_revalidate()																			|																											|	待定																						|				
+								__follow_mount_rcu():                                               |				fs/namei.c
+									managed_dentry_might_block():                                     |				fs/namei.c
+										dentry->d_op->d_manage()																				|																											|	待定																						|
+									d_mountpoint()                                                    |				include/linux/dcache.h
+									__lookup_mnt():                                               		|				fs/namei.c
+										......																													|				......																				| 之前已经解释过了，同上													|			部分后代函数需要发消息
+									read_seqcount_begin()                                             |				include/linux/seqlock.h												|	宏展开后会使用到kernel下的lock_release()				|			在__follow_mount_rcu()内发送关于read_seqcount_begin()的消息
+								unlazy_walk():                                                      |				fs/namei.c
+									......																														|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+								__d_lookup():                                                       |				fs/dcache.c
+									d_hash()                                                          |				fs/dcache.c
+									rcu_read_lock()                                                   |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在__d_lookup()内发送关于rcu_read_lock()的消息
+									hlist_bl_for_each_entry_rcu()                                     |				include/linux/rculist_bl.h										|	宏展开后会调用arch和kernel下的函数							|			在__d_lookup()内发送关于hlist_bl_for_each_entry_rcu()的消息
+									spin_lock()                                                       |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在__d_lookup()内发送关于spin_lock()的消息
+									d_unhashed()                                                      |				include/linux/dcache.h
+									parent->d_op->d_compare()                                         |																											|	待定																						|
+									dentry_cmp()                                                      |				fs/dcache.c
+										smp_read_barrier_depends()                                      |				arch/x86/include/asm/barrier.h								|																									|			在dentry_cmp()内发送关于smp_read_barrier_depends()的消息
+										dentry_string_cmp()                                             |				fs/dcache.c
+									spin_unlock()                                                     |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在__d_lookup()内发送关于spin_unlock()的消息
+									rcu_read_unlock()                                                 |				include/linux/rcupdate.h                      | 内部会调用若干定义在kernel和lib中的函数         |			在__d_lookup()内发送关于rcu_read_unlock()的消息
+								dput():                                                             |				include/linux/dcache.c
+									......																														|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+								d_invalidate():                                                     |				fs/dcache.c
+									spin_lock()                                                       |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在d_invalidate()内发送关于spin_lock()的消息
+									d_unhashed()                                                      |				include/linux/dcache.h
+									list_empty()                                                      |       include/linux/list.h
+									spin_unlock()                                                     |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在d_invalidate()内发送关于spin_unlock()的消息
+									shrink_dcache_parent()                                            |				fs/dcache.c
+										INIT_LIST_HEAD()                                                |				include/linux/list.h
+										d_walk():                                                       |				fs/dcache.c
+											read_seqbegin_or_lock()                                       |
+											spin_lock()                                                   |
+											enter()                                                       |
+											list_entry()                                                  |
+											spin_lock_nested()                                            |
+											spin_unlock()                                                 |
+											list_empty()                                                  |
+											spin_release()                                                |
+											spin_acquire()                                                |
+											rcu_read_lock()                                               |
+											need_seqretry()                                               |
+											rcu_read_unlock()                                             |
+											done_seqretry()                                               |
+										shrink_dentry_list()                                            |
+										cond_resched()                                                  |
+									d_mountpoint()                                                    |				include/linux/dcache.h
+									__d_drop():                                                       |				fs/dcache.c
+										......																													|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+								follow_managed()                                                    |
+								path_put_conditional()                                              |
+							lookup_slow()                                                         |
+							should_follow_link()                                                  |
+							unlazy_walk():                                                        |				fs/namei.c
+								......																															|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+							path_to_nameidata()                                                   |
+							terminate_walk()                                                      |
+						nested_symlink()                                                        |				fs/namei.c
+						d_is_directory()                                                        |				include/linux/dcache.h
+						terminate_walk()                                                        |				fs/namei.c
+					lookup_last()                                                             |
+					may_follow_link()                                                         |
+					follow_link()                                                             |
+					put_link()                                                                |
+					complete_walk()                                                           |
+					d_is_directory()                                                          |				include/linux/dcache.h
+					path_put()                                                                |
+					fput()                                                                    |
+				mnt_want_write()                                                            |				fs/namespace.c
+				inode_permission()                                                          |				fs/namei.c
+				d_alloc()                                                                   |				fs/dcache.c
+				dir->i_op->tmpfile()                                                        |																											|	待定																						|
+				audit_inode()                                                               |				include/linux/audit.h
+				may_open()                                                                  |				fs/namei.c		
+				finish_open()                                                               |				fs/open.c
+				open_check_o_direct()                                                       |				fs/open.c
+				fput()                                                                      |				fs/file_table.c
+				file_inode()                                                                |				include/linux/fs.h
+				spin_lock()                                                                 |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在do_tmpfile()内发送关于spin_lock()的消息
+				spin_unlock()                                                               |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在do_tmpfile()内发送关于spin_unlock()的消息
+				mnt_drop_write():                                                           |				fs/namespace.c
+					__mnt_drop_write():                                                       |				fs/namespace.c
+						preempt_disable()                                                       |				include/linux/preempt.h												| 内部可能会调用kernel下的preempt_count_add()			|			在__mnt_drop_write()内发送关于preempt_disable()的消息
+						mnt_dec_writers()                                                       |				fs/namespace.c
+						real_mount()                                                            |				fs/mount.h			
+						preempt_enable()                                                        |				include/linux/preempt.h												| 内部可能会调用kernel下的preempt_count_sub()			|			在__mnt_drop_write()内发送关于preempt_enable()的消息
+					sb_end_write():                                                           |				include/linux/fs.h
+						__sb_end_write():																												|				fs/super.c
+							percpu_counter_dec()                                                  |  			include/linux/percpu_counter.h   							|	可能会调用定义在kernel和lib下的一些函数					|			在__sb_end_write()内发送关于percpu_counter_dec()的消息
+							smp_mb()                                                              |				arch/x86/include/asm/barrier.h								|																									|			在__sb_end_write()内发送关于smp_mb()的消息
+							waitqueue_active()                                                    |				include/linux/wait.h
+							wake_up()                                                             |				include/linux/wait.h													| 宏定义为__wake_up()，而该函数定义于kernel中			|			在__sb_end_write()内发送关于wake_up()的消息
+							rwsem_release()                                                       |				include/linux/lockdep.h												|	宏定义为lock_release()，而该函数定义于kernel中	|			在__sb_end_write()内发送关于rwsem_release()的消息
+				path_put():                                                                 |       fs/namei.c
+					......																																		|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息				
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			path_init()                                                                   |                                                     
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			link_path_walk():                                                             |                                                     
+        inode_permission():                                                         |                                                     
+          __inode_permission():                                                     |                                                     
+            generic_permission()                                                    |                                                     
+            security_inode_permission():                                            |                                                     
+              cap_inode_permission()                                                |                                                     
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			do_last():                                                                    |                                                     
+        complete_walk():                                                            |                                                     
+          legitimize_mnt()                                                          |                                                     
+        mnt_want_write():                                                           |                                                     
+          __sb_start_write()                                                        |                                                     
+          __mnt_want_write()                                                        |                                                     
+        mutex_lock():                                                               |                                                     
+          _cond_resched()                                                           |                                                     
+        lookup_dcache():                                                            |                                                     
+          d_lookup():                                                               |                                                     
+            __d_lookup():                                                           |                                                     
+              _raw_spin_lock()                                                      |                                                     
+              _raw_spin_unlock()                                                    |                                                     
+        security_path_mknod():                                                      |                                                     
+          apparmor_path_mknod():                                                    |                                                     
+            common_perm_create.constprop.23():                                      |                                                     
+              common_perm()                                                         |                                                     
+        vfs_create():                                                               |                                                     
+          inode_permission():                                                       |                                                     
+            __inode_permission():                                                   |                                                     
+              generic_permission()                                                  |                                                     
+              security_inode_permission():                                          |                                                     
+                cap_inode_permission()                                              |                                                     
+          security_inode_create():                                                  |                                                     
+            cap_inode_create()                                                      |                                                     
+          ext4_create():                                                            |                                                     
+            dquot_initialize():                                                     |                                                     
+              __dquot_initialize():                                                 |                                                     
+                dquot_active.isra.8()                                               |                                                     
+            __ext4_new_inode():                                                     |                                                     
+              new_inode():                                                          |                                                     
+                new_inode_pseudo():                                                 |                                                     
+                  alloc_inode():                                                    |                                                     
+                    ext4_alloc_inode():                                             |                                                     
+                      kmem_cache_alloc()                                            |                                                     
+                      ext4_es_init_tree()                                           |                                                     
+                    inode_init_always():                                            |                                                     
+                      make_kuid():                                                  |                                                     
+                        map_id_down()                                               |                                                     
+                      make_kgid():                                                  |                                                     
+                        map_id_down()                                               |                                                     
+                      security_inode_alloc():                                       |                                                     
+                        cap_inode_alloc_security()                                  |                                                     
+                      __mutex_init()                                                |                                                     
+                  _raw_spin_lock()                                                  |                                                     
+                  _raw_spin_unlock()                                                |                                                     
+                inode_sb_list_add():                                                |                                                     
+                  _raw_spin_lock()                                                  |                                                     
+                  _raw_spin_unlock()                                                |                                                     
+              inode_init_owner()                                                    |                                                     
+              dquot_initialize():                                                   |                                                     
+                __dquot_initialize():                                               |                                                     
+                  dquot_active.isra.8()                                             |                                                     
+              ext4_get_group_desc()                                                 |                                                     
+              ext4_free_inodes_count()                                              |                                                     
+              ext4_get_group_desc()                                                 |                                                     
+              ext4_free_inodes_count()                                              |                                                     
+              ext4_read_inode_bitmap():                                             |                                                     
+                ext4_get_group_desc()                                               |                                                     
+                ext4_inode_bitmap()                                                 |                                                     
+                __getblk():                                                         |                                                     
+                  __find_get_block():                                               |                                                     
+                    mark_page_accessed()                                            |                                                     
+                  _cond_resched()                                                   |                                                     
+                _raw_spin_trylock()                                                 |                                                     
+                _raw_spin_unlock()                                                  |                                                     
+              __ext4_journal_start_sb():                                            |                                                     
                 ext4_journal_check_start():                                         | 
                   _cond_resched()                                                   | 
                 jbd2__journal_start():                                              | 
@@ -703,14 +974,49 @@ do_sys_open(): 																															        |   	fs/namei.c           
         terminate_walk():                                                           | 
           dput()                                                                    | 
           mntput():                                                                 | 
-            mntput_no_expire()                                                      | 
+            mntput_no_expire()                                                      |
+
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			path_put_conditional():                                                       |
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			path_put():                                                                   |
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			may_follow_link():                                                            |
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			follow_link():                                                                |
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			put_link():                                                                   |
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			path_put():                                                                   |
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			fput():                                                                       |
+      ******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+			put_filp():                                                                   |
+			******************************************************************************|*****************************************************|*************************************************|****************************************************************
+
   **********************************************************************************|*****************************************************|*************************************************|****************************************************************
                                                                                     |                                                     |                                                 |  
   **********************************************************************************|*****************************************************|*************************************************|****************************************************************
   put_unused_fd():                                                                  |       fs/file.c                                     |                                                 |      
     spin_lock()                                                                     | 			include/linux/spinlock.h                      | 调用定义在kernel模块中的_raw_spin_lock()		    |			在put_unused_fd()内发送关于spin_lock()的消息
     __put_unused_fd():                                                              |       fs/file.c                                     |                                                 |
-      files_fdtable()                                                               |       include/linux/fdtable.h                       |                                                 |
+      files_fdtable()                                                               |       include/linux/fdtable.h                       | 宏展开后，会调用定义在kernel下的lock_is_held()	|			在__put_unused_fd()内发送关于files_fdtable()的消息
       __clear_open_fd():                                                            |       fs/file.c                                     |                                                 |
         __clear_bit()                                                               | 			arch/x86/include/asm/bitops.h                 |                                                 |     在__clear_open_fd()内发送关于__clear_bit()的消息
     spin_unlock()                                                                   | 			include/linux/spinlock.h                      |	调用定义在kernel模块中的_raw_spin_unlock()	    |			在put_unused_fd()内发送关于spin_unlock()的消息
@@ -888,7 +1194,7 @@ do_sys_open(): 																															        |   	fs/namei.c           
 																op->drop_inode()														        |																											|	op = inode->i_sb->s_op，待定										|
 																generic_drop_inode()                                |				include/linux/fs.h                            |                                                 |
 																inode_add_lru():                                    |				fs/inode.c                                    |                                                 |
-																	atomic_read()                                     |				arch.x86/include/asm/atomic.h									|																									|			在inode_add_lru()内发送关于atomic_read()的消息
+																	atomic_read()                                     |				arch/x86/include/asm/atomic.h									|																									|			在inode_add_lru()内发送关于atomic_read()的消息
 																	inode_lru_list_add():                             |				fs/inode.c                                    |                                                 |
 																		list_lru_add()                                  |				mm/list_lru.c																	|																									|			在inode_lru_list_add()内发送关于list_lru_add()的消息
 																		this_cpu_inc()                                  |				include/linux/percpu.h                        |                                                 |
@@ -898,7 +1204,7 @@ do_sys_open(): 																															        |   	fs/namei.c           
 																	mapping_cap_writeback_dirty()                     |				include/linux/backing-dev.h                   |                                                 |
 																	writeback_single_inode():                         |				fs/fs-writeback.c                             |                                                 |
 																		spin_lock()                                     | 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在writeback_single_inode()内发送关于spin_lock()的消息
-																		atomic_read()                                   |				arch.x86/include/asm/atomic.h									|																									|			在writeback_single_inode()内发送关于atomic_read()的消息
+																		atomic_read()                                   |				arch/x86/include/asm/atomic.h									|																									|			在writeback_single_inode()内发送关于atomic_read()的消息
 																		__inode_wait_for_writeback():                   |				fs/fs-writeback.c                             |                                                 |
 																			DEFINE_WAIT_BIT()                             |				include/linux/wait.h                          |                                                 |
 																			bit_waitqueue()                               |				kernel/sched/wait.c														|																									|			在__inode_wait_for_writeback()内发送关于bit_waitqueue()的消息	
@@ -1068,7 +1374,7 @@ do_sys_open(): 																															        |   	fs/namei.c           
   fd_install():                                                                     |				fs/file.c                                     |                                                 |
     __fd_install():                                                                 |				fs/file.c                                     |                                                 |
       spin_lock()                                                              			|		 		include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在__fd_install()内发送关于spin_lock()的消息
-      files_fdtable()                                                               |       include/linux/fdtable.h                       |                                                 |
+      files_fdtable()                                                               |       include/linux/fdtable.h                       | 宏展开后，会调用定义在kernel下的lock_is_held()	|			在__fd_install()内发送关于files_fdtable()的消息
       __clear_open_fd():                                                            |       fs/file.c                                     |                                                 |
         __clear_bit()                                                               | 			arch/x86/include/asm/bitops.h                 |                                                 |     在__clear_open_fd()内发送关于__clear_bit()的消息
 			rcu_assign_pointer()                                                          |				include/linux/rcupdate.h											|	调用定义在arch下的smp_wmb()，故在此发消息				|			在__fd_install()内发送关于rcu_assign_pointer()的消息
