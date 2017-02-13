@@ -1,3 +1,7 @@
+# 发消息前都要先判断该进程是否是B进程，即判断current->comm == "fs_kthread"，若是则发消息；否则使用原函数 —— 防止系统崩溃。
+
+
+
            FUNCTION CALLS																										        |   							Defined files						            |										注释											    |															结论
 ------------------------------------------------------------------------------------|-----------------------------------------------------|-------------------------------------------------|----------------------------------------------------------------
 do_sys_open(): 																															        |       fs/namei.c                                    |                                                 |
@@ -208,8 +212,7 @@ do_sys_open(): 																															        |       fs/namei.c        
 										read_sequnlock_excl()                                           |				include/linux/seqlock.h												|	调用spin_unlock()，而该函数会调用kernel中的函数	|			在follow_up()内发送关于read_sequnlock_excl()的消息
 										mntget():                                                       |				fs/namespace.c
 											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
-										dget():                                                         |				include/linux/dcache.h
-											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+										dget()                                                          |				include/linux/dcache.h												|	调用lockref_get()，它会调用kernel和lib中的函数	|			在follow_up()内发送关于dget()的消息
 										dput():                                                         |				include/linux/dcache.c
 											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
 										mntput():                                                       |				fs/namespace.c
@@ -228,8 +231,7 @@ do_sys_open(): 																															        |       fs/namei.c        
 											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息                                                       
 										mntput():                                                       |				fs/namespace.c
 											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
-										dget():                                                         |				include/linux/dcache.h
-											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息                                                         
+										dget()                                                          |				include/linux/dcache.h												|	调用lockref_get()，它会调用kernel和lib中的函数	|			在follow_mount()内发送关于dget()的消息                                                         
 							lookup_fast():                                                        |				fs/namei.c
 								__d_lookup_rcu():                                                   |				fs/dcache.c
 									d_hash()                                                          |				fs/dcache.c
@@ -278,50 +280,482 @@ do_sys_open(): 																															        |       fs/namei.c        
 									shrink_dcache_parent()                                            |				fs/dcache.c
 										INIT_LIST_HEAD()                                                |				include/linux/list.h
 										d_walk():                                                       |				fs/dcache.c
-											read_seqbegin_or_lock()                                       |
-											spin_lock()                                                   |
-											enter()                                                       |
-											list_entry()                                                  |
-											spin_lock_nested()                                            |
-											spin_unlock()                                                 |
-											list_empty()                                                  |
-											spin_release()                                                |
-											spin_acquire()                                                |
-											rcu_read_lock()                                               |
-											need_seqretry()                                               |
-											rcu_read_unlock()                                             |
-											done_seqretry()                                               |
-										shrink_dentry_list()                                            |
-										cond_resched()                                                  |
+											read_seqbegin_or_lock()                                       |				include/linux/seqlock.h												|	调用链中会调用spin_lock()												|			在d_walk()内发送关于read_seqbegin_or_lock()的消息
+											spin_lock()                                                   |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在d_walk()内发送关于spin_lock()的消息
+											list_entry()                                                  |				include/linux/list.h
+											spin_lock_nested()                                            |				include/linux/spinlock.h											|																									|			在d_walk()内发送关于spin_lock_nested()的消息
+											spin_unlock()                                                 |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在d_walk()内发送关于spin_unlock()的消息
+											list_empty()                                                  |				include/linux/list.h
+											spin_release()                                                |				include/linux/lockdep.h												|	宏定义为定义在kernel中的lock_release()					|			在d_walk()内发送关于spin_release()的消息
+											spin_acquire()                                                |				include/linux/lockdep.h												|	宏定义为定义在kernel中的lock_acquire()					|			在d_walk()内发送关于spin_acquire()的消息
+											rcu_read_lock()                                               |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在d_walk()内发送关于rcu_read_lock()的消息
+											need_seqretry()                                               |				include/linux/seqlock.h												|	最终会调用定义在arch下的smp_rmb()								|			在d_walk()内发送关于need_seqretry()的消息
+											rcu_read_unlock()                                             |				include/linux/rcupdate.h                      | 内部会调用若干定义在kernel和lib中的函数         |			在d_walk()内发送关于rcu_read_unlock()的消息
+											done_seqretry()                                               |				include/linux/seqlock.h												|	调用spin_lock()																	|			在d_walk()内发送关于done_seqretry()的消息
+										shrink_dentry_list():                                           |				fs/dcache.c
+											rcu_read_lock()                                               |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在shrink_dentry_list()内发送关于rcu_read_lock()的消息
+											list_entry_rcu()                                              |				include/linux/rculist.h												|	宏展开后会调用定义在kernel下的一些函数					|			在shrink_dentry_list()内发送关于list_entry_rcu()的消息
+											spin_lock()                                                   |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在shrink_dentry_list()内发送关于spin_lock()的消息
+											list_entry()                                                  |				include/linux/list.h
+											spin_unlock()                                                 |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在shrink_dentry_list()内发送关于spin_unlock()的消息
+											d_shrink_del():                                               |				fs/dcache.c
+												list_del_init()																							|				include/linux/list.h
+												this_cpu_dec()																							|				include/linux/percpu.h
+											rcu_read_unlock()                                             |				include/linux/rcupdate.h                      | 内部会调用若干定义在kernel和lib中的函数         |			在shrink_dentry_list()内发送关于rcu_read_unlock()的消息
+											try_prune_one_dentry():                                       |				fs/dcache.c
+												dentry_kill():                                              |				fs/dcache.c
+													......																										|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+												lockref_put_or_lock()	                                      |				lib/lockref.c																	|																									|			在try_prune_one_dentry()内发送关于rcu_read_unlock()的消息
+											d_shrink_add():                                               |				fs/dcache.c
+												list_add()                                                  |				include/linux/list.h
+												this_cpu_inc()                                              |				include/linux/percpu.h
+										cond_resched()                                                  |				include/linux/sched.h													|	内部会调用定义在kernel下的__might_sleep()				|			在shrink_dcache_parent()内发送关于cond_resched()的消息
 									d_mountpoint()                                                    |				include/linux/dcache.h
 									__d_drop():                                                       |				fs/dcache.c
 										......																													|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
-								follow_managed()                                                    |
-								path_put_conditional()                                              |
-							lookup_slow()                                                         |
-							should_follow_link()                                                  |
+								follow_managed():                                                   |				fs/namei.c
+									path->dentry->d_op->d_manage()                                    |																											|	待定																						|				
+									lookup_mnt():                                                     |				fs/namespace.c
+										......																													|				......																				| 之前已经解释过了，同上													|			部分后代函数需要发消息
+									dput():                                                           |				fs/dcache.c
+										......																													|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+									mntput():                                                         |				fs/namespace.c
+										......																													|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+									dget()                                                            |				include/linux/dcache.h												|	调用lockref_get()，它会调用kernel和lib中的函数	|			在follow_managed()内发送关于dget()的消息 
+									follow_automount():                                               |				fs/namei.c
+										path->dentry->d_op->d_automount()                               |																											|	待定																						|
+										mntget():                                                       |				fs/namespace.c
+											......																												|				......																				| 之前已经解释过了，同下													|			部分后代函数需要发消息
+										finish_automount():                                             |				fs/namespace.c
+											real_mount()                                                  |				fs/mount.h
+											mnt_get_count()                                               |				fs/namespace.c
+											do_add_mount():                                               |				fs/namespace.c
+												lock_mount():                                               |				fs/namespace.c
+													mutex_lock()                                              |				kernel/locking/mutex.c												|																									|			在lock_mount()内发送关于mutex_lock()的消息
+													cant_mount()                                              |				include/linux/dcache.h
+													mutex_unlock()                                            |				kernel/locking/mutex.c												|																									|			在lock_mount()内发送关于mutex_unlock()的消息
+													namespace_lock():                                         |				fs/namespace.c
+														down_write()																						|				kernel/locking/rwsem.c												|																									|			在namespace_lock()内发送关于down_write()的消息
+													lookup_mnt():                                             |				fs/namespace.c
+														......																									|				......																				| 之前已经解释过了，同上													|			部分后代函数需要发消息
+													new_mountpoint():                                         |				fs/namespace.c
+														hash()                                                  |				fs/namespace.c
+														list_for_each_entry()                                   |				include/linux/list.h
+														d_unlinked()                                            |				include/linux/dcache.h
+														kmalloc()                                               |				include/linux/slab.h													|																									|			在new_mountpoint()内发送关于kmalloc()的消息
+														d_set_mounted():                                        |				fs/dcache.c
+															write_seqlock()                                       |				include/linux/seqlock.h												|	调用了spin_lock()																|			在d_set_mounted()内发送关于write_seqlock()的消息
+															spin_lock()                                           |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在d_set_mounted()内发送关于spin_lock()的消息
+															d_unhashed()                                          |				include/linux/dcache.h 
+															spin_unlock()                                         |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在d_set_mounted()内发送关于spin_unlock()的消息
+															d_unlinked()                                          |				include/linux/dcache.h
+															write_sequnlock()                                     |				include/linux/seqlock.h												|	调用了spin_unlock()															|			在d_set_mounted()内发送关于write_sequnlock()的消息
+														kfree()                                                 |				mm/slub.c																			|																									|			在new_mountpoint()内发送关于kfree()的消息
+														list_add()                                              |				include/linux/list.h
+													namespace_unlock():                                       |				fs/namespace.c
+														LIST_HEAD()                                             |				include/linux/list.h
+														list_empty()                                            |				include/linux/list.h
+														up_write()                                              |				kernel/locking/rwsem.c												|																									|			在namespace_unlock()内发送关于up_write()的消息
+														list_splice_init()                                      |				include/linux/list.h
+														synchronize_rcu()                                       |				kernel/rcu/tree_plugin.h											|																									|			在namespace_unlock()内发送关于synchronize_rcu()的消息
+														list_first_entry()                                      |				include/linux/list.h
+														list_del_init()                                         |				include/linux/list.h
+														path_put():                                             |				fs/namei.c
+															......																								|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+														mntput():                                               |				fs/namespace.c
+															......																								|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+													path_put():                                               |				fs/namei.c
+														......																									|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+													dget()                                                    |				include/linux/dcache.h												|	调用lockref_get()，它会调用kernel和lib中的函数	|			在do_add_mount()内发送关于dget()的消息
+												real_mount()                                                |				fs/namespace.c
+												check_mnt()                                                 |				fs/namespace.c
+												graft_tree():                                               |				fs/namespace.c	
+													attach_recursive_mnt(): 																	|				fs/namespace.c
+														LIST_HEAD()                                             |				include/linux/list.h
+														IS_MNT_SHARED()                                         |				fs/pnode.h
+														invent_group_ids():                                     |				fs/namespace.c
+															next_mnt()                                            |				fs/namespace.c
+															IS_MNT_SHARED()                                       |				include/linux/list.h
+															mnt_alloc_group_id():                                 |				fs/namespace.c
+																ida_pre_get()                                       |				lib/ldr.c																			|																									|			在mnt_alloc_group_id()内发送关于ida_pre_get()的消息
+																ida_get_new_above()                                 |				lib/ldr.c																			|																									|			在mnt_alloc_group_id()内发送关于ida_get_new_above()的消息
+															cleanup_group_ids():                                  |				fs/namespace.c
+																next_mnt()                                          |				fs/namespace.c
+																IS_MNT_SHARED()                                     |				fs/namespace.c
+																mnt_release_group_id():                             |				fs/namespace.c
+																	ida_remove()																			|				lib/ldr.c																			|																									|			在mnt_release_group_id()内发送关于ida_remove()的消息
+														propagate_mnt():                                        |				fs/pnode.c
+															LIST_HEAD()                                           |				include/linux/list.h
+															propagation_next()                                    |				fs/pnode.c
+															get_source()                                          |				fs/pnode.c
+															copy_tree():                                          |				fs/namespace.c
+																is_mnt_ns_file()                                    |				fs/namespace.c
+																clone_mnt():                                        |				fs/namespace.c
+																	alloc_vfsmnt():                                   |				fs/namespace.c
+																		kmem_cache_zalloc()														  |				include/linux/slab.h													|																									|			在alloc_vfsmnt()内发送关于kmem_cache_zalloc()的消息
+																		mnt_alloc_id():                                 |				fs/namespace.c
+																			ida_pre_get()                                 |				lib/ldr.c																			|																									|			在mnt_alloc_id()内发送关于ida_pre_get()的消息
+																			spin_lock()                                   |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在mnt_alloc_id()内发送关于spin_lock()的消息
+																			ida_get_new_above()                           |				lib/ldr.c																			|																									|			在mnt_alloc_id()内发送关于ida_get_new_above()的消息
+																			spin_unlock()                                 |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在mnt_alloc_id()内发送关于spin_unlock()的消息
+																		kstrdup()                                       |				mm/util.c																			|																									|			在alloc_vfsmnt()内发送关于kstrdup()的消息
+																		alloc_percpu()                                  |				include/linux/percpu.h												|	宏展开后会调用定义在mm中的__alloc_percpu()			|			在alloc_vfsmnt()内发送关于alloc_percpu()的消息
+																		this_cpu_add()                                  |				include/linux/percpu.h
+																		INIT_LIST_HEAD()                                |				include/linux/list.h
+																		INIT_HLIST_HEAD()                               |				include/linux/list.h
+																		kfree()                                         |				mm/slub.c																			|																									|			在alloc_vfsmnt()内发送关于kfree()的消息
+																		mnt_free_id():                                  |				fs/namespace.c
+																			spin_lock()                                   |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在mnt_free_id()内发送关于spin_lock()的消息
+																			ida_remove()                                  |				lib/ldr.c																			|																									|			在mnt_release_group_id()内发送关于ida_remove()的消息
+																			spin_unlock()                                 |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在mnt_free_id()内发送关于spin_unlock()的消息
+																		kmem_cache_free()                               |				mm/slub.c																			|																									|			在alloc_vfsmnt()内发送关于kmem_cache_free()的消息
+																	mnt_alloc_group_id():                             |				fs/namespace.c
+																		......																					|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+																	list_empty()                                      |				include/linux/list.h
+																	atomic_inc()                                      |				arch/x86/include/asm/atomic.h									|																									|			在clone_mnt()内发送关于atomic_inc()的消息
+																	dget()                                            |				include/linux/dcache.h												|	调用lockref_get()，它会调用kernel和lib中的函数	|			在clone_mnt()内发送关于dget()的消息
+																	lock_mount_hash():                                |				fs/mount.h
+																		......																					|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+																	list_add_tail()                                   |				include/linux/list.h
+																	unlock_mount_hash():                              |				fs/mount.h
+																		......																					|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+																	list_add()                                        |				include/linux/list.h
+																	set_mnt_shared()                                  |				fs/pnode.h
+																	free_vfsmnt():																		|				fs/namespace.c
+																		kfree()                                         |				mm/slub.c																			|																									|			在free_vfsmnt()内发送关于kfree()的消息
+																		mnt_free_id():                                  |				fs/namespace.c
+																			......																				|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息	
+																		free_percpu()                                   |				mm/percpu.c																		|																									|			在free_vfsmnt()内发送关于free_percpu()的消息
+																		kmem_cache_free()                               |				mm/slub.c																			|																									|			在free_vfsmnt()内发送关于kmem_cache_free()的消息
+																list_for_each_entry()                               |				include/linux/list.h
+																is_subdir():                                        |				fs/dcache.c
+																	read_seqbegin()                                   |				include/linux/seqlock.h												|	内部可能会调用kernel下的一些函数								|			在is_subdir()内发送关于read_seqbegin()的消息
+																	rcu_read_lock()                                   |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在is_subdir()内发送关于rcu_read_lock()的消息
+																	d_ancestor()                                      |				fs/dcache.c
+																	rcu_read_unlock()                                 |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在is_subdir()内发送关于rcu_read_unlock()的消息
+																	read_seqretry()                                   |				include/linux/seqlock.h												|	最终会调用arch下的smp_rmb()											|			在is_subdir()内发送关于read_seqretry()的消息
+																next_mnt()                                          |				fs/namespace.c
+																skip_mnt_tree()                                     |				fs/namespace.c
+																lock_mount_hash():                                  |				fs/mount.h
+																	......																						|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+																list_add_tail()                                     |				include/linux/list.h
+																attach_mnt():                                       |				fs/namespace.c
+																	mnt_set_mountpoint():                             |				fs/namespace.c
+																		mnt_add_count():                                |				fs/namespace.c
+																			......																				|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+																		dget()                                          |				include/linux/dcache.h												|	调用lockref_get()，它会调用kernel和lib中的函数	|			在mnt_set_mountpoint()内发送关于dget()的消息
+																	list_add_tail()                                   |				include/linux/list.h
+																unlock_mount_hash():                                |				fs/mount.h
+																	......																						|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+															list_splice()                                         |				include/linux/list.h
+															is_subdir():                                          |				fs/dcache.c
+																......																							|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+															mnt_set_mountpoint():                                 |				fs/namespace.c
+																......																							|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+															list_add_tail()                                       |				include/linux/list.h
+															lock_mount_hash():                                    |				fs/mount.h
+																......																							|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+															list_empty()                                          |				include/linux/list.h
+															list_first_entry()                                    |				include/linux/list.h
+															umount_tree():                                        |				fs/namespace.c
+																LIST_HEAD()                                         |				include/linux/list.h
+																list_move()                                         |				include/linux/list.h
+																propagate_umount()                                  |				fs/pnode.c
+																list_for_each_entry()                               |				include/linux/list.h
+																list_del_init()                                     |				include/linux/list.h
+																__touch_mnt_namespace():                            |				fs/namespace.c
+																	wake_up_interruptible()														|				include/linux/wait.h													|	宏展开后会调用定义在kernel中的__wake_up()				|			在__touch_mnt_namespace()内发送关于wake_up_interruptible()的消息
+																mnt_has_parent()                                    |				fs/mount.h
+																put_mountpoint():                                   |				fs/namespace.c
+																	spin_lock()                                       |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在put_mountpoint()内发送关于spin_lock()的消息			
+																	spin_unlock()                                     |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在put_mountpoint()内发送关于spin_unlock()的消息
+																	list_del()                                        |				include/linux/list.h
+																	kfree()                                           |				mm/slub.c																			|																									|			在put_mountpoint()内发送关于kfree()的消息
+																change_mnt_propagation():                           |				fs/pnode.c
+																	set_mnt_shared()                                  |				fs/pnode.h
+																	do_make_slave():                                  |				fs/pnode.c
+																		next_peer()                                     |				fs/pnode.c
+																		list_empty()                                    |				include/linux/list.h
+																		mnt_release_group_id():                         |				fs/namespace.c
+																			......																				|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+																		list_del_init()                                 |				include/linux/list.h
+																		list_for_each_entry()                           |				include/linux/list.h
+																		list_move()                                     |				include/linux/list.h
+																		list_splice()                                   |				include/linux/list.h
+																		INIT_LIST_HEAD()                                |				include/linux/list.h
+																		list_empty()                                    |				include/linux/list.h
+																		list_first_entry()                              |				include/linux/list.h
+																	list_del_init()                                   |				include/linux/list.h
+																list_splice()                                       |				include/linux/list.h
+															unlock_mount_hash():                                  |				fs/mount.h
+																......																							|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+														lock_mount_hash():                                      |				fs/mount.h
+															......																								|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+														next_mnt()                                              |				fs/namespace.c
+														set_mnt_shared()                                        |				fs/pnode.h
+														detach_mnt():                                           |				fs/namespace.c
+															list_del_init()                                       |				include/linux/list.h
+															put_mountpoint():                                     |				fs/namespace.c
+																......                                              |				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+														attach_mnt():                                           |				fs/namespace.c
+															......																								|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+														touch_mnt_namespace():                                  |				fs/namespace.c
+															wake_up_interruptible()																|				include/linux/wait.h													|	宏展开后会调用kernel下的__wake_up()							|			在touch_mnt_namespace()内发送关于wake_up_interruptible()的消息
+														mnt_set_mountpoint():                                   |				fs/namespace.c
+															......																								|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+														commit_tree():                                          |				fs/namespace.c
+															LIST_HEAD()                                           |				include/linux/list.h
+															list_add_tail()                                       |				include/linux/list.h
+															list_for_each_entry()                                 |				include/linux/list.h
+															list_splice()                                         |				include/linux/list.h
+															list_add_tail()                                       |				include/linux/list.h
+															touch_mnt_namespace():                                |				fs/namespace.c
+																......																							|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+														list_del_init()                                         |				include/linux/list.h
+														unlock_mount_hash():                                    |				fs/mount.h
+															......																								|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+														cleanup_group_ids():                                    |				fs/namespace.c
+															......																								|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+												unlock_mount():                                             |				fs/namespace.c
+													put_mountpoint():                                         |				fs/namespace.c
+														......																									|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+													namespace_unlock():                                       |				fs/namespace.c
+														......																									|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+													mutex_unlock()                                            |				kernel/locking/mutex.c												|																									|			在unlock_mount()内发送关于mutex_unlock()的消息
+											list_empty()                                                  |				include/linux/list.h
+											namespace_lock():                                             |				fs/namespace.c
+												......																											|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+											list_del_init()                                               |				include/linux/list.h
+											namespace_unlock():                                           |				fs/namespace.c
+												......																											|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+											mntput():																											|				fs/namespace.c
+												......																											|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+										path_put():                                                     |				fs/namei.c
+											......																												|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+										dget():                                                         |				include/linux/dcache.h												|	调用lockref_get()，它会调用kernel和lib中的函数	|			在follow_automount()内发送关于dget()的消息
+								path_put_conditional():                                             |				fs/namei.c
+									dput():                                                           |				fs/dcache.c
+										......                                                          |				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+									mntput():                                                         |				fs/namespace.c
+										......                                                          |				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+							lookup_slow():                                                        |				fs/namei.c
+								mutex_lock()                                                        |				kernel/locking/mutex.c												|																									|			在lookup_slow()内发送关于mutex_lock()的消息
+								__lookup_hash():                                                    |				fs/namei.c
+									lookup_dcache():                                                  |				fs/namei.c
+										d_lookup():                                                     |				fs/namei.c
+											read_seqbegin()                                               |				include/linux/seqlock.h												|	内部可能会调用kernel下的一些函数								|			在d_lookup()内发送关于read_seqbegin()的消息
+											__d_lookup():                                                 |				fs/dcache.c
+												......																											|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+											read_seqretry()                                               |				include/linux/seqlock.h												|	最终会调用arch下的smp_rmb()											|			在d_lookup()内发送关于read_seqretry()的消息
+										d_revalidate():                                                 |				fs/namei.c
+											dentry->d_op->d_revalidate()																	|																											|	待定																						|
+										dput():                                                         |				fs/dcache.c
+											......																												|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+										d_invalidate():                                                 |				fs/dcache.c
+											......																												|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+										d_alloc():                                                      |				fs/dcache.c
+											__d_alloc():                                                  |				fs/dcache.c
+												kmem_cache_alloc()                                          |				mm/slub.c																			|																									|			在__d_alloc()内发送关于kmem_cache_alloc()的消息
+												kmalloc()                                                   |				include/linux/slab.h													|																									|			在__d_alloc()内发送关于kmalloc()的消息
+												kmem_cache_free()                                           |				mm/slub.c																			|																									|			在__d_alloc()内发送关于kmem_cache_free()的消息
+												memcpy()                                                    |				arch/x86/include/asm/string_64.h							|																									|			在__d_alloc()内发送关于memcpy()的消息
+												smp_wmb()                                                   |				arch/x86/include/asm/barrier.h								|																									|			在__d_alloc()内发送关于smp_wmb()的消息
+												spin_lock_init()                                            | 			include/linux/spinlock.h											| 调用定义在kernel模块中的__raw_spin_lock_init()  |			在__d_alloc()内发送关于spin_lock_init()的消息
+												seqcount_init()                                             |				include/linux/deqlock.h												|	宏定义展开后会调用kernel下的lockdep_init_map()	|			在__d_alloc()内发送关于seqcount_init()的消息
+												d_set_d_op()                                                |				fs/dcache.c
+												this_cpu_inc()                                              |				include/linux/percpu.h
+											spin_lock()                                                   |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在d_alloc()内发送关于spin_lock()的消息
+											__dget_dlock()                                                |				fs/dcache.c
+											list_add()                                                    |				include/linux/list.h
+											spin_unlock()                                                 |	 			include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在d_alloc()内发送关于spin_unlock()的消息
+									lookup_real():                                                    |				fs/namei.c
+										dput():                                                         |				fs/dcache.c
+											......																												|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+										dir->i_op->lookup()                                             |																											|	待定																						|
+								mutex_unlock()                                                      |				kernel/locking/mutex.c												|																									|			在lookup_slow()内发送关于mutex_unlock()的消息
+								follow_managed():                                                   |				fs/namei.c
+									......																														|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+								path_put_conditional():                                             |				fs/namei.c
+									......																														|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+							should_follow_link()                                                  |				fs/namei.c
 							unlazy_walk():                                                        |				fs/namei.c
 								......																															|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
-							path_to_nameidata()                                                   |
-							terminate_walk()                                                      |
-						nested_symlink()                                                        |				fs/namei.c
+							path_to_nameidata():                                                  |				fs/namei.c
+								dput():                                                             |				fs/dcache.c
+									......                                                            |				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+								mntput():                                                           |				fs/namespace.c
+									......                                                            |				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+							terminate_walk():                                                     |				fs/namei.c
+								path_put():                                                         |				fs/namei.c
+									......                                                            |				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+								rcu_read_unlock()                                                   |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在terminate_walk()内发送关于rcu_read_unlock()的消息
+						nested_symlink():                                                       |				fs/namei.c
+							path_put_conditional():                                               |				fs/namei.c
+								......																															|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+							path_put():                                                           |				fs/namei.c
+								......                                                           	 	|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+							follow_link():                                                        |				fs/namei.c
+								mntget():                                                           |				fs/namespace.c
+									......																														|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+								cond_resched()                                                      |				include/linux/sched.h													|	内部会调用定义在kernel下的__might_sleep()				|			在follow_link()内发送关于cond_resched()的消息
+								touch_atime()                                                       |				fs/inode.c
+									current_fs_time()                                                 |				kernel/time.c																	|																									|			在touch_atime()内发送关于current_fs_time()的消息
+									relatime_need_update():                                           |				fs/inode.c
+									timespec_equal()                                                  |				include/linux/time.h
+									sb_start_write_trylock():                                         |				include/linux/fs.h
+										__sb_start_write():																							|				fs/super.c
+											wait_event()																									|				include/linux/wait.h													|	宏定义展开后会调用kernel下的schedule()					|			在__sb_start_write()内发送关于wait_event()的消息
+											acquire_freeze_lock() :                                       |				fs/super.c
+												lock_is_held()                                              |				kernel/locking/lockdep.c											|																									|			在acquire_freeze_lock()内发送关于lock_is_held()的消息
+												rwsem_acquire_read()                                        |				include/linux/lockdep.h												|	宏定义展开后会调用kernel下的lock_acquire()			|			在acquire_freeze_lock()内发送关于rwsem_acquire_read()的消息
+											percpu_counter_inc()                                          |  			include/linux/percpu_counter.h   							|	可能会调用定义在kernel和lib下的一些函数					|			在__sb_start_write()内发送关于percpu_counter_inc()的消息
+											smp_mb()                                                      |				arch/x86/include/asm/barrier.h								|																									|			在__sb_start_write()内发送关于smp_mb()的消息
+											__sb_end_write():                                             |				fs/super.c
+												......																											|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+									__mnt_want_write():                                               |				fs/namespace.c
+										real_mount()                                                    |				fs/mount.h
+										preempt_disable()                                               |				include/linux/preempt.h												| 内部可能会调用kernel下的preempt_count_add()			|			在__mnt_want_write()内发送关于preempt_disable()的消息
+										mnt_inc_writers()                                               |				fs/namespace.c
+										smp_mb()                                                        |				arch/x86/include/asm/barrier.h								|																									|			在__mnt_want_write()内发送关于smp_mb()的消息
+										cpu_relax()                                                     |				arch/x86/include/asm/processor.h							|																									|			在__mnt_want_write()内发送关于cpu_relax()的消息
+										smp_rmb()                                                       |				arch/x86/include/asm/barrier.h								|																									|			在__mnt_want_write()内发送关于smp_rmb()的消息
+										mnt_is_readonly():                                              |				fs/namespace.c
+											smp_rmb()                                                     |				arch/x86/include/asm/barrier.h								|																									|			在mnt_is_readonly()内发送关于smp_rmb()的消息
+											__mnt_is_readonly()                                           |				fs/namespace.c
+										mnt_dec_writers()                                               |				fs/namespace.c
+										preempt_enable()                                                |				include/linux/preempt.h												| 内部可能会调用kernel下的preempt_count_sub()			|			在__mnt_want_write()内发送关于preempt_enable()的消息
+									update_time():                                                    |				fs/inode.c
+										inode->i_op->update_time()                                      |																											|	待定																						|
+										mark_inode_dirty_sync():                                        |				include/linux/fs.h
+											__mark_inode_dirty():																					|				fs/fs-writeback.c
+												sb->s_op->dirty_inode()                                     |																											|	待定																						|
+												smp_mb()                                                    |				arch/x86/include/asm/barrier.h								|																									|			在__mark_inode_dirty()内发送关于smp_mb()的消息
+												block_dump___mark_inode_dirty():                            |				fs/fs-writeback.c
+													strcmp()                                                  |				lib/string.c																	|																									|			在block_dump___mark_inode_dirty()内发送关于strcmp()的消息
+													d_find_alias():                                           |				fs/dcache.c
+														hlist_empty()                                           |				include/linux/list.h
+														spin_lock()                                             |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在d_find_alias()内发送关于spin_lock()的消息
+														__d_find_alias():                                       |				fs/dcache.c
+															hlist_for_each_entry()                                |				include/linux/list.h													| 多层宏定义，不涉及其他模块，故不发消息			    |
+															spin_lock()                                           |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在__d_find_alias()内发送关于spin_lock()的消息
+															d_unhashed()                                          |				include/linux/dcache.h
+															__dget_dlock()                                        |				fs/dcache.c
+															spin_unlock()                                         |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在__d_find_alias()内发送关于spin_unlock()的消息
+														spin_unlock()                                           |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在d_find_alias()内发送关于spin_unlock()的消息
+													spin_lock()                                               |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在block_dump___mark_inode_dirty()内发送关于spin_lock()的消息
+													printk()                                                  |				kernel/printk/printk.c												|																									|			在block_dump___mark_inode_dirty()内发送关于printk()的消息
+													task_pid_nr()                                             |				include/linux/sched.h
+													spin_unlock()                                             |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在block_dump___mark_inode_dirty()内发送关于spin_unlock()的消息
+													dput():                                                   |				fs/dcache.c
+														......																									|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+												inode_unhashed()                                            |				include/linux/fs.h
+												inode_to_bdi():                                             |				fs/fs-writeback.c
+													sb_is_blkdev_sb()																					|				fs/block_dev.c	
+												spin_unlock()                                               |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_unlock()		  |			在__mark_inode_dirty()内发送关于spin_unlock()的消息
+												spin_lock()                                                 |				include/linux/spinlock.h											| 调用定义在kernel模块中的_raw_spin_lock()		    |			在__mark_inode_dirty()内发送关于spin_lock()的消息
+												bdi_cap_writeback_dirty()                                   |				include/linux/backing-dev.h
+												list_move()                                                 |				include/linux/list.h
+												bdi_wakeup_thread_delayed()                                 |				mm/backing-dev.c															|																									|			在__mark_inode_dirty()内发送关于bdi_wakeup_thread_delayed()的消息
+									__mnt_drop_write():                                               |				fs/namespace.c
+										......																													|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+									sb_end_write():                                                   |				include/linux/fs.h
+										......																													|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+								nd_set_link()                                                       |				include/linux/namei.h
+								security_inode_follow_link()                                        |				security/security.c														|																									|			在follow_link()内发送关于security_inode_follow_link()的消息
+								dentry->d_inode->i_op->follow_link()                                |																											|	待定																						|
+								path_put():                                                         |				fs/namei.c
+									......																														|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+								put_link():                                                         |				fs/namei.c
+									inode->i_op->put_link()                                           |																											|	待定
+									path_put():                                                       |				fs/namei.c
+										......                                                          |				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+								set_root()                                                          |				fs/namei.c
+									......																														|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+								path_get():                                                         |				fs/namei.c
+									......																														|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+								link_path_walk():                                                   |				fs/namei.c
+									......																														|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+							walk_component():                                                     |				fs/namei.c
+								......																															|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+							put_link():                                                           |				fs/namei.c
+								......																															|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
 						d_is_directory()                                                        |				include/linux/dcache.h
-						terminate_walk()                                                        |				fs/namei.c
-					lookup_last()                                                             |
-					may_follow_link()                                                         |
-					follow_link()                                                             |
-					put_link()                                                                |
-					complete_walk()                                                           |
+						terminate_walk():                                                       |				fs/namei.c
+							......																																|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+					lookup_last():                                                            |				fs/namei.c
+						walk_component():                                                       |				fs/namei.c
+							......                                                                |				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+					may_follow_link():                                                        |				fs/namei.c
+						current_cred()                                                          |				include/linux/cred.h													|	宏展开后可能会使用到kernel下的相关函数					|			在may_follow_link()内发送关于current_cred()的消息		
+						uid_eq()                                                                |				include/linux/uidgid.h
+						audit_log_link_denied()                                                 |				kernel/audit.c																|																									|			在may_follow_link()内发送关于audit_log_link_denied()的消息
+						path_put_conditional():                                                 |				fs/namei.c
+							......																																|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+						path_put():                                                             |				fs/namei.c
+							......																																|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+					follow_link():                                                            |				fs/namei.c
+						......																																	|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+					put_link():                                                               |				fs/namei.c
+						......																																	|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+					complete_walk():                                                          |				fs/namei.c
+						legitimize_mnt()                                                        |				fs/namespace.c
+							......																																|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+						rcu_read_unlock()                                                       |				include/linux/rcupdate.h			                | 内部会调用若干定义在kernel和lib中的函数         |			在complete_walk()内发送关于rcu_read_unlock()的消息
+						lockref_get_not_dead()                                                  |				lib/lockref.c																	|																									|			在complete_walk()内发送关于lockref_get_not_dead()的消息
+						mntput()                                                                |				fs/namespace.c
+							......																																|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+						read_seqcount_retry()                                                   |				include/linux/seqlock.h												|	调用arch下的smp_rmb()														|			在complete_walk()内发送关于read_seqcount_retry()的消息
+						dput():                                                                 |				fs/dcache.c
+							......                                                                |				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+						dentry->d_op->d_weak_revalidate()                                       |																											|	待定																						|
+						path_put():                                                             |				fs/namei.c
+							......                                                                |				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
 					d_is_directory()                                                          |				include/linux/dcache.h
-					path_put()                                                                |
-					fput()                                                                    |
-				mnt_want_write()                                                            |				fs/namespace.c
-				inode_permission()                                                          |				fs/namei.c
-				d_alloc()                                                                   |				fs/dcache.c
+					path_put():                                                               |				fs/namei.c
+						......																																	|				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+					fput():                                                                   |				fs/file_table.c
+						......																																	|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+				mnt_want_write():                                                           |				fs/namespace.c
+					sb_start_write():                                                         |				include/linux/fs.h
+						__sb_start_write()                                                      |				fs/super.c
+							......																																|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+					__mnt_want_write():                                                       |				fs/namespace.c
+						......																																	|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+					sb_end_write():                                                           |				include/linux/fs.h
+						......                                                                  |				......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+				inode_permission():                                                         |				fs/namei.c
+					......																																		|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+				d_alloc():                                                                  |				fs/dcache.c
+					......																																		|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
 				dir->i_op->tmpfile()                                                        |																											|	待定																						|
-				audit_inode()                                                               |				include/linux/audit.h
-				may_open()                                                                  |				fs/namei.c		
-				finish_open()                                                               |				fs/open.c
+				audit_inode():                                                              |				include/linux/audit.h
+					audit_dummy_context()                                                     |				include/linux/audit.h
+					__audit_getname()								                                          |				kernel/auditsc.c															|																									|			在audit_inode()内发送关于__audit_getname()的消息
+				may_open():                                                                 |				fs/namei.c	
+					inode_permission():                                                       |				fs/namei.c
+						......																																	|				......																				|	之前已经解释过了，同上													|			部分后代函数需要发消息
+					inode_owner_or_capable():                                                 |				fs/inode.c
+						uid_eq()                                                                |				include/linux/uidgid.h
+						inode_capable()                                                         |				kernel/capability.c														|																									|			在inode_owner_or_capable()内发送关于inode_capable()的消息
+				finish_open():                                                              |				fs/open.c
+					current_cred()                                                            |				include/linux/cred.h													|	宏展开后可能会使用到kernel下的相关函数					|			在may_follow_link()内发送关于current_cred()的消息
+					do_dentry_open():                                                         |				fs/open.c
+            path_get():                                                             | 			fs/namei.c
+              ......																																|	 			......																				|	之前已经解释过了，同下													|			部分后代函数需要发消息
+            __get_file_write_access():																							|				fs/open.c
+							get_write_access()                                                    |				include/linux/fs.h														|	底层会调用定义在arch下的atomic_cmpxchg()				|			在__get_file_write_access()内发送关于get_write_access()的消息
+							special_file()                                                        |				include/linux/fs.h
+							put_write_access()                                                    |				include/linux/fs.h														|	底层会调用定义在arch下的atomic_dec()						|			在__get_file_write_access()内发送关于put_write_access()的消息
+						special_file()                                                          |				include/linux/fs.h
+						file_take_write()                                                       |				include/linux/fs.h
+						fops_get()				                                                      |				include/linux/fs.h														|	宏展开后会调用定义在kernel下的try_module_get()	|			在do_dentry_open()内发送关于fops_get()的消息
+            security_file_open():                                                   | 			security/security.c														|																									|			在do_dentry_open()内发送关于security_file_open()的消息
+						break_lease()                                                           |
+						dquot_file_open():                                                      |
+							generic_file_open()                                                   |
+							dquot_initialize()                                                    |
+						i_readcount_inc()                                                       |
+						file_ra_state_init()                                                    |
 				open_check_o_direct()                                                       |				fs/open.c
 				fput()                                                                      |				fs/file_table.c
 				file_inode()                                                                |				include/linux/fs.h
@@ -351,631 +785,12 @@ do_sys_open(): 																															        |       fs/namei.c        
 			******************************************************************************|*****************************************************|*************************************************|****************************************************************
 			link_path_walk():                                                             |                                                     
         inode_permission():                                                         |                                                     
-          __inode_permission():                                                     |                                                     
-            generic_permission()                                                    |                                                     
-            security_inode_permission():                                            |                                                     
-              cap_inode_permission()                                                |                                                     
+          ......										                                               	|                                                     
       ******************************************************************************|*****************************************************|*************************************************|****************************************************************
 			
 			******************************************************************************|*****************************************************|*************************************************|****************************************************************
 			do_last():                                                                    |                                                     
-        complete_walk():                                                            |                                                     
-          legitimize_mnt()                                                          |                                                     
-        mnt_want_write():                                                           |                                                     
-          __sb_start_write()                                                        |                                                     
-          __mnt_want_write()                                                        |                                                     
-        mutex_lock():                                                               |                                                     
-          _cond_resched()                                                           |                                                     
-        lookup_dcache():                                                            |                                                     
-          d_lookup():                                                               |                                                     
-            __d_lookup():                                                           |                                                     
-              _raw_spin_lock()                                                      |                                                     
-              _raw_spin_unlock()                                                    |                                                     
-        security_path_mknod():                                                      |                                                     
-          apparmor_path_mknod():                                                    |                                                     
-            common_perm_create.constprop.23():                                      |                                                     
-              common_perm()                                                         |                                                     
-        vfs_create():                                                               |                                                     
-          inode_permission():                                                       |                                                     
-            __inode_permission():                                                   |                                                     
-              generic_permission()                                                  |                                                     
-              security_inode_permission():                                          |                                                     
-                cap_inode_permission()                                              |                                                     
-          security_inode_create():                                                  |                                                     
-            cap_inode_create()                                                      |                                                     
-          ext4_create():                                                            |                                                     
-            dquot_initialize():                                                     |                                                     
-              __dquot_initialize():                                                 |                                                     
-                dquot_active.isra.8()                                               |                                                     
-            __ext4_new_inode():                                                     |                                                     
-              new_inode():                                                          |                                                     
-                new_inode_pseudo():                                                 |                                                     
-                  alloc_inode():                                                    |                                                     
-                    ext4_alloc_inode():                                             |                                                     
-                      kmem_cache_alloc()                                            |                                                     
-                      ext4_es_init_tree()                                           |                                                     
-                    inode_init_always():                                            |                                                     
-                      make_kuid():                                                  |                                                     
-                        map_id_down()                                               |                                                     
-                      make_kgid():                                                  |                                                     
-                        map_id_down()                                               |                                                     
-                      security_inode_alloc():                                       |                                                     
-                        cap_inode_alloc_security()                                  |                                                     
-                      __mutex_init()                                                |                                                     
-                  _raw_spin_lock()                                                  |                                                     
-                  _raw_spin_unlock()                                                |                                                     
-                inode_sb_list_add():                                                |                                                     
-                  _raw_spin_lock()                                                  |                                                     
-                  _raw_spin_unlock()                                                |                                                     
-              inode_init_owner()                                                    |                                                     
-              dquot_initialize():                                                   |                                                     
-                __dquot_initialize():                                               |                                                     
-                  dquot_active.isra.8()                                             |                                                     
-              ext4_get_group_desc()                                                 |                                                     
-              ext4_free_inodes_count()                                              |                                                     
-              ext4_get_group_desc()                                                 |                                                     
-              ext4_free_inodes_count()                                              |                                                     
-              ext4_read_inode_bitmap():                                             |                                                     
-                ext4_get_group_desc()                                               |                                                     
-                ext4_inode_bitmap()                                                 |                                                     
-                __getblk():                                                         |                                                     
-                  __find_get_block():                                               |                                                     
-                    mark_page_accessed()                                            |                                                     
-                  _cond_resched()                                                   |                                                     
-                _raw_spin_trylock()                                                 |                                                     
-                _raw_spin_unlock()                                                  |                                                     
-              __ext4_journal_start_sb():                                            |                                                     
-                ext4_journal_check_start():                                         | 
-                  _cond_resched()                                                   | 
-                jbd2__journal_start():                                              | 
-                  kmem_cache_alloc()                                                | 
-                  start_this_handle():                                              | 
-                    kmem_cache_alloc()                                              | 
-                    _raw_read_lock()                                                | 
-                    _raw_write_lock()                                               | 
-                    ktime_get()                                                     | 
-                    round_jiffies_up()                                              | 
-                    add_timer():                                                    | 
-                      mod_timer():                                                  | 
-                        lock_timer_base.isra.35():                                  | 
-                          _raw_spin_lock_irqsave()                                  | 
-                        detach_if_pending()                                         | 
-                        idle_cpu()                                                  | 
-                        _raw_spin_unlock()                                          | 
-                        _raw_spin_lock()                                            | 
-                        internal_add_timer():                                       | 
-                          __internal_add_timer()                                    | 
-                        _raw_spin_unlock_irqrestore()                               | 
-                    _raw_read_lock()                                                | 
-              __ext4_journal_get_write_access():                                    | 
-                _cond_resched()                                                     | 
-                jbd2_journal_get_write_access():                                    | 
-                  jbd2_journal_add_journal_head()                                   | 
-                  do_get_write_access():                                            | 
-                    _cond_resched()                                                 | 
-                    unlock_buffer():                                                | 
-                      wake_up_bit():                                                | 
-                        bit_waitqueue()                                             | 
-                        __wake_up_bit()                                             | 
-                    _raw_spin_lock()                                                | 
-                    __jbd2_journal_file_buffer():                                   | 
-                      jbd2_journal_grab_journal_head()                              | 
-                    _raw_spin_unlock()                                              | 
-                    jbd2_journal_cancel_revoke()                                    | 
-                  jbd2_journal_put_journal_head()                                   | 
-              _raw_spin_trylock()                                                   | 
-              _raw_spin_unlock()                                                    | 
-              __ext4_handle_dirty_metadata():                                       | 
-                _cond_resched()                                                     | 
-                jbd2_journal_dirty_metadata():                                      | 
-                  jbd2_journal_grab_journal_head()                                  | 
-                  _raw_spin_lock()                                                  | 
-                  __jbd2_journal_file_buffer():                                     | 
-                    __jbd2_journal_temp_unlink_buffer()                             | 
-                  _raw_spin_unlock()                                                | 
-                  jbd2_journal_put_journal_head()                                   | 
-              __ext4_journal_get_write_access():                                    | 
-                _cond_resched()                                                     | 
-                jbd2_journal_get_write_access():                                    | 
-                  jbd2_journal_add_journal_head()                                   | 
-                  do_get_write_access():                                            | 
-                    _cond_resched()                                                 | 
-                    unlock_buffer():                                                | 
-                      wake_up_bit():                                                | 
-                        bit_waitqueue()                                             | 
-                        __wake_up_bit()                                             | 
-                    _raw_spin_lock()                                                | 
-                    __jbd2_journal_file_buffer():                                   | 
-                      jbd2_journal_grab_journal_head()                              | 
-                    _raw_spin_unlock()                                              | 
-                    jbd2_journal_cancel_revoke()                                    | 
-                  jbd2_journal_put_journal_head()                                   | 
-              down_read():                                                          | 
-                _cond_resched()                                                     | 
-              _raw_spin_trylock()                                                   | 
-              ext4_itable_unused_count()                                            | 
-              up_read()                                                             | 
-              ext4_free_inodes_count()                                              | 
-              ext4_free_inodes_set()                                                | 
-              ext4_inode_bitmap_csum_set()                                          | 
-              ext4_group_desc_csum_set():                                           | 
-                ext4_group_desc_csum()                                              | 
-              _raw_spin_unlock()                                                    | 
-              __ext4_handle_dirty_metadata():                                       | 
-                _cond_resched()                                                     | 
-                jbd2_journal_dirty_metadata():                                      | 
-                  jbd2_journal_grab_journal_head()                                  | 
-                  _raw_spin_lock()                                                  | 
-                  __jbd2_journal_file_buffer():                                     | 
-                    __jbd2_journal_temp_unlink_buffer()                             | 
-                  _raw_spin_unlock()                                                | 
-                  jbd2_journal_put_journal_head()                                   | 
-              current_fs_time():                                                    | 
-                current_kernel_time()                                               | 
-              ext4_set_inode_flags()                                                | 
-              insert_inode_locked():                                                | 
-                _raw_spin_lock()                                                    | 
-                _raw_spin_lock()                                                    | 
-                _raw_spin_unlock()                                                  | 
-                _raw_spin_unlock()                                                  | 
-              _raw_spin_lock()                                                      | 
-              _raw_spin_unlock()                                                    | 
-              dquot_alloc_inode():                                                  | 
-                dquot_active.isra.8()                                               | 
-              ext4_init_acl():                                                      | 
-                ext4_get_acl()                                                      | 
-                current_umask()                                                     | 
-              ext4_init_security():                                                 | 
-                security_inode_init_security():                                     | 
-                  cap_inode_init_security()                                         | 
-              ext4_ext_tree_init():                                                 | 
-                ext4_mark_inode_dirty():                                            | 
-                  _cond_resched()                                                   | 
-                  ext4_reserve_inode_write():                                       | 
-                    ext4_get_inode_loc():                                           | 
-                      __ext4_get_inode_loc():                                       | 
-                        ext4_get_group_desc()                                       | 
-                        ext4_inode_table()                                          | 
-                        __getblk():                                                 | 
-                          __find_get_block():                                       | 
-                            mark_page_accessed()                                    | 
-                          _cond_resched()                                           | 
-                    __ext4_journal_get_write_access():                              | 
-                      _cond_resched()                                               | 
-                      jbd2_journal_get_write_access():                              | 
-                        jbd2_journal_add_journal_head()                             | 
-                        do_get_write_access():                                      | 
-                          _cond_resched()                                           | 
-                          unlock_buffer():                                          | 
-                            wake_up_bit():                                          | 
-                              bit_waitqueue()                                       | 
-                              __wake_up_bit()                                       | 
-                          _raw_spin_lock()                                          | 
-                          __jbd2_journal_file_buffer():                             | 
-                            jbd2_journal_grab_journal_head()                        | 
-                          _raw_spin_unlock()                                        | 
-                          jbd2_journal_cancel_revoke()                              | 
-                        jbd2_journal_put_journal_head()                             | 
-                  ext4_mark_iloc_dirty():                                           | 
-                    ext4_get_inode_flags()                                          | 
-                    from_kuid():                                                    | 
-                      map_id_up()                                                   | 
-                    from_kgid():                                                    | 
-                      map_id_up()                                                   | 
-                    ext4_has_inline_data()                                          | 
-                    __ext4_handle_dirty_metadata():                                 | 
-                      _cond_resched()                                               | 
-                      jbd2_journal_dirty_metadata():                                | 
-                        jbd2_journal_grab_journal_head()                            | 
-                        _raw_spin_lock()                                            | 
-                        __jbd2_journal_file_buffer():                               | 
-                          __jbd2_journal_temp_unlink_buffer()                       | 
-                        _raw_spin_unlock()                                          | 
-                        jbd2_journal_put_journal_head()                             | 
-                    __brelse()                                                      | 
-              ext4_mark_inode_dirty():                                              | 
-                _cond_resched()                                                     | 
-                ext4_reserve_inode_write():                                         | 
-                  ext4_get_inode_loc():                                             | 
-                    __ext4_get_inode_loc():                                         | 
-                      ext4_get_group_desc()                                         | 
-                      ext4_inode_table()                                            | 
-                      __getblk():                                                   | 
-                        __find_get_block():                                         | 
-                          mark_page_accessed()                                      | 
-                        _cond_resched()                                             | 
-                  __ext4_journal_get_write_access():                                | 
-                    _cond_resched()                                                 | 
-                    jbd2_journal_get_write_access():                                | 
-                      jbd2_journal_add_journal_head()                               | 
-                      do_get_write_access():                                        | 
-                        _cond_resched()                                             | 
-                        unlock_buffer():                                            | 
-                          wake_up_bit():                                            | 
-                            bit_waitqueue()                                         | 
-                            __wake_up_bit()                                         | 
-                        jbd2_journal_cancel_revoke()                                | 
-                      jbd2_journal_put_journal_head()                               | 
-                ext4_mark_iloc_dirty():                                             | 
-                  ext4_get_inode_flags()                                            | 
-                  from_kuid():                                                      | 
-                    map_id_up()                                                     | 
-                  from_kgid():                                                      | 
-                    map_id_up()                                                     | 
-                  ext4_has_inline_data()                                            | 
-                  __ext4_handle_dirty_metadata():                                   | 
-                    _cond_resched()                                                 | 
-                    jbd2_journal_dirty_metadata():                                  | 
-                      jbd2_journal_grab_journal_head()                              | 
-                      jbd2_journal_put_journal_head()                               | 
-                  __brelse()                                                        | 
-              __brelse()                                                            | 
-            ext4_set_aops()                                                         | 
-            ext4_add_nondir():                                                      | 
-              ext4_add_entry():                                                     | 
-                ext4_has_inline_data()                                              | 
-                __ext4_read_dirblock():                                             | 
-                  ext4_bread():                                                     | 
-                    ext4_getblk():                                                  | 
-                      ext4_map_blocks():                                            | 
-                        ext4_es_lookup_extent():                                    | 
-                          _raw_read_lock()                                          | 
-                        ext4_es_lru_add()                                           | 
-                        ext4_data_block_valid()                                     | 
-                      __getblk():                                                   | 
-                        __find_get_block():                                         | 
-                          __find_get_block_slow():                                  | 
-                            find_get_page()                                         | 
-                            _raw_spin_lock()                                        | 
-                            _raw_spin_unlock()                                      | 
-                            put_page()                                              | 
-                          __brelse()                                                | 
-                          mark_page_accessed()                                      | 
-                        _cond_resched()                                             | 
-                add_dirent_to_buf():                                                | 
-                  ext4_find_dest_de():                                              | 
-                    __ext4_check_dir_entry()                                        | 
-                    __ext4_check_dir_entry()                                        | 
-                    __ext4_check_dir_entry()                                        | 
-                    __ext4_check_dir_entry()                                        | 
-                    __ext4_check_dir_entry()                                        | 
-                    __ext4_check_dir_entry()                                        | 
-                    __ext4_check_dir_entry()                                        | 
-                    __ext4_check_dir_entry()                                        | 
-                    __ext4_check_dir_entry()                                        | 
-                    __ext4_check_dir_entry()                                        | 
-                  __ext4_journal_get_write_access():                                | 
-                    _cond_resched()                                                 | 
-                    jbd2_journal_get_write_access():                                | 
-                      jbd2_journal_add_journal_head():                              | 
-                        kmem_cache_alloc():                                         | 
-                          _cond_resched()                                           | 
-                      do_get_write_access():                                        | 
-                        _cond_resched()                                             | 
-                        unlock_buffer():                                            | 
-                          wake_up_bit():                                            | 
-                            bit_waitqueue()                                         | 
-                            __wake_up_bit()                                         | 
-                        _raw_spin_lock()                                            | 
-                        __jbd2_journal_file_buffer():                               | 
-                          jbd2_journal_grab_journal_head()                          | 
-                        _raw_spin_unlock()                                          | 
-                        jbd2_journal_cancel_revoke()                                | 
-                      jbd2_journal_put_journal_head()                               | 
-                  ext4_insert_dentry()                                              | 
-                  current_fs_time():                                                | 
-                    current_kernel_time()                                           | 
-                  ext4_mark_inode_dirty():                                          | 
-                    _cond_resched()                                                 | 
-                    ext4_reserve_inode_write():                                     | 
-                      ext4_get_inode_loc():                                         | 
-                        __ext4_get_inode_loc():                                     | 
-                          ext4_get_group_desc()                                     | 
-                          ext4_inode_table()                                        | 
-                          __getblk():                                               | 
-                            __find_get_block():                                     | 
-                              __find_get_block_slow():                              | 
-                                find_get_page()                                     | 
-                                _raw_spin_lock()                                    | 
-                                _raw_spin_unlock()                                  | 
-                                put_page()                                          | 
-                              __brelse()                                            | 
-                              mark_page_accessed()                                  | 
-                            _cond_resched()                                         | 
-                      __ext4_journal_get_write_access():                            | 
-                        _cond_resched()                                             | 
-                        jbd2_journal_get_write_access():                            | 
-                          jbd2_journal_add_journal_head()                           | 
-                          do_get_write_access():                                    | 
-                            _cond_resched()                                         | 
-                            unlock_buffer():                                        | 
-                              wake_up_bit():                                        | 
-                                bit_waitqueue()                                     | 
-                                __wake_up_bit()                                     | 
-                            _raw_spin_lock()                                        | 
-                            __jbd2_journal_file_buffer():                           | 
-                              jbd2_journal_grab_journal_head()                      | 
-                            _raw_spin_unlock()                                      | 
-                            jbd2_journal_cancel_revoke()                            | 
-                          jbd2_journal_put_journal_head()                           | 
-                    ext4_mark_iloc_dirty():                                         | 
-                      ext4_get_inode_flags()                                        | 
-                      from_kuid():                                                  | 
-                        map_id_up()                                                 | 
-                      from_kgid():                                                  | 
-                        map_id_up()                                                 | 
-                      ext4_has_inline_data()                                        | 
-                      __ext4_handle_dirty_metadata():                               | 
-                        _cond_resched()                                             | 
-                        jbd2_journal_dirty_metadata():                              | 
-                          jbd2_journal_grab_journal_head()                          | 
-                          _raw_spin_lock()                                          | 
-                          __jbd2_journal_file_buffer():                             | 
-                            __jbd2_journal_temp_unlink_buffer()                     | 
-                          _raw_spin_unlock()                                        | 
-                          jbd2_journal_put_journal_head()                           | 
-                      __brelse()                                                    | 
-                  ext4_handle_dirty_dirent_node():                                  | 
-                    __ext4_handle_dirty_metadata():                                 | 
-                      _cond_resched()                                               | 
-                      jbd2_journal_dirty_metadata():                                | 
-                        jbd2_journal_grab_journal_head()                            | 
-                        _raw_spin_lock()                                            | 
-                        __jbd2_journal_file_buffer():                               | 
-                          __jbd2_journal_temp_unlink_buffer()                       | 
-                        _raw_spin_unlock()                                          | 
-                        jbd2_journal_put_journal_head()                             | 
-                __brelse()                                                          | 
-              ext4_mark_inode_dirty():                                              | 
-                _cond_resched()                                                     | 
-                ext4_reserve_inode_write():                                         | 
-                  ext4_get_inode_loc():                                             | 
-                    __ext4_get_inode_loc():                                         | 
-                      ext4_get_group_desc()                                         | 
-                      ext4_inode_table()                                            | 
-                      __getblk():                                                   | 
-                        __find_get_block():                                         | 
-                          mark_page_accessed()                                      | 
-                        _cond_resched()                                             | 
-                  __ext4_journal_get_write_access():                                | 
-                    _cond_resched()                                                 | 
-                    jbd2_journal_get_write_access():                                | 
-                      jbd2_journal_add_journal_head()                               | 
-                      do_get_write_access():                                        | 
-                        _cond_resched()                                             | 
-                        unlock_buffer():                                            | 
-                          wake_up_bit():                                            | 
-                            bit_waitqueue()                                         | 
-                            __wake_up_bit()                                         | 
-                        jbd2_journal_cancel_revoke()                                | 
-                      jbd2_journal_put_journal_head()                               | 
-                ext4_mark_iloc_dirty():                                             | 
-                  ext4_get_inode_flags()                                            | 
-                  from_kuid():                                                      | 
-                    map_id_up()                                                     | 
-                  from_kgid():                                                      | 
-                    map_id_up()                                                     | 
-                  ext4_has_inline_data()                                            | 
-                  __ext4_handle_dirty_metadata():                                   | 
-                    _cond_resched()                                                 | 
-                    jbd2_journal_dirty_metadata():                                  | 
-                      jbd2_journal_grab_journal_head()                              | 
-                      jbd2_journal_put_journal_head()                               | 
-                  __brelse()                                                        | 
-              unlock_new_inode():                                                   | 
-                _raw_spin_lock()                                                    | 
-                wake_up_bit():                                                      | 
-                  bit_waitqueue()                                                   | 
-                  __wake_up_bit()                                                   | 
-                _raw_spin_unlock()                                                  | 
-              d_instantiate():                                                      | 
-                _raw_spin_lock()                                                    | 
-                __d_instantiate():                                                  | 
-                  d_flags_for_inode()                                               | 
-                  _raw_spin_lock()                                                  | 
-                  _raw_spin_unlock()                                                | 
-                  _raw_spin_lock()                                                  | 
-                  _raw_spin_unlock()                                                | 
-                _raw_spin_unlock()                                                  | 
-                security_d_instantiate():                                           | 
-                  cap_d_instantiate()                                               | 
-            __ext4_journal_stop():                                                  | 
-              jbd2_journal_stop():                                                  | 
-                __wake_up():                                                        | 
-                  _raw_spin_lock_irqsave()                                          | 
-                  __wake_up_common()                                                | 
-                  _raw_spin_unlock_irqrestore()                                     | 
-                kmem_cache_free()                                                   | 
-          fsnotify():                                                               | 
-            __srcu_read_lock()                                                      | 
-            send_to_group():                                                        | 
-              inotify_should_send_event()                                           | 
-              fsnotify_create_event():                                              | 
-                kmem_cache_alloc():                                                 | 
-                  _cond_resched()                                                   | 
-                kstrdup():                                                          | 
-                  __kmalloc_track_caller():                                         | 
-                    kmalloc_slab()                                                  | 
-                    _cond_resched()                                                 | 
-              inotify_handle_event():                                               | 
-                kmem_cache_alloc():                                                 | 
-                  _cond_resched()                                                   | 
-                fsnotify_get_group()                                                | 
-                fsnotify_add_notify_event():                                        | 
-                  mutex_lock():                                                     | 
-                    _cond_resched()                                                 | 
-                  _raw_spin_lock()                                                  | 
-                  _raw_spin_unlock()                                                | 
-                  mutex_unlock()                                                    | 
-                  __wake_up():                                                      | 
-                    _raw_spin_lock_irqsave()                                        | 
-                    __wake_up_common():                                             | 
-                      pollwake():                                                   | 
-                        default_wake_function():                                    | 
-                          try_to_wake_up():                                         | 
-                            _raw_spin_lock_irqsave()                                | 
-                            task_waking_fair()                                      | 
-                            select_task_rq_fair():                                  | 
-                              source_load()                                         | 
-                              target_load()                                         | 
-                              idle_cpu()                                            | 
-                              cpus_share_cache()                                    | 
-                              idle_cpu()                                            | 
-                            set_task_cpu():                                         | 
-                              migrate_task_rq_fair()                                | 
-                            _raw_spin_lock()                                        | 
-                            ttwu_do_activate.constprop.74():                        | 
-                              activate_task():                                      | 
-                                enqueue_task():                                     | 
-                                  update_rq_clock.part.63()                         | 
-                                  enqueue_task_fair():                              | 
-                                    enqueue_entity():                               | 
-                                      update_curr()                                 | 
-                                      __compute_runnable_contrib.part.51()          | 
-                                      update_cfs_rq_blocked_load()                  | 
-                                      account_entity_enqueue()                      | 
-                                      update_cfs_shares()                           | 
-                                      place_entity()                                | 
-                                      __enqueue_entity()                            | 
-                                      update_cfs_rq_blocked_load()                  | 
-                                    enqueue_entity():                               | 
-                                      update_curr()                                 | 
-                                      update_cfs_rq_blocked_load()                  | 
-                                      account_entity_enqueue()                      | 
-                                      update_cfs_shares()                           | 
-                                      place_entity()                                | 
-                                      __enqueue_entity()                            | 
-                                    hrtick_update()                                 | 
-                              ttwu_do_wakeup():                                     | 
-                                check_preempt_curr():                               | 
-                                  resched_task():                                   | 
-                                    native_smp_send_reschedule():                   | 
-                                      x2apic_send_IPI_mask():                       | 
-                                        __x2apic_send_IPI_mask()                    | 
-                            _raw_spin_unlock()                                      | 
-                            ttwu_stat()                                             | 
-                            _raw_spin_unlock_irqrestore()                           | 
-                    _raw_spin_unlock_irqrestore()                                   | 
-                  kill_fasync()                                                     | 
-            send_to_group():                                                        | 
-              inotify_should_send_event()                                           | 
-              inotify_handle_event():                                               | 
-                kmem_cache_alloc():                                                 | 
-                  _cond_resched()                                                   | 
-                fsnotify_get_group()                                                | 
-                fsnotify_add_notify_event():                                        | 
-                  kmem_cache_alloc():                                               | 
-                    _cond_resched()                                                 | 
-                  mutex_lock():                                                     | 
-                    _cond_resched()                                                 | 
-                  _raw_spin_lock()                                                  | 
-                  _raw_spin_unlock()                                                | 
-                  mutex_unlock()                                                    | 
-                  __wake_up():                                                      | 
-                    _raw_spin_lock_irqsave()                                        | 
-                    __wake_up_common():                                             | 
-                      pollwake():                                                   | 
-                        default_wake_function():                                    | 
-                          try_to_wake_up():                                         | 
-                            _raw_spin_lock_irqsave()                                | 
-                            task_waking_fair()                                      | 
-                            select_task_rq_fair():                                  | 
-                              source_load()                                         | 
-                              target_load()                                         | 
-                              idle_cpu()                                            | 
-                              cpus_share_cache()                                    | 
-                              idle_cpu()                                            | 
-                            set_task_cpu():                                         | 
-                              migrate_task_rq_fair()                                | 
-                            _raw_spin_lock()                                        | 
-                            ttwu_do_activate.constprop.74():                        | 
-                              activate_task():                                      | 
-                                enqueue_task():                                     | 
-                                  update_rq_clock.part.63()                         | 
-                                  enqueue_task_fair():                              | 
-                                    enqueue_entity():                               | 
-                                      update_curr()                                 | 
-                                      __compute_runnable_contrib.part.51()          | 
-                                      update_cfs_rq_blocked_load()                  | 
-                                      account_entity_enqueue()                      | 
-                                      update_cfs_shares()                           | 
-                                      place_entity()                                | 
-                                      __enqueue_entity()                            | 
-                                      update_cfs_rq_blocked_load()                  | 
-                                    enqueue_entity():                               | 
-                                      update_curr():                                | 
-                                        update_min_vruntime()                       | 
-                                      update_cfs_rq_blocked_load()                  | 
-                                      account_entity_enqueue()                      | 
-                                      update_cfs_shares()                           | 
-                                      place_entity()                                | 
-                                      __enqueue_entity()                            | 
-                                    hrtick_update()                                 | 
-                              ttwu_do_wakeup():                                     | 
-                                check_preempt_curr():                               | 
-                                  check_preempt_wakeup():                           | 
-                                    update_curr()                                   | 
-                                    wakeup_gran.isra.47():                          | 
-                                      __calc_delta()                                | 
-                            _raw_spin_unlock()                                      | 
-                            ttwu_stat()                                             | 
-                            _raw_spin_unlock_irqrestore()                           | 
-                    _raw_spin_unlock_irqrestore()                                   | 
-                  kill_fasync()                                                     | 
-            __srcu_read_unlock()                                                    | 
-            fsnotify_put_event()                                                    | 
-        mutex_unlock()                                                              | 
-        dput()                                                                      | 
-        may_open():                                                                 | 
-          inode_permission():                                                       | 
-            __inode_permission():                                                   | 
-              _raw_spin_lock()                                                      | 
-              _raw_spin_unlock()                                                    | 
-              generic_permission()                                                  | 
-              security_inode_permission():                                          | 
-                cap_inode_permission()                                              | 
-        vfs_open():                                                                 | 
-          do_dentry_open():                                                         | 
-            path_get():                                                             | 
-              mntget()                                                              | 
-            __mnt_want_write()                                                      | 
-            try_module_get()                                                        | 
-            security_file_open():                                                   | 
-              apparmor_file_open()                                                  | 
-              __fsnotify_parent():                                                  | 
-                dget_parent()                                                       | 
-                dput()                                                              | 
-              fsnotify()                                                            | 
-            ext4_file_open():                                                       | 
-              ext4_inode_attach_jinode():                                           | 
-                kmem_cache_alloc():                                                 | 
-                  _cond_resched()                                                   | 
-                _raw_spin_lock()                                                    | 
-                jbd2_journal_init_jbd_inode()                                       | 
-                _raw_spin_unlock()                                                  | 
-              dquot_file_open():                                                    | 
-                generic_file_open()                                                 | 
-                __dquot_initialize():                                               | 
-                  dquot_active.isra.8()                                             | 
-            file_ra_state_init()                                                    | 
-        open_check_o_direct()                                                       | 
-        ima_file_check():                                                           | 
-          mutex_lock():                                                             | 
-            _cond_resched()                                                         | 
-          mutex_unlock()                                                            | 
-          process_measurement():                                                    | 
-            ima_template_desc_current()                                             | 
-            ima_get_action():                                                       | 
-              ima_match_policy()                                                    | 
-        mnt_drop_write():                                                           | 
-          __sb_end_write()                                                          | 
-        dput()                                                                      | 
-        mntput()                                                                    | 
-        terminate_walk():                                                           | 
-          dput()                                                                    | 
-          mntput():                                                                 | 
-            mntput_no_expire()                                                      |
-
+																																										|
       ******************************************************************************|*****************************************************|*************************************************|****************************************************************
 			
 			******************************************************************************|*****************************************************|*************************************************|****************************************************************
@@ -1129,8 +944,7 @@ do_sys_open(): 																															        |       fs/namei.c        
 										this_cpu_add()																					        |				include/linux/percpu.h                        |                                                 |
 										preempt_disable()																				        |				include/linux/preempt.h												| 内部可能会调用kernel下的preempt_count_add()			|			在mnt_add_count()内发送关于preempt_disable()的消息
 										preempt_enable()																				        |				include/linux/preempt.h												|	内部可能会调用kernel下的preempt_count_sub()			|			在mnt_add_count()内发送关于preempt_enable()的消息
-								dget():																											        |				include/linux/dcache.h												|																									|
-									lockref_get()																							        |				lib/lockref.c																	|																									|			在dget()内发送关于lockref_get()的消息
+								dget() 																											        |				include/linux/dcache.h												|	调用lockref_get()，它会调用kernel和lib中的函数	|			在path_get()内发送关于dget()的消息
 					srcu_read_unlock()																								        |				include/linux/srcu.h													|	内部会调用若干定义在kernel和lib中的函数			    |			在fsnotify()内发送关于srcu_read_unlock()的消息
 					fsnotify_put_event():                                                     |     	fs/notify/notification.c 											|																									|                                                                                          
 						atomic_dec_and_test()                                                   |       arch/x86/include/asm/atomic.h									|																									|			在fsnotify_put_event()内发送关于atomic_dec_and_test()的消息

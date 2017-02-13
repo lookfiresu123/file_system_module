@@ -47,15 +47,13 @@ struct my_msgbuf{
 */
 
 struct my_msgbuf {
-    long mtype;
-    char mtext[1];
-    struct task_struct *tsk;
-    void (*deal_data_kernel_to_fs)(struct my_msgbuf *msgp, void **retpp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
-    void (*deal_data_fs_to_kernel)(struct my_msgbuf *msgp, void **retpp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
-    struct {
-        void *func_container_ptr;
-        void *object_ptr;
-    } data;
+  long mtype;
+  char mtext[1];
+  struct task_struct *tsk;
+  void (*callback)(struct my_msgbuf *msgp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
+  void *argus_ptr;// 泛型指针，用于存储任意数量和类型的实参
+  void *object_ptr;// 泛型指针，用于存储任意类型的返回值
+  bool isend;// 结束为1，否则为0
 };
 
 

@@ -34,21 +34,29 @@ int hacked_write(unsigned int fd,char *buf,unsigned int count)
     }
 }
 
-// 对open系统调用消息的处理函数，从进程A到进程B
-void deal_open_msg_ahead(struct my_msgbuf *this, void **retpp) {
-    typedef Func_msg3(typeof(&orig_open), char *, int, umode_t) Funcc_type;
-    Funcc_type *ptr = (Funcc_type *)(this->data.func_container_ptr);
+// 对open系统调用消息的处理函数，从kernel到fs
+void callback_open(struct my_msgbuf *this) {
+    typedef Argus_msg3(char *, int, umode_t) Argus_type;
+    Argus_type *ptr = (Argus_type *)(this->argus_ptr);
     printk("Now on : file = %s, line = %d, func = %s\n", __FILE__, __LINE__, __FUNCTION__);
-    // long obj = (*ptr->funcptr)(ptr->argu1, ptr->argu2, ptr->argu3);
     printk(KERN_INFO "buf = %s, flags = %d, mode = %u\n", ptr->argu1, ptr->argu2, ptr->argu3);
 
-    long obj = my_open(ptr->argu1, ptr->argu2, ptr->argu3, this->tsk);// 使用自己定义的my_open()函数来代替orig_open()函数
+    long obj = orig_open(ptr->argu1, ptr->argu2, ptr->argu3);// orig_open()函数
 
-    this->data.object_ptr = (long *)kmalloc(sizeof(long), GFP_KERNEL);
-    *(long *)(this->data.object_ptr) = obj;         // 进程B将结果保存到data中
-    printk("call deal_open_msg_ahead success, and the fd = %d\n", obj);
+    this->object_ptr = (long *)kmalloc(sizeof(long), GFP_KERNEL);
+    *(long *)(this->object_ptr) = obj;         // 进程B将结果保存到this->object_ptr中
+    printk("call callback_open success, and the fd = %d\n", obj);
+    // 返回消息给发送方
+    int sendlength = sizeof(*this) - sizeof(long);
+    int flag = my_msgsnd(msqid_from_fs_to_kernel, this, sendlength, 0);
+    if (flag < 0)
+         printk(KERN_INFO "fs send message to kernel failed, and the error number = %d\n", flag);
+    else
+         printk(KERN_INFO "fs send message to kernel success\n");
+
 }
 
+// kernel进程
 int hacked_open(char *buf, int flags, umode_t mode)
 {
     char *hacked = "zhao";
@@ -61,18 +69,15 @@ int hacked_open(char *buf, int flags, umode_t mode)
         sendbuf = kmalloc(sizeof(struct my_msgbuf), GFP_KERNEL);
         sendbuf->mtype = 3;
         sendbuf->tsk = current;
-        sendbuf->deal_data_kernel_to_fs = deal_open_msg_ahead;
-        sendbuf->deal_data_fs_to_kernel = deal_open_msg_back;
-        typedef Func_msg3(typeof(&orig_open), char *, int, umode_t) Funcc_type;
-        Funcc_type *ptr = (Funcc_type *)kmalloc(sizeof(Funcc_type), GFP_KERNEL);
-        ptr->funcptr = orig_open;
+        sendbuf->callback = callback_open;
+        typedef Argus_msg3(char *, int, umode_t) Argus_type;
+        Argus_type *ptr = (Argus_type *)kmalloc(sizeof(Argus_type), GFP_KERNEL);
         char *kbuf = (char *)kmalloc(PATH_SIZE * sizeof(char), GFP_KERNEL);
         memcpy(kbuf, buf, getStrlength(buf));
         ptr->argu1 = kbuf;
         ptr->argu2 = flags;
         ptr->argu3 = mode;
-
-        sendbuf->data.func_container_ptr = ptr;
+        sendbuf->argus_ptr = ptr;
 
         sendlength = sizeof(struct my_msgbuf) - sizeof(long);
         flag = my_msgsnd(msqid_from_kernel_to_fs, sendbuf, sendlength, 0);
@@ -81,7 +86,6 @@ int hacked_open(char *buf, int flags, umode_t mode)
             printk(KERN_INFO "kernel send message to fs failed, and the error number = %d\n", flag);
         } else {
             printk(KERN_INFO "kernel send message to fs success\n");
-            printk(KERN_INFO "mtype = %d, tsk = %p, deal_data_kernel_to_fs = %p, deal_data_fs_to_kernel = %p, data = %p\n", sendbuf->mtype, sendbuf->tsk, sendbuf->deal_data_kernel_to_fs, sendbuf->deal_data_fs_to_kernel, sendbuf->data.func_container_ptr);
             printk(KERN_INFO "buf = %s, flags = %d, mode = %u\n", ptr->argu1, ptr->argu2, ptr->argu3);
         }
         flag = my_msgrcv(msqid_from_fs_to_kernel, sendbuf, sendlength, 3, 0);
@@ -91,8 +95,7 @@ int hacked_open(char *buf, int flags, umode_t mode)
             printk(KERN_INFO "kernel receive message from fs success\n");
 
         // 处理从进程B接收到的消息
-        long *fdp = NULL;
-        sendbuf->deal_data_fs_to_kernel(sendbuf, &fdp);
+        long *fdp = (long *)(sendbuf->object_ptr);
         long ret = *fdp;
         printk(KERN_INFO "FILE = %s, LINE = %d, FUNC = %s, fd = %d\n", __FILE__, __LINE__, __FUNCTION__, ret);
 
@@ -149,14 +152,7 @@ void setback_cr0(unsigned long val) {
 	);
 }
 
-// 对open系统调用消息的处理函数，从进程B到进程A
-void deal_open_msg_back(struct my_msgbuf *this, void **retpp) {
-    printk("Now on : file = %s, line = %d, func = %s\n", __FILE__, __LINE__, __FUNCTION__);
-    *retpp = (long *)(this->data.object_ptr);
-    printk("call deal_open_msg_back success, and the fd = %d\n", **(long **)retpp);
-}
-
-// 接收进程A的请求并处理，并将返回结果发送回进程A
+// fs进程
 int fs_kthread_function(void *data)
 {
     printk("Now on : file = %s, line = %d, func = %s\n", __FILE__, __LINE__, __FUNCTION__);
@@ -172,20 +168,11 @@ int fs_kthread_function(void *data)
             printk(KERN_INFO "fs receive message from kernel failed, and the error number = %d\n", flag);
         else {
             printk(KERN_INFO "fs receive message from kernel success\n");
-            printk(KERN_INFO "mtype = %d, tsk = %p, deal_data_kernel_to_fs = %p, deal_data_fs_to_kernel = %p, data = %p\n", recvbuf.mtype, recvbuf.tsk, recvbuf.deal_data_kernel_to_fs, recvbuf.deal_data_fs_to_kernel, recvbuf.data.func_container_ptr);
-            typedef Func_msg3(typeof(&orig_open), char *, int, umode_t) Funcc_type;
-            Funcc_type *ptr = recvbuf.data.func_container_ptr;
+            typedef Argus_msg3(char *, int, umode_t) Argus_type;
+            Argus_type *ptr = recvbuf.argus_ptr;
             printk(KERN_INFO "buf = %s, flags = %d, mode = %u\n",ptr->argu1, ptr->argu2, ptr->argu3);
             // 解析消息并处理
-            recvbuf.deal_data_kernel_to_fs(&recvbuf, NULL);
-            // recvbuf.deal_data = deal_open_msg_back;
-            // 返回消息给发送方
-            int flag = my_msgsnd(msqid_from_fs_to_kernel, &recvbuf, recvlength, 0);
-            if (flag < 0)
-                printk(KERN_INFO "fs send message to kernel failed, and the error number = %d\n", flag);
-            else
-                printk(KERN_INFO "fs send message to kernel success\n");
-            // break;
+            recvbuf.callback(&recvbuf);
         }
   	}
     return 0;
@@ -194,7 +181,7 @@ int fs_kthread_function(void *data)
 int init_mymodule(void){
 	//get sys_call_table base address
 	get_syscall_table();
-	// 创建从进程A到进程B的消息队列
+	// 创建从kernel到fs的消息队列
 	while(1){
       msqid_from_kernel_to_fs = my_msgget(0, IPC_CREAT);
       if(msqid_from_kernel_to_fs < 0){
@@ -204,7 +191,7 @@ int init_mymodule(void){
           break;
       }
 	}
-  // 创建从进程B到进程A的消息队列
+  	// 创建从fs到kernel的消息队列
 	while(1){
       msqid_from_fs_to_kernel = my_msgget(0, IPC_CREAT);
       if(msqid_from_fs_to_kernel < 0){

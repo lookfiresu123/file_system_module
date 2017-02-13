@@ -41,7 +41,6 @@
 #include <linux/time.h>
 
 #include "my_msg.h"
-#include "open.h"
 
 
 MODULE_LICENSE("GPL");
@@ -55,73 +54,54 @@ MODULE_LICENSE("GPL");
 #define Pointer(T) typeof(T *)
 #define Array(T, N) typeof(T [N])
 
-#define Func_msg0(functype)                     \
-    struct Func_container2 {                    \
-        functype funcptr;                       \
+#define Argus_msg0()                             \
+    struct Argus_container0 {                    \
     }
 
-#define Func_msg1(functype, type1)              \
-    struct Func_container2 {                    \
-        functype funcptr;                       \
-        type1 argu1;                            \
+#define Argus_msg1(type1)                        \
+    struct Argus_container1 {                    \
+      type1 argu1;                               \
     }
 
-#define Func_msg2(functype, type1, type2)       \
-    struct Func_container2 {                    \
-        functype funcptr;                       \
-        type1 argu1;                            \
-        type2 argu2;                            \
+#define Argus_msg2(type1, type2)                 \
+    struct Argus_container2 {                    \
+      type1 argu1;                               \
+      type2 argu2;                               \
     }
 
-#define Func_msg3(functype, type1, type2, type3)  \
-    struct Func_container3 {                      \
-        functype funcptr;                         \
-        type1 argu1;                              \
-        type2 argu2;                              \
-        type3 argu3;                              \
+#define Argus_msg3(type1, type2, type3)            \
+    struct Argus_container3 {                      \
+      type1 argu1;                                 \
+      type2 argu2;                                 \
+      type3 argu3;                                 \
     }
 
-#define Func_msg4(functype, type1, type2, type3, type4) \
-    struct Func_container4 {                            \
-        functype funcptr;                               \
-        type1 argu1;                                    \
-        type2 argu2;                                    \
-        type3 argu3;                                    \
-        type4 argu4;                                    \
+#define Argus_msg4(type1, type2, type3, type4)           \
+    struct Argus_container4 {                            \
+      type1 argu1;                                       \
+      type2 argu2;                                       \
+      type3 argu3;                                       \
+      type4 argu4;                                       \
     }
 
-#define Func_msg5(functype, type1, type2, type3, type4, type5)  \
-    struct Func_container5 {                                    \
-        functype funcptr;                                       \
-        type1 argu1;                                            \
-        type2 argu2;                                            \
-        type3 argu3;                                            \
-        type4 argu4;                                            \
-        type5 argu5;                                            \
+#define Argus_msg5(type1, type2, type3, type4, type5)            \
+    struct Argus_container5 {                                    \
+      type1 argu1;                                               \
+      type2 argu2;                                               \
+      type3 argu3;                                               \
+      type4 argu4;                                               \
+      type5 argu5;                                               \
     }
 
-#define Func_msg6(functype, type1, type2, type3, type4, type5, type6) \
-    struct Func_container6 {                                          \
-        functype funcptr;                                             \
-        type1 argu1;                                                  \
-        type2 argu2;                                                  \
-        type3 argu3;                                                  \
-        type4 argu4;                                                  \
-        type5 argu5;                                                  \
-        type6 argu6;                                                  \
+#define Argus_msg6(type1, type2, type3, type4, type5, type6)           \
+    struct Argus_container6 {                                          \
+      type1 argu1;                                                     \
+      type2 argu2;                                                     \
+      type3 argu3;                                                     \
+      type4 argu4;                                                     \
+      type5 argu5;                                                     \
+      type6 argu6;                                                     \
     }
-
-/*
-struct my_msgbuf {
-    long mtype;
-    struct task_struct *tsk;
-    void (*deal_data)(struct my_msgbuf *msgp, void **retpp);                 // 需要在初始化时注册处理函数，用于让接收方或发送方调用并处理该消息中的data_ptr
-    union {
-        void *func_container_ptr;
-        void *object_ptr;
-    } data;
-};
-*/
 
 static unsigned long long *syscall_table_addr;
 int (*orig_write)(unsigned int fd,char *buf,unsigned int count);
