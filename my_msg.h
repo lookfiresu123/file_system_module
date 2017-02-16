@@ -54,6 +54,7 @@ struct my_msgbuf {
   void *argus_ptr;// 泛型指针，用于存储任意数量和类型的实参
   void *object_ptr;// 泛型指针，用于存储任意类型的返回值
   bool isend;// 结束为1，否则为0
+  int msqid;//回调函数会将消息发送到这个消息队列中
 };
 
 
