@@ -39,8 +39,11 @@
 #include <linux/compiler.h>
 #include <linux/fsnotify.h>
 #include <linux/time.h>
+#include <linux/string.h>
 
-#include "my_msg.h"
+#include <linux/my_msg.h>
+#include <linux/interactive_design.h>
+// #include "my_msg.h"
 
 
 MODULE_LICENSE("GPL");
@@ -109,8 +112,11 @@ int (*orig_open)(char *buf, int flags, umode_t mode);
 int (*orig_read)(unsigned int fd, char *buf, unsigned int count);
 int (*orig_close)(unsigned int fd);
 
-static int msqid_from_kernel_to_fs = -1;
-static int msqid_from_fs_to_kernel = -1;
+// static int msqid_from_kernel_to_fs;
+// static int msqid_from_fs_to_kernel;
+extern bool fs_start;
+extern struct task_struct *fs_temp;
+
 static int isRemove_module = 0;
 struct work_struct current_work;    // 定义一个工作
 struct timeval tpstart, tpend;

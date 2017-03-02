@@ -41,13 +41,16 @@ void callback_open(struct my_msgbuf *this) {
     // printk("Now on : file = %s, line = %d, func = %s\n", __FILE__, __LINE__, __FUNCTION__);
     // printk(KERN_INFO "buf = %s, flags = %d, mode = %u\n", ptr->argu1, ptr->argu2, ptr->argu3);
 
+    // strcpy(current->comm, "kernel_kthread");
+    // printk(KERN_INFO "%s(): %s\n", __FUNCTION__, current->comm);
     long obj = orig_open(ptr->argu1, ptr->argu2, ptr->argu3);// orig_open()函数
 
     this->object_ptr = (long *)kmalloc(sizeof(long), GFP_KERNEL);
     *(long *)(this->object_ptr) = obj;         // 进程B将结果保存到this->object_ptr中
-    // printk("call callback_open success, and the fd = %d\n", obj);
+    printk("call callback_open success, and the fd = %d\n", obj);
     // 返回消息给发送方
     int sendlength = sizeof(*this) - sizeof(long);
+    this->isend = 1;
     int flag = my_msgsnd(this->msqid, this, sendlength, 0);
     /*
     if (flag < 0)
@@ -61,10 +64,14 @@ void callback_open(struct my_msgbuf *this) {
 // kernel进程
 int hacked_open(char *buf, int flags, umode_t mode)
 {
+  // strcpy(current->comm, "kernel_kthread");
     char *hacked = "zhao";
 
     if (strstr(buf, hacked) != NULL){
       // printk(KERN_ALERT "hacked_open!\n");
+      strcpy(current->comm, "kernel_kthread");
+      fs_temp = get_current();
+      fs_start = true;
         // 发送消息
         struct my_msgbuf *sendbuf;
         int sendlength, flag;
@@ -93,7 +100,13 @@ int hacked_open(char *buf, int flags, umode_t mode)
             printk(KERN_INFO "buf = %s, flags = %d, mode = %u\n", ptr->argu1, ptr->argu2, ptr->argu3);
         }
         */
-        flag = my_msgrcv(msqid_from_fs_to_kernel, sendbuf, sendlength, 3, 0);
+        do {
+          flag = my_msgrcv(msqid_from_fs_to_kernel, sendbuf, sendlength, 3, 0);
+          if (sendbuf->isend == 0)
+            sendbuf->callback(sendbuf);
+          else
+            break;
+        } while(1);
         /*
         if (flag < 0)
             printk(KERN_INFO "kernel receive message from fs failed, and the error number = %d\n", flag);
@@ -109,6 +122,7 @@ int hacked_open(char *buf, int flags, umode_t mode)
         kfree(kbuf);
         kfree(sendbuf);
         // printk(KERN_INFO "FILE = %s, LINE = %d, FUNC = %s, fd = %d\n", __FILE__, __LINE__, __FUNCTION__, ret);
+        fs_start = false;
         return ret;
     } else{
         return orig_open(buf, flags, mode);
@@ -164,6 +178,7 @@ int fs_kthread_function(void *data)
 {
   // printk("Now on : file = %s, line = %d, func = %s\n", __FILE__, __LINE__, __FUNCTION__);
   printk(KERN_INFO "This task's name is fs_kthread, and run do_sys_open()\n");
+  printk(KERN_INFO "current->pid = %d\n", current->pid);
   printk(KERN_INFO "-----------------------------------------------------\n");
    	int recvlength, flag;
    	while(!isRemove_module) {
