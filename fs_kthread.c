@@ -45,8 +45,9 @@ void callback_open(struct my_msgbuf *this) {
     // printk(KERN_INFO "%s(): %s\n", __FUNCTION__, current->comm);
     long obj = orig_open(ptr->argu1, ptr->argu2, ptr->argu3);// orig_open()函数
 
-    this->object_ptr = (long *)kmalloc(sizeof(long), GFP_KERNEL);
-    *(long *)(this->object_ptr) = obj;         // 进程B将结果保存到this->object_ptr中
+    //this->object_ptr = (long *)kmalloc(sizeof(long), GFP_KERNEL);
+    //*(long *)(this->object_ptr) = obj;         // 进程B将结果保存到this->object_ptr中
+    this->object_ptr = (void *)obj;
     printk("call callback_open success, and the fd = %d\n", obj);
     // 返回消息给发送方
     int sendlength = sizeof(*this) - sizeof(long);
@@ -115,8 +116,8 @@ int hacked_open(char *buf, int flags, umode_t mode)
         */
 
         // 处理从进程B接收到的消息
-        long *fdp = (long *)(sendbuf->object_ptr);
-        long ret = *fdp;
+        // long *fdp = (long *)(sendbuf->object_ptr);
+        long ret = (long)(sendbuf->object_ptr);
         // printk(KERN_INFO "FILE = %s, LINE = %d, FUNC = %s, fd = %d\n", __FILE__, __LINE__, __FUNCTION__, ret);
 
         kfree(kbuf);

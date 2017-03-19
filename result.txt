@@ -1,0 +1,663 @@
+[  136.433286] mfs_kthread: module verification failed: signature and/or  required key missing - tainting kernel
+[  136.434752] kfree(): fs_kthread
+[  136.434756] This task's name is fs_kthread, and run do_sys_open()
+[  136.434757] current->pid = 3148
+[  136.434757] -----------------------------------------------------
+[  140.199513] do_general_protection: 39 callbacks suppressed
+[  140.199520] traps: dpkg[3171] general protection ip:40bce0 sp:7fff36013ef8 error:0 in dpkg[400000+3f000]
+[  140.199540] Process 3171(dpkg) has RLIMIT_CORE set to 1
+[  140.199542] Aborting core
+[  140.951702] traps: dpkg[3196] general protection ip:40bce0 sp:7fff11827a28 error:0 in dpkg[400000+3f000]
+[  140.951714] Process 3196(dpkg) has RLIMIT_CORE set to 1
+[  140.951715] Aborting core
+[  141.248134] traps: dpkg[3204] general protection ip:40bce0 sp:7fff8786df38 error:0 in dpkg[400000+3f000]
+[  141.248147] Process 3204(dpkg) has RLIMIT_CORE set to 1
+[  141.248148] Aborting core
+[  141.272035] Process 3209(apport) has RLIMIT_CORE set to 1
+[  141.272038] Aborting core
+[  154.815974] File = /home/lookfiresu/Desktop/file_system_module/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.815977] get_seconds(): kernel_kthread
+[  154.815978] get_seconds(): kernel_kthread
+[  154.816067] kfree(): fs_kthread
+[  154.816070] do_sys_open(): fs_kthread
+[  154.816071] msg_audit_reusename(): fs_kthread
+[  154.816073] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816074] get_seconds(): fs_kthread
+[  154.816075] get_seconds(): fs_kthread
+[  154.816095] ------------[ cut here ]------------
+[  154.816102] WARNING: CPU: 2 PID: 0 at kernel/sched/cputime.c:642 get_vtime_delta+0x64/0x80()
+[  154.816120] kfree(): kernel_kthread
+[  154.816121] callback_audit_reusename(): kernel_kthread
+[  154.816122] audit_reusename(): kernel_kthread
+[  154.816123] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816125] get_seconds(): kernel_kthread
+[  154.816127] get_seconds(): kernel_kthread
+[  154.816102] Modules linked in: mfs_kthread(OF) vmw_vsock_vmci_transport vsock rfcomm bnep bluetooth binfmt_misc vmwgfx snd_ens1371 snd_ac97_codec ac97_bus gameport snd_pcm ttm snd_page_alloc snd_seq_midi snd_seq_midi_event snd_rawmidi drm snd_seq coretemp crct10dif_pclmul snd_seq_device snd_timer crc32_pclmul ghash_clmulni_intel snd aesni_intel parport_pc aes_x86_64 psmouse ppdev lrw lp soundcore gf128mul vmw_vmci glue_helper shpchp parport ablk_helper i2c_piix4 serio_raw cryptd vmw_balloon mac_hid hid_generic usbhid hid ahci libahci e1000 vmw_pvscsi mptspi mptscsih mptbase vmxnet3
+[  154.816136] CPU: 2 PID: 0 Comm: swapper/2 Tainted: GF          O 3.13.0+ #33
+[  154.816137] Hardware name: VMware, Inc. VMware Virtual Platform/440BX Desktop Reference Platform, BIOS 6.00 07/02/2015
+[  154.816139]  ffffffff81a591a8 ffff88007b125d70 ffffffff8171d82c 0000000000000000
+[  154.816141]  ffff88007b125da8 ffffffff8106dc0f 00000004479ccdc7 ffff8800675b17f0
+[  154.816143]  ffff880075d85e80 0000000000000001 ffff88007b11afe0 ffff88007b125db8
+[  154.816144] Call Trace:
+[  154.816149]  [<ffffffff8171d82c>] dump_stack+0x45/0x56
+[  154.816151]  [<ffffffff8106dc0f>] warn_slowpath_common+0xaf/0xf0
+[  154.816152]  [<ffffffff8106dd0a>] warn_slowpath_null+0x1a/0x20
+[  154.816154]  [<ffffffff810ae4d4>] get_vtime_delta+0x64/0x80
+[  154.816155]  [<ffffffff810ae812>] __vtime_account_system+0x12/0x40
+[  154.816157]  [<ffffffff810aec7d>] vtime_account_system+0x2d/0x50
+[  154.816158]  [<ffffffff810af08c>] vtime_common_task_switch+0x1c/0x40
+[  154.816160]  [<ffffffff810a80d8>] finish_task_switch+0x1c8/0x270
+[  154.816162]  [<ffffffff81721f84>] __schedule+0x384/0x830
+[  154.816164]  [<ffffffff8172248d>] schedule+0x5d/0xb0
+[  154.816165]  [<ffffffff81722bfe>] schedule_preempt_disabled+0xe/0x10
+[  154.816168]  [<ffffffff810d1316>] cpu_startup_entry+0x276/0x2c0
+[  154.816171]  [<ffffffff81044e79>] start_secondary+0x249/0x310
+[  154.816172] ---[ end trace 33447108556077bb ]---
+[  154.816175] kfree(): fs_kthread
+[  154.816177] msg_audit_reusename() cost 104933
+[  154.816177] kmem_cache_alloc(): fs_kthread
+[  154.816178] msg_audit_getname(): fs_kthread
+[  154.816179] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816180] get_seconds(): fs_kthread
+[  154.816181] get_seconds(): fs_kthread
+[  154.816213] kfree(): kernel_kthread
+[  154.816215] callback_audit_getname(): kernel_kthread
+[  154.816216] audit_getname(): kernel_kthread
+[  154.816217] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816218] get_seconds(): kernel_kthread
+[  154.816218] get_seconds(): kernel_kthread
+[  154.816256] kfree(): fs_kthread
+[  154.816259] msg_audit_getname() cost 79349
+[  154.816260] do_filp_open(): fs_kthread
+[  154.816261] path_openat(): fs_kthread
+[  154.816262] msg_kmem_cache_zalloc(): fs_kthread
+[  154.816263] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816264] get_seconds(): fs_kthread
+[  154.816265] get_seconds(): fs_kthread
+[  154.816306] kfree(): kernel_kthread
+[  154.816308] callback_kmem_cache_zalloc(): kernel_kthread
+[  154.816309] kmem_cache_zalloc(): kernel_kthread
+[  154.816309] kmem_cache_alloc(): kernel_kthread
+[  154.816310] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816311] get_seconds(): kernel_kthread
+[  154.816312] get_seconds(): kernel_kthread
+[  154.816350] kfree(): fs_kthread
+[  154.816352] msg_kmem_cache_zalloc() cost 89172
+[  154.816353] msg_percpu_counter_inc(): fs_kthread
+[  154.816354] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816355] get_seconds(): fs_kthread
+[  154.816355] get_seconds(): fs_kthread
+[  154.816392] kfree(): kernel_kthread
+[  154.816394] callback_percpu_counter_inc(): kernel_kthread
+[  154.816395] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816396] get_seconds(): kernel_kthread
+[  154.816396] get_seconds(): kernel_kthread
+[  154.816432] kfree(): fs_kthread
+[  154.816433] msg_percpu_counter_inc() cost 79780
+[  154.816434] msg_get_cred(): fs_kthread
+[  154.816435] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816436] get_seconds(): fs_kthread
+[  154.816437] get_seconds(): fs_kthread
+[  154.816489] kfree(): kernel_kthread
+[  154.816491] callback_get_cred(): kernel_kthread
+[  154.816492] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816493] get_seconds(): kernel_kthread
+[  154.816493] get_seconds(): kernel_kthread
+[  154.816533] kfree(): fs_kthread
+[  154.816535] msg_get_cred() cost 99837
+[  154.816536] do_last(): fs_kthread
+[  154.816537] msg_audit_inode(): fs_kthread
+[  154.816539] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816539] get_seconds(): fs_kthread
+[  154.816540] get_seconds(): fs_kthread
+[  154.816580] kfree(): kernel_kthread
+[  154.816582] callback_audit_inode(): kernel_kthread
+[  154.816583] audit_inode(): kernel_kthread
+[  154.816584] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816585] get_seconds(): kernel_kthread
+[  154.816585] get_seconds(): kernel_kthread
+[  154.816626] kfree(): fs_kthread
+[  154.816627] msg_audit_inode() cost 89241
+[  154.816629] msg_read_seqbegin(): fs_kthread
+[  154.816630] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816631] get_seconds(): fs_kthread
+[  154.816631] get_seconds(): fs_kthread
+[  154.816684] kfree(): kernel_kthread
+[  154.816685] callback_read_seqbegin(): kernel_kthread
+[  154.816686] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816687] get_seconds(): kernel_kthread
+[  154.816688] get_seconds(): kernel_kthread
+[  154.816740] kfree(): fs_kthread
+[  154.816742] msg_read_seqbegin() cost 111967
+[  154.816743] kmem_cache_alloc(): fs_kthread
+[  154.816744] lookup_real(): fs_kthread
+[  154.816745] ext2_lookup(): fs_kthread
+[  154.816746] msg_read_mapping_page(): fs_kthread
+[  154.816747] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816748] get_seconds(): fs_kthread
+[  154.816748] get_seconds(): fs_kthread
+[  154.816790] kfree(): kernel_kthread
+[  154.816792] callback_read_mapping_page(): kernel_kthread
+[  154.816792] read_mapping_page(): kernel_kthread
+[  154.816793] find_get_page(): kernel_kthread
+[  154.816794] mark_page_accessed(): kernel_kthread
+[  154.816795] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816796] get_seconds(): kernel_kthread
+[  154.816797] get_seconds(): kernel_kthread
+[  154.816837] kfree(): fs_kthread
+[  154.816839] msg_read_mapping_page() cost 92030
+[  154.816842] vfs_create(): fs_kthread
+[  154.816843] msg_audit_inode_child(): fs_kthread
+[  154.816844] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816845] get_seconds(): fs_kthread
+[  154.816845] get_seconds(): fs_kthread
+[  154.816887] kfree(): kernel_kthread
+[  154.816889] callback_audit_inode_child(): kernel_kthread
+[  154.816889] audit_inode_child(): kernel_kthread
+[  154.816890] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816891] get_seconds(): kernel_kthread
+[  154.816892] get_seconds(): kernel_kthread
+[  154.816932] kfree(): fs_kthread
+[  154.816934] msg_audit_inode_child() cost 90495
+[  154.816935] ext2_create(): fs_kthread
+[  154.816936] alloc_inode(): fs_kthread
+[  154.816937] ext2_alloc_inode(): fs_kthread
+[  154.816937] msg_kmem_cache_alloc(): fs_kthread
+[  154.816939] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816939] get_seconds(): fs_kthread
+[  154.816940] get_seconds(): fs_kthread
+[  154.816982] kfree(): kernel_kthread
+[  154.816983] callback_kmem_cache_alloc(): kernel_kthread
+[  154.816984] kmem_cache_alloc(): kernel_kthread
+[  154.816985] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.816986] get_seconds(): kernel_kthread
+[  154.816987] get_seconds(): kernel_kthread
+[  154.817027] kfree(): fs_kthread
+[  154.817028] msg_kmem_cache_alloc() cost 90147
+[  154.817030] read_inode_bitmap(): fs_kthread
+[  154.817031] __bread(): fs_kthread
+[  154.817031] __getblk(): fs_kthread
+[  154.817032] __find_get_block(): fs_kthread
+[  154.817033] __find_get_block_slow(): fs_kthread
+[  154.817034] msg_find_get_page(): fs_kthread
+[  154.817035] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817036] get_seconds(): fs_kthread
+[  154.817037] get_seconds(): fs_kthread
+[  154.817078] kfree(): kernel_kthread
+[  154.817080] callback_find_get_page(): kernel_kthread
+[  154.817080] find_get_page(): kernel_kthread
+[  154.817082] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817082] get_seconds(): kernel_kthread
+[  154.817083] get_seconds(): kernel_kthread
+[  154.817123] kfree(): fs_kthread
+[  154.817124] msg_find_get_page() cost 89406
+[  154.817125] __find_get_block(): fs_kthread
+[  154.817126] __find_get_block_slow(): fs_kthread
+[  154.817127] msg_find_get_page(): fs_kthread
+[  154.817128] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817129] get_seconds(): fs_kthread
+[  154.817129] get_seconds(): fs_kthread
+[  154.817170] kfree(): kernel_kthread
+[  154.817172] callback_find_get_page(): kernel_kthread
+[  154.817172] find_get_page(): kernel_kthread
+[  154.817174] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817174] get_seconds(): kernel_kthread
+[  154.817175] get_seconds(): kernel_kthread
+[  154.817216] kfree(): fs_kthread
+[  154.817217] msg_find_get_page() cost 89374
+[  154.817218] find_get_page(): fs_kthread
+[  154.817222] kmem_cache_zalloc(): fs_kthread
+[  154.817223] kmem_cache_alloc(): fs_kthread
+[  154.817224] msg_attach_page_buffers(): fs_kthread
+[  154.817225] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817226] get_seconds(): fs_kthread
+[  154.817226] get_seconds(): fs_kthread
+[  154.817269] kfree(): kernel_kthread
+[  154.817270] callback_attach_page_buffers(): kernel_kthread
+[  154.817271] attach_page_buffers(): kernel_kthread
+[  154.817272] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817273] get_seconds(): kernel_kthread
+[  154.817273] get_seconds(): kernel_kthread
+[  154.817314] kfree(): fs_kthread
+[  154.817315] msg_attach_page_buffers() cost 90564
+[  154.817316] unlock_page(): fs_kthread
+[  154.817317] __find_get_block(): fs_kthread
+[  154.817318] __find_get_block_slow(): fs_kthread
+[  154.817318] msg_find_get_page(): fs_kthread
+[  154.817319] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817320] get_seconds(): fs_kthread
+[  154.817321] get_seconds(): fs_kthread
+[  154.817363] kfree(): kernel_kthread
+[  154.817364] callback_find_get_page(): kernel_kthread
+[  154.817365] find_get_page(): kernel_kthread
+[  154.817366] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817367] get_seconds(): kernel_kthread
+[  154.817368] get_seconds(): kernel_kthread
+[  154.817411] kfree(): fs_kthread
+[  154.817412] msg_find_get_page() cost 92890
+[  154.817413] msg_mark_page_accessed(): fs_kthread
+[  154.817415] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817416] get_seconds(): fs_kthread
+[  154.817416] get_seconds(): fs_kthread
+[  154.817436] kfree(): kernel_kthread
+[  154.817437] callback_mark_page_accessed(): kernel_kthread
+[  154.817438] mark_page_accessed(): kernel_kthread
+[  154.817439] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.817440] get_seconds(): kernel_kthread
+[  154.817441] get_seconds(): kernel_kthread
+[  154.817460] kfree(): fs_kthread
+[  154.817461] msg_mark_page_accessed() cost 47396
+[  154.817463] mempool_alloc(): kernel_kthread
+[  154.817464] kmem_cache_alloc(): fs_kthread
+[  154.817465] submit_bio(): fs_kthread
+[  154.817471] mempool_alloc(): kernel_kthread
+[  154.817472] kmem_cache_alloc(): fs_kthread
+[  154.817478] kmem_cache_zalloc(): fs_kthread
+[  154.817479] kmem_cache_alloc(): fs_kthread
+[  154.817479] kmem_cache_alloc(): fs_kthread
+[  154.817481] mempool_alloc(): kernel_kthread
+[  154.817482] kmem_cache_alloc(): fs_kthread
+[  154.835453] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.835455] get_seconds(): fs_kthread
+[  154.835455] get_seconds(): fs_kthread
+[  154.835514] kfree(): kernel_kthread
+[  154.835517] callback_page_mapping(): kernel_kthread
+[  154.835518] page_mapping(): kernel_kthread
+[  154.835519] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.835520] get_seconds(): kernel_kthread
+[  154.835521] get_seconds(): kernel_kthread
+[  154.835570] kfree(): fs_kthread
+[  154.835572] msg_page_mapping() cost 119714
+[  154.835573] __set_page_dirty(): fs_kthread
+[  154.835573] msg_account_page_dirtied(): fs_kthread
+[  154.835575] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.835576] get_seconds(): fs_kthread
+[  154.835576] get_seconds(): fs_kthread
+[  154.835760] kfree(): kernel_kthread
+[  154.835761] callback_account_page_dirtied(): kernel_kthread
+[  154.835762] account_page_dirtied(): kernel_kthread
+[  154.835764] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.835765] get_seconds(): kernel_kthread
+[  154.835765] get_seconds(): kernel_kthread
+[  154.835782] kfree(): fs_kthread
+[  154.835783] msg_account_page_dirtied() cost 209099
+[  154.835785] msg_percpu_counter_add(): fs_kthread
+[  154.835786] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.835787] get_seconds(): fs_kthread
+[  154.835788] get_seconds(): fs_kthread
+[  154.835849] kfree(): kernel_kthread
+[  154.835851] callback_percpu_counter_add(): kernel_kthread
+[  154.835852] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.835853] get_seconds(): kernel_kthread
+[  154.835853] get_seconds(): kernel_kthread
+[  154.836137] kfree(): fs_kthread
+[  154.836139] msg_percpu_counter_add() cost 352396
+[  154.836140] get_seconds(): fs_kthread
+[  154.836142] __getblk(): fs_kthread
+[  154.836142] __find_get_block(): fs_kthread
+[  154.836143] __find_get_block_slow(): fs_kthread
+[  154.836144] msg_find_get_page(): fs_kthread
+[  154.836145] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.836146] get_seconds(): fs_kthread
+[  154.836147] get_seconds(): fs_kthread
+[  154.836246] kfree(): kernel_kthread
+[  154.836248] callback_find_get_page(): kernel_kthread
+[  154.836249] find_get_page(): kernel_kthread
+[  154.836252] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.836253] get_seconds(): kernel_kthread
+[  154.836253] get_seconds(): kernel_kthread
+[  154.836327] kfree(): fs_kthread
+[  154.836328] msg_find_get_page() cost 183021
+[  154.836329] msg_mark_page_accessed(): fs_kthread
+[  154.836331] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.836331] get_seconds(): fs_kthread
+[  154.836332] get_seconds(): fs_kthread
+[  154.836629] kfree(): kernel_kthread
+[  154.836631] callback_mark_page_accessed(): kernel_kthread
+[  154.836632] mark_page_accessed(): kernel_kthread
+[  154.836634] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.836635] get_seconds(): kernel_kthread
+[  154.836635] get_seconds(): kernel_kthread
+[  154.836812] kfree(): fs_kthread
+[  154.836814] msg_mark_page_accessed() cost 483282
+[  154.836815] wake_up_bit(): fs_kthread
+[  154.836816] ext2_add_link(): fs_kthread
+[  154.836817] msg_read_mapping_page(): fs_kthread
+[  154.836818] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.836819] get_seconds(): fs_kthread
+[  154.836820] get_seconds(): fs_kthread
+[  154.836905] kfree(): kernel_kthread
+[  154.836907] callback_read_mapping_page(): kernel_kthread
+[  154.836908] read_mapping_page(): kernel_kthread
+[  154.836908] find_get_page(): kernel_kthread
+[  154.836909] mark_page_accessed(): kernel_kthread
+[  154.836911] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.836912] get_seconds(): kernel_kthread
+[  154.836912] get_seconds(): kernel_kthread
+[  154.836969] kfree(): fs_kthread
+[  154.836970] msg_read_mapping_page() cost 151968
+[  154.836971] kmem_cache_zalloc(): fs_kthread
+[  154.836972] kmem_cache_alloc(): fs_kthread
+[  154.836973] attach_page_buffers(): fs_kthread
+[  154.836974] ext2_commit_chunk(): fs_kthread
+[  154.836975] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.836976] get_seconds(): fs_kthread
+[  154.836977] get_seconds(): fs_kthread
+[  154.837030] kfree(): kernel_kthread
+[  154.837032] callback_page_mapping(): kernel_kthread
+[  154.837033] page_mapping(): kernel_kthread
+[  154.837034] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837035] get_seconds(): kernel_kthread
+[  154.837036] get_seconds(): kernel_kthread
+[  154.837080] kfree(): fs_kthread
+[  154.837082] msg_page_mapping() cost 106794
+[  154.837082] __set_page_dirty(): fs_kthread
+[  154.837083] msg_account_page_dirtied(): fs_kthread
+[  154.837084] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837085] get_seconds(): fs_kthread
+[  154.837086] get_seconds(): fs_kthread
+[  154.837139] kfree(): kernel_kthread
+[  154.837141] callback_account_page_dirtied(): kernel_kthread
+[  154.837142] account_page_dirtied(): kernel_kthread
+[  154.837144] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837145] get_seconds(): kernel_kthread
+[  154.837146] get_seconds(): kernel_kthread
+[  154.837191] kfree(): fs_kthread
+[  154.837192] msg_account_page_dirtied() cost 108364
+[  154.837194] msg_unlock_page(): fs_kthread
+[  154.837195] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837196] get_seconds(): fs_kthread
+[  154.837197] get_seconds(): fs_kthread
+[  154.837250] kfree(): kernel_kthread
+[  154.837253] callback_unlock_page(): kernel_kthread
+[  154.837253] unlock_page(): kernel_kthread
+[  154.837255] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837256] get_seconds(): kernel_kthread
+[  154.837257] get_seconds(): kernel_kthread
+[  154.837302] kfree(): fs_kthread
+[  154.837303] msg_unlock_page() cost 108277
+[  154.837304] msg_get_seconds(): fs_kthread
+[  154.837305] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837306] get_seconds(): fs_kthread
+[  154.837307] get_seconds(): fs_kthread
+[  154.837359] kfree(): kernel_kthread
+[  154.837361] callback_get_seconds(): kernel_kthread
+[  154.837362] get_seconds(): kernel_kthread
+[  154.837363] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837364] get_seconds(): kernel_kthread
+[  154.837365] get_seconds(): kernel_kthread
+[  154.837409] kfree(): fs_kthread
+[  154.837411] msg_get_seconds() cost 105605
+[  154.837412] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837413] get_seconds(): fs_kthread
+[  154.837414] get_seconds(): fs_kthread
+[  154.837466] kfree(): kernel_kthread
+[  154.837468] callback_wake_up_bit(): kernel_kthread
+[  154.837469] wake_up_bit(): kernel_kthread
+[  154.837471] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837472] get_seconds(): kernel_kthread
+[  154.837472] get_seconds(): kernel_kthread
+[  154.837518] kfree(): fs_kthread
+[  154.837519] msg_wake_up_bit() cost 107053
+[  154.837520] audit_inode_child(): fs_kthread
+[  154.837522] finish_open(): fs_kthread
+[  154.837522] do_dentry_open(): fs_kthread
+[  154.837523] dget(): fs_kthread
+[  154.837525] msg_file_ra_state_init(): fs_kthread
+[  154.837526] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837527] get_seconds(): fs_kthread
+[  154.837527] get_seconds(): fs_kthread
+[  154.837573] kfree(): kernel_kthread
+[  154.837575] callback_file_ra_state_init(): kernel_kthread
+[  154.837576] file_ra_state_init(): kernel_kthread
+[  154.837577] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837585] get_seconds(): kernel_kthread
+[  154.837586] get_seconds(): kernel_kthread
+[  154.837600] kfree(): fs_kthread
+[  154.837602] msg_file_ra_state_init() cost 76302
+[  154.837605] do_filp_open() cost 1489742317:137191501 - 1489742317:113191502
+[  154.837606] msg_kmem_cache_free(): fs_kthread
+[  154.837608] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837608] get_seconds(): fs_kthread
+[  154.837609] get_seconds(): fs_kthread
+[  154.837917] kfree(): kernel_kthread
+[  154.837919] callback_kmem_cache_free(): kernel_kthread
+[  154.837920] kmem_cache_free(): kernel_kthread
+[  154.837921] File = ipc/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837922] get_seconds(): kernel_kthread
+[  154.837923] get_seconds(): kernel_kthread
+[  154.837960] kfree(): fs_kthread
+[  154.837961] msg_kmem_cache_free() cost 354035
+[  154.837962] do_sys_open() cost 26545947
+[  154.837963] call callback_open success, and the fd = 3
+[  154.837972] File = /home/lookfiresu/Desktop/file_system_module/my_msg.c, Line = 335, Func = my_do_msgsnd
+[  154.837973] get_seconds(): fs_kthread
+[  154.837974] get_seconds(): fs_kthread
+[  154.838132] kfree(): kernel_kthread
+[  154.838134] kfree(): kernel_kthread
+[  154.838134] kfree(): kernel_kthread
+[  154.838149] find_get_page(): kernel_kthread
+[  154.838150] unlock_page(): kernel_kthread
+[  154.838152] find_get_page(): kernel_kthread
+[  154.838153] unlock_page(): kernel_kthread
+[  154.838154] find_get_page(): kernel_kthread
+[  154.838155] unlock_page(): kernel_kthread
+[  154.838161] msg_percpu_counter_dec(): kernel_kthread
+[  154.838162] list_lru_add(): kernel_kthread
+[  154.838165] find_get_page(): kernel_kthread
+[  154.838166] unlock_page(): kernel_kthread
+[  154.838168] find_get_page(): kernel_kthread
+[  154.838169] unlock_page(): kernel_kthread
+[  154.838171] find_get_page(): kernel_kthread
+[  154.838171] unlock_page(): kernel_kthread
+[  154.838173] find_get_page(): kernel_kthread
+[  154.838173] unlock_page(): kernel_kthread
+[  154.838175] find_get_page(): kernel_kthread
+[  154.838176] unlock_page(): kernel_kthread
+[  154.838177] find_get_page(): kernel_kthread
+[  154.838178] unlock_page(): kernel_kthread
+[  154.838179] find_get_page(): kernel_kthread
+[  154.838180] unlock_page(): kernel_kthread
+[  154.838189] find_get_page(): kernel_kthread
+[  154.838190] unlock_page(): kernel_kthread
+[  154.838200] find_get_page(): kernel_kthread
+[  154.838201] unlock_page(): kernel_kthread
+[  154.838206] mark_page_accessed(): kernel_kthread
+[  154.838207] mark_page_accessed(): kernel_kthread
+[  154.838208] mark_page_accessed(): kernel_kthread
+[  154.838209] mark_page_accessed(): kernel_kthread
+[  154.838209] mark_page_accessed(): kernel_kthread
+[  154.838210] mark_page_accessed(): kernel_kthread
+[  154.838211] mark_page_accessed(): kernel_kthread
+[  154.838211] mark_page_accessed(): kernel_kthread
+[  154.838214] mark_page_accessed(): kernel_kthread
+[  154.838215] mark_page_accessed(): kernel_kthread
+[  154.838215] mark_page_accessed(): kernel_kthread
+[  154.838216] mark_page_accessed(): kernel_kthread
+[  154.838217] mark_page_accessed(): kernel_kthread
+[  154.838217] mark_page_accessed(): kernel_kthread
+[  154.838218] mark_page_accessed(): kernel_kthread
+[  154.838219] mark_page_accessed(): kernel_kthread
+[  154.838219] mark_page_accessed(): kernel_kthread
+[  154.838220] mark_page_accessed(): kernel_kthread
+[  154.838221] mark_page_accessed(): kernel_kthread
+[  154.838221] mark_page_accessed(): kernel_kthread
+[  154.838222] mark_page_accessed(): kernel_kthread
+[  154.838223] mark_page_accessed(): kernel_kthread
+[  154.838223] mark_page_accessed(): kernel_kthread
+[  154.838224] mark_page_accessed(): kernel_kthread
+[  154.838224] mark_page_accessed(): kernel_kthread
+[  154.838225] mark_page_accessed(): kernel_kthread
+[  154.838226] mark_page_accessed(): kernel_kthread
+[  154.838227] mark_page_accessed(): kernel_kthread
+[  154.838227] mark_page_accessed(): kernel_kthread
+[  154.838228] mark_page_accessed(): kernel_kthread
+[  154.838229] mark_page_accessed(): kernel_kthread
+[  154.838229] mark_page_accessed(): kernel_kthread
+[  154.838230] mark_page_accessed(): kernel_kthread
+[  154.838230] mark_page_accessed(): kernel_kthread
+[  154.838231] mark_page_accessed(): kernel_kthread
+[  154.838231] mark_page_accessed(): kernel_kthread
+[  154.838232] mark_page_accessed(): kernel_kthread
+[  154.838233] mark_page_accessed(): kernel_kthread
+[  154.838233] mark_page_accessed(): kernel_kthread
+[  154.838234] mark_page_accessed(): kernel_kthread
+[  154.838234] mark_page_accessed(): kernel_kthread
+[  154.838235] mark_page_accessed(): kernel_kthread
+[  154.838235] mark_page_accessed(): kernel_kthread
+[  154.838236] mark_page_accessed(): kernel_kthread
+[  154.838237] mark_page_accessed(): kernel_kthread
+[  154.838244] mark_page_accessed(): kernel_kthread
+[  154.838245] mark_page_accessed(): kernel_kthread
+[  154.838245] mark_page_accessed(): kernel_kthread
+[  154.838246] mark_page_accessed(): kernel_kthread
+[  154.838253] mark_page_accessed(): kernel_kthread
+[  154.838254] mark_page_accessed(): kernel_kthread
+[  154.838255] mark_page_accessed(): kernel_kthread
+[  154.838255] mark_page_accessed(): kernel_kthread
+[  154.838256] mark_page_accessed(): kernel_kthread
+[  154.838263] mark_page_accessed(): kernel_kthread
+[  154.838264] mark_page_accessed(): kernel_kthread
+[  154.838265] mark_page_accessed(): kernel_kthread
+[  154.838265] mark_page_accessed(): kernel_kthread
+[  154.838266] mark_page_accessed(): kernel_kthread
+[  154.838267] mark_page_accessed(): kernel_kthread
+[  154.838267] mark_page_accessed(): kernel_kthread
+[  154.838268] mark_page_accessed(): kernel_kthread
+[  154.838268] mark_page_accessed(): kernel_kthread
+[  154.838269] mark_page_accessed(): kernel_kthread
+[  154.838269] mark_page_accessed(): kernel_kthread
+[  154.838270] mark_page_accessed(): kernel_kthread
+[  154.838271] mark_page_accessed(): kernel_kthread
+[  154.838271] mark_page_accessed(): kernel_kthread
+[  154.838272] mark_page_accessed(): kernel_kthread
+[  154.838273] mark_page_accessed(): kernel_kthread
+[  154.838273] mark_page_accessed(): kernel_kthread
+[  154.838274] mark_page_accessed(): kernel_kthread
+[  154.838274] mark_page_accessed(): kernel_kthread
+[  154.838275] mark_page_accessed(): kernel_kthread
+[  154.838276] mark_page_accessed(): kernel_kthread
+[  154.838276] mark_page_accessed(): kernel_kthread
+[  154.838277] mark_page_accessed(): kernel_kthread
+[  154.838277] mark_page_accessed(): kernel_kthread
+[  154.838278] mark_page_accessed(): kernel_kthread
+[  154.838279] mark_page_accessed(): kernel_kthread
+[  154.838279] mark_page_accessed(): kernel_kthread
+[  154.838280] mark_page_accessed(): kernel_kthread
+[  154.838280] mark_page_accessed(): kernel_kthread
+[  154.838281] mark_page_accessed(): kernel_kthread
+[  154.838282] mark_page_accessed(): kernel_kthread
+[  154.838282] mark_page_accessed(): kernel_kthread
+[  154.838283] mark_page_accessed(): kernel_kthread
+[  154.838283] mark_page_accessed(): kernel_kthread
+[  154.838284] mark_page_accessed(): kernel_kthread
+[  154.838285] mark_page_accessed(): kernel_kthread
+[  154.838285] mark_page_accessed(): kernel_kthread
+[  154.838286] mark_page_accessed(): kernel_kthread
+[  154.838286] mark_page_accessed(): kernel_kthread
+[  154.838287] mark_page_accessed(): kernel_kthread
+[  154.838288] mark_page_accessed(): kernel_kthread
+[  154.838288] mark_page_accessed(): kernel_kthread
+[  154.838289] mark_page_accessed(): kernel_kthread
+[  154.838289] mark_page_accessed(): kernel_kthread
+[  154.838290] mark_page_accessed(): kernel_kthread
+[  154.838291] mark_page_accessed(): kernel_kthread
+[  154.838291] mark_page_accessed(): kernel_kthread
+[  154.838292] mark_page_accessed(): kernel_kthread
+[  154.838292] mark_page_accessed(): kernel_kthread
+[  154.838293] mark_page_accessed(): kernel_kthread
+[  154.838294] mark_page_accessed(): kernel_kthread
+[  154.838294] mark_page_accessed(): kernel_kthread
+[  154.838295] mark_page_accessed(): kernel_kthread
+[  154.838296] mark_page_accessed(): kernel_kthread
+[  154.838296] mark_page_accessed(): kernel_kthread
+[  154.838297] mark_page_accessed(): kernel_kthread
+[  154.838297] mark_page_accessed(): kernel_kthread
+[  154.838298] mark_page_accessed(): kernel_kthread
+[  154.838299] mark_page_accessed(): kernel_kthread
+[  154.838299] mark_page_accessed(): kernel_kthread
+[  154.838300] mark_page_accessed(): kernel_kthread
+[  154.838302] mark_page_accessed(): kernel_kthread
+[  154.838303] mark_page_accessed(): kernel_kthread
+[  154.838303] mark_page_accessed(): kernel_kthread
+[  154.838304] mark_page_accessed(): kernel_kthread
+[  154.838305] mark_page_accessed(): kernel_kthread
+[  154.838305] mark_page_accessed(): kernel_kthread
+[  154.838306] mark_page_accessed(): kernel_kthread
+[  154.838306] mark_page_accessed(): kernel_kthread
+[  154.838307] mark_page_accessed(): kernel_kthread
+[  154.838308] mark_page_accessed(): kernel_kthread
+[  154.838308] mark_page_accessed(): kernel_kthread
+[  154.838309] mark_page_accessed(): kernel_kthread
+[  154.838309] mark_page_accessed(): kernel_kthread
+[  154.838310] mark_page_accessed(): kernel_kthread
+[  154.838311] mark_page_accessed(): kernel_kthread
+[  154.838311] mark_page_accessed(): kernel_kthread
+[  154.838312] mark_page_accessed(): kernel_kthread
+[  154.838312] mark_page_accessed(): kernel_kthread
+[  154.838313] mark_page_accessed(): kernel_kthread
+[  154.838314] mark_page_accessed(): kernel_kthread
+[  154.838314] mark_page_accessed(): kernel_kthread
+[  154.838315] mark_page_accessed(): kernel_kthread
+[  154.838315] mark_page_accessed(): kernel_kthread
+[  154.838316] mark_page_accessed(): kernel_kthread
+[  154.838317] mark_page_accessed(): kernel_kthread
+[  154.838317] mark_page_accessed(): kernel_kthread
+[  154.838318] mark_page_accessed(): kernel_kthread
+[  154.838318] mark_page_accessed(): kernel_kthread
+[  154.838319] mark_page_accessed(): kernel_kthread
+[  154.838322] mark_page_accessed(): kernel_kthread
+[  154.838323] kmem_cache_free(): kernel_kthread
+[  154.838324] kmem_cache_free(): kernel_kthread
+[  154.838325] kmem_cache_free(): kernel_kthread
+[  154.838326] kmem_cache_free(): kernel_kthread
+[  154.838326] kmem_cache_free(): kernel_kthread
+[  154.838328] kmem_cache_free(): kernel_kthread
+[  154.838329] kmem_cache_free(): kernel_kthread
+[  154.838329] kmem_cache_free(): kernel_kthread
+[  154.838330] kmem_cache_free(): kernel_kthread
+[  154.838330] kmem_cache_free(): kernel_kthread
+[  154.838331] kmem_cache_free(): kernel_kthread
+[  154.838332] kmem_cache_free(): kernel_kthread
+[  154.838332] kmem_cache_free(): kernel_kthread
+[  154.838333] kmem_cache_free(): kernel_kthread
+[  154.838334] kmem_cache_free(): kernel_kthread
+[  154.838334] kmem_cache_free(): kernel_kthread
+[  154.838335] kmem_cache_free(): kernel_kthread
+[  154.838336] kmem_cache_free(): kernel_kthread
+[  154.838336] kmem_cache_free(): kernel_kthread
+[  154.838337] kmem_cache_free(): kernel_kthread
+[  154.838338] kmem_cache_free(): kernel_kthread
+[  154.838338] kmem_cache_free(): kernel_kthread
+[  154.838345] kmem_cache_free(): kernel_kthread
+[  154.838346] kmem_cache_free(): kernel_kthread
+[  154.838346] kmem_cache_free(): kernel_kthread
+[  154.838347] kmem_cache_free(): kernel_kthread
+[  154.838348] kmem_cache_free(): kernel_kthread
+[  154.838348] kmem_cache_free(): kernel_kthread
+[  154.838349] kmem_cache_free(): kernel_kthread
+[  154.838350] kmem_cache_free(): kernel_kthread
+[  154.838350] kmem_cache_free(): kernel_kthread
+[  154.838351] kmem_cache_free(): kernel_kthread
+[  154.838352] kmem_cache_free(): kernel_kthread
+[  154.838352] kmem_cache_free(): kernel_kthread
+[  154.838353] kmem_cache_free(): kernel_kthread
+[  154.838353] kmem_cache_free(): kernel_kthread
+[  154.838354] kmem_cache_free(): kernel_kthread
+[  154.838354] kmem_cache_free(): kernel_kthread
+[  154.838355] kmem_cache_free(): kernel_kthread
+[  154.838356] kmem_cache_free(): kernel_kthread
+[  154.838356] kmem_cache_free(): kernel_kthread
+[  154.838360] kmem_cache_free(): kernel_kthread
+[  154.838361] kmem_cache_free(): kernel_kthread
+[  154.838363] kfree(): kernel_kthread
+[  154.838364] msg_percpu_counter_dec(): kernel_kthread
+[  154.838364] kfree(): kernel_kthread
+[  154.838365] msg_percpu_counter_dec(): kernel_kthread
+[  154.838366] kfree(): kernel_kthread
+[  154.838366] msg_percpu_counter_dec(): kernel_kthread
+[  154.838367] kfree(): kernel_kthread
+[  154.838368] msg_percpu_counter_dec(): kernel_kthread
+[  154.838376] kmem_cache_alloc(): kernel_kthread
+[  154.838411] put_io_context(): kernel_kthread
+[  154.838412] kmem_cache_free(): kernel_kthread
