@@ -1,6 +1,6 @@
 MODULE_NAME := mfs_kthread
 RESMAN_CORE_OBJS := fs_kthread.o
-RESMAN_GLUE_OBJS := my_msg.o
+RESMAN_GLUE_OBJS :=
 
 $(MODULE_NAME)-objs := $(RESMAN_GLUE_OBJS) $(RESMAN_CORE_OBJS)
 obj-m := mfs_kthread.o

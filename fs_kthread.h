@@ -41,7 +41,8 @@
 #include <linux/time.h>
 #include <linux/string.h>
 
-#include <linux/my_msg.h>
+//#include <linux/my_msg.h>
+#include <linux/msgA_Sync.h>
 #include <linux/interactive_design.h>
 // #include "my_msg.h"
 
@@ -56,6 +57,7 @@ MODULE_LICENSE("GPL");
 
 #define Pointer(T) typeof(T *)
 #define Array(T, N) typeof(T [N])
+/*
 
 #define Argus_msg0()                             \
     struct Argus_container0 {                    \
@@ -106,6 +108,7 @@ MODULE_LICENSE("GPL");
       type6 argu6;                                                     \
     }
 
+*/
 static unsigned long long *syscall_table_addr;
 int (*orig_write)(unsigned int fd,char *buf,unsigned int count);
 int (*orig_open)(char *buf, int flags, umode_t mode);
