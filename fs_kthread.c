@@ -174,10 +174,11 @@ int fs_kthread_function(void *data)
 {
   // printk("Now on : file = %s, line = %d, func = %s\n", __FILE__, __LINE__, __FUNCTION__);
   printk(KERN_INFO "This task's name is fs_kthread, and run do_sys_open()\n");
-  printk(KERN_INFO "current->pid = %d\n", current->pid);
+  printk(KERN_INFO "current->pid = %d\n", get_current()->pid);
   printk(KERN_INFO "-----------------------------------------------------\n");
   int recvlength, flag;
   while(!isRemove_module) {
+    strcpy(get_current()->comm, "");
     struct my_msgbuf recvbuf;
     memset(&recvbuf, 0x00, sizeof(recvbuf));
     recvlength = sizeof(recvbuf);
@@ -188,7 +189,9 @@ int fs_kthread_function(void *data)
     Argus_type *ptr = recvbuf.argus_ptr;
     printk(KERN_INFO "buf = %s, flags = %d, mode = %u\n",ptr->argu1, ptr->argu2, ptr->argu3);
     // 解析消息并处理
+    strcpy(get_current()->comm, "fs_kthread");
     recvbuf.callback(&recvbuf);
+    strcpy(get_current()->comm, "");
   }
   return 0;
 }
