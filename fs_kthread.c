@@ -60,8 +60,9 @@ int hacked_open(char *buf, int flags, umode_t mode)
   if (strstr(buf, hacked) != NULL){
     // printk(KERN_ALERT "hacked_open!\n");
     strcpy(current->comm, "kernel_kthread");
+    printk("kernel_kthread's real PCB = %p, pid = %d, cpu id = %d\n", get_current(), get_current()->pid, smp_processor_id());
     fs_temp = get_current();
-    fs_start = true;
+    //fs_start = true;
     // 发送消息
     struct my_msgbuf *sendbuf;
     int sendlength, flag;
@@ -80,6 +81,7 @@ int hacked_open(char *buf, int flags, umode_t mode)
     sendbuf->argus_ptr = ptr;
     sendlength = sizeof(struct my_msgbuf);
     //AsendB(sendbuf, sendlength);
+    fs_start = true;
     my_msgsendB(sendbuf, sendlength);
     printk(KERN_INFO "send message to B success! and current process is %s\n", current->comm);
     //sendlength = sizeof(struct my_msgbuf) - sizeof(long);
@@ -111,12 +113,13 @@ int hacked_open(char *buf, int flags, umode_t mode)
     */
     // 处理从进程B接收到的消息
     // long *fdp = (long *)(sendbuf->object_ptr);
+    fs_start = false;
     ret = (long)(sendbuf->object_ptr);
     // printk(KERN_INFO "FILE = %s, LINE = %d, FUNC = %s, fd = %d\n", __FILE__, __LINE__, __FUNCTION__, ret);
     kfree(kbuf);
     kfree(sendbuf);
     // printk(KERN_INFO "FILE = %s, LINE = %d, FUNC = %s, fd = %d\n", __FILE__, __LINE__, __FUNCTION__, ret);
-    fs_start = false;
+    //fs_start = false;
     // return ret;
   } else {
     ret = orig_open(buf, flags, mode);
@@ -174,16 +177,16 @@ int fs_kthread_function(void *data)
 {
   // printk("Now on : file = %s, line = %d, func = %s\n", __FILE__, __LINE__, __FUNCTION__);
   printk(KERN_INFO "This task's name is fs_kthread, and run do_sys_open()\n");
-  printk(KERN_INFO "current->pid = %d\n", get_current()->pid);
+  printk(KERN_INFO "fs_kthread's real PCB = %p, pid = %d, cpu id = %d\n", get_current(), get_current()->pid, smp_processor_id());
   printk(KERN_INFO "-----------------------------------------------------\n");
   int recvlength, flag;
-  while(!isRemove_module) {
+  while (!isRemove_module) {
     strcpy(get_current()->comm, "");
     struct my_msgbuf recvbuf;
     memset(&recvbuf, 0x00, sizeof(recvbuf));
     recvlength = sizeof(recvbuf);
     my_msgrcvA(&recvbuf, recvlength);
-    printk(KERN_INFO "receive message from A success!\n");
+    //printk(KERN_INFO "receive message from A success!\n");
     // printk(KERN_INFO "fs receive message from kernel success\n");
     typedef Argus_msg3(char *, int, umode_t) Argus_type;
     Argus_type *ptr = recvbuf.argus_ptr;
@@ -203,8 +206,8 @@ int init_mymodule(void){
   BA_shmAddr = alloc_pages_exact(maxSize, GFP_KERNEL);
   init_shm();
   init_waitqueue();
-  printk(KERN_INFO "AB_shmAddr = %p, msgsendA_begin_addr = %p, msgrcvA_begin_addr = %p\n", AB_shmAddr, msgsendB_begin_addr, msgrcvA_begin_addr);
-  printk(KERN_INFO "BA_shmAddr = %p, msgsendB_begin_addr = %p, msgrcvB_begin_addr = %p\n", BA_shmAddr, msgsendA_begin_addr, msgrcvB_begin_addr);
+  //printk(KERN_INFO "AB_shmAddr = %p, msgsendA_begin_addr = %p, msgrcvA_begin_addr = %p\n", AB_shmAddr, msgsendB_begin_addr, msgrcvA_begin_addr);
+  //printk(KERN_INFO "BA_shmAddr = %p, msgsendB_begin_addr = %p, msgrcvB_begin_addr = %p\n", BA_shmAddr, msgsendA_begin_addr, msgrcvB_begin_addr);
 	// 创建从kernel到fs的消息队列
   /*
 	while(1){

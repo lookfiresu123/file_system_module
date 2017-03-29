@@ -1,19 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h> //为了使用exit()
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 int main(){
-	int ch;
-	FILE* fp;
-	char fname[50]; //用于存放文件名
-	printf("输入文件名：");
-	scanf("%s",fname);
-	fp=fopen(fname,"w+"); //只供读取
-	if(fp==NULL){
-		printf("错误！");
-		exit(1); //中止程序
-	}
-//getc()用于在打开文件中获取一个字符 
-	while((ch=getc(fp))!=EOF)
-	putchar(ch);
-	fclose(fp); //关闭文件 
+	open("zhao1", O_RDWR|O_CREAT, 0666);
+	open("zhao2", O_RDWR|O_CREAT, 0666);
 	return 0;
 } 
