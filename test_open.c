@@ -4,6 +4,6 @@
 
 int main(){
 	open("zhao1", O_RDWR|O_CREAT, 0666);
-	open("zhao2", O_RDWR|O_CREAT, 0666);
+	//open("zhao2", O_RDWR|O_CREAT, 0666);
 	return 0;
 } 
